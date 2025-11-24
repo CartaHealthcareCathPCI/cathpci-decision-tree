@@ -506,15 +506,21 @@
                     Is the patient being brought to the Cath Lab following a Cardiac Arrest?
                 </div>
                 <div class="option-group">
-                    <div class="option" onclick="toggleCheckbox('cardiac-arrest')">
-                        <input type="checkbox" id="cardiac-arrest" onchange="handleCheckboxChange('Resuscitated Cardiac Arrest', this)">
-                        <label for="cardiac-arrest" class="has-tooltip">Yes - Resuscitated Cardiac Arrest
-                            <span class="tooltip">The patient presents status post cardiac arrest.</span>
-                        </label>
+                    <div class="option" onclick="toggleRadioGroup('cardiac-arrest', 'yes')">
+                        <input type="radio" name="cardiac-arrest" id="cardiac-arrest-yes" value="yes">
+                        <label for="cardiac-arrest-yes">Yes</label>
                     </div>
-                    <div class="option">
-                        <input type="radio" name="cardiac-arrest-group" checked disabled style="visibility: hidden;">
-                        <label>No - Move to next question</label>
+                    <div class="sub-option-group" id="cardiac-arrest-sub-group" style="display: none;">
+                        <div class="option" onclick="selectIndication('Resuscitated Cardiac Arrest', 'resuscitated-cardiac-arrest')">
+                            <input type="radio" name="cardiac-arrest-type" id="resuscitated-cardiac-arrest" value="Resuscitated Cardiac Arrest">
+                            <label for="resuscitated-cardiac-arrest" class="has-tooltip">Resuscitated Cardiac Arrest
+                                <span class="tooltip">The patient presents status post cardiac arrest.</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option" onclick="toggleRadioGroup('cardiac-arrest', 'no')">
+                        <input type="radio" name="cardiac-arrest" id="cardiac-arrest-no" value="no">
+                        <label for="cardiac-arrest-no">No - Move to next question</label>
                     </div>
                 </div>
             </div>
@@ -726,8 +732,9 @@
                                   document.getElementById('cad-no')?.checked;
             updateArrowState(3, step3Complete);
 
-            // Step 4: Cardiac Arrest - check if checkbox is checked or implicitly skipped
-            const step4Complete = document.getElementById('cardiac-arrest')?.checked || step3Complete;
+            // Step 4: Cardiac Arrest - check if any cardiac arrest option is selected
+            const step4Complete = document.getElementById('resuscitated-cardiac-arrest')?.checked ||
+                                  document.getElementById('cardiac-arrest-no')?.checked;
             updateArrowState(4, step4Complete);
 
             // Step 5: Non-Ischemic - check if any option is selected or implicitly skipped
@@ -819,7 +826,20 @@
                     removeIndication('Stable Known CAD');
                 }
             }
-            
+
+            // Handle Cardiac Arrest radio group
+            if (groupName === 'cardiac-arrest') {
+                const cardiacArrestSubGroup = document.getElementById('cardiac-arrest-sub-group');
+                if (value === 'yes') {
+                    cardiacArrestSubGroup.style.display = 'block';
+                } else {
+                    cardiacArrestSubGroup.style.display = 'none';
+                    // Clear cardiac arrest selection
+                    document.getElementById('resuscitated-cardiac-arrest').checked = false;
+                    removeIndication('Resuscitated Cardiac Arrest');
+                }
+            }
+
             updateArrows();
         }
 
