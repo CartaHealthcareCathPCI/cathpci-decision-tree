@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.1*
+*Version: 2.2*
 
 ## Project Overview
 
@@ -405,14 +405,18 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24 (Current Version)
+### 2025-11-24 (Current Version - v2.2)
+- **Anginal Equivalent Quote Fix**: Added quotes around 'anginal equivalent' in Step 2 Angina prompt for clarity (PR #12)
+- **ACS Question Formatting**: Updated Step 1 ACS question text to list STEMI, NSTEMI, and Unstable Angina on separate lines without 'ACS:' prefix for improved readability (PR #11)
+- **Documentation Update**: Updated CLAUDE.md to version 2.2 to reflect latest changes
+
+### 2025-11-24 (v2.1)
 - Updated CLAUDE.md to version 2.1 with current codebase state
 - Updated line count from 1121 to 1169 lines
 - Documented recent UI and content improvements
 
 ### Recent Updates (Prior Merges)
 - **Angina Prompt Update**: Updated angina prompt wording to clarify "recent or ongoing chest pain" and explicitly documented anginal equivalents
-- **ACS Section Update**: Modified ACS section text to list STEMI, NSTEMI, and Unstable Angina on separate lines for better readability
 - **Orange Section Headings**: Added orange-themed section headings to all 7 decision tree steps for improved visual hierarchy
 - **Tooltip Fix**: Fixed tooltip positioning to appear next to label text instead of at edge of container
 - **Angina Question Update**: Updated Angina question text to clarify patient presentation and format history criteria as a list
