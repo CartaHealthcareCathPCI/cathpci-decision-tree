@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.1*
+*Version: 2.2*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1169 lines)
+├── index.html                    # Main application (1202 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1169 lines): Complete self-contained application
+- **index.html** (1202 lines): Complete self-contained application
   - Lines 10-372: CSS styling with gradient backgrounds, responsive design, and orange section headings
-  - Lines 374-660: HTML structure for 7-step decision tree interface with section headings
-  - Lines 661-1169: JavaScript logic for state management, validation, and PCI determination
+  - Lines 374-691: HTML structure for 7-step decision tree interface with section headings
+  - Lines 692-1202: JavaScript logic for state management, validation, and PCI determination
 
 ---
 
@@ -406,9 +406,10 @@ Expected: All selections cleared, form returns to initial state
 ## Recent Changes History
 
 ### 2025-11-24 (Current Version)
-- Updated CLAUDE.md to version 2.1 with current codebase state
-- Updated line count from 1121 to 1169 lines
-- Documented recent UI and content improvements
+- Updated CLAUDE.md to version 2.2 with accurate line counts and section breakdowns
+- Updated line count to 1202 lines (current state)
+- Updated line number breakdowns for CSS, HTML, and JavaScript sections
+- Documented recent UI and content improvements from prior merges
 
 ### Recent Updates (Prior Merges)
 - **Angina Prompt Update**: Updated angina prompt wording to clarify "recent or ongoing chest pain" and explicitly documented anginal equivalents
