@@ -427,7 +427,7 @@
                 <div class="section-heading">Angina</div>
                 <div class="step-title">
                     <span class="step-number" id="step-arrow-2">➔</span>
-                    Is the patient being taken to the Cath Lab for recent or ongoing chest pain, or for symptoms explicitly documented by the provider as an 'anginal equivalent'?
+                    In the last 2 months, has the patient experienced Chest Pain or a documented anginal equivalent?
                 </div>
                 <div class="option-group">
                     <div class="option" onclick="toggleRadioGroup('angina', 'yes')">
@@ -439,20 +439,35 @@
                             Does the patient have a history of:<br>
                             Prior MI<br>
                             Prior PCI<br>
-                            CABG<br>
-                            or a history of angina that has increased in severity or frequency within the last 2 months?
+                            Prior CABG<br>
+                            History of Angina
                         </p>
-                        <div class="option" onclick="selectIndication('Worsening Angina', 'worsening-angina')">
-                            <input type="radio" name="angina-type" id="worsening-angina" value="Worsening Angina">
-                            <label for="worsening-angina" class="has-tooltip">Yes - Worsening Angina
-                                <span class="tooltip">The patient has a history of angina that has increased in severity or frequency within the last 2 months.</span>
-                            </label>
-                        </div>
                         <div class="option" onclick="selectIndication('New Onset Angina <= 2 months', 'new-onset-angina')">
-                            <input type="radio" name="angina-type" id="new-onset-angina" value="New Onset Angina <= 2 months">
-                            <label for="new-onset-angina" class="has-tooltip">No - New Onset Angina ≤ 2 months
+                            <input type="radio" name="angina-history-type" id="new-onset-angina" value="New Onset Angina <= 2 months">
+                            <label for="new-onset-angina" class="has-tooltip">No - New Onset Angina
                                 <span class="tooltip">The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.</span>
                             </label>
+                        </div>
+                        <div class="option" onclick="toggleRadioGroup('angina-history', 'yes')">
+                            <input type="radio" name="angina-history-type" id="angina-history-yes" value="yes">
+                            <label for="angina-history-yes">Yes</label>
+                        </div>
+                        <div class="sub-option-group" id="angina-change-group" style="display: none;">
+                            <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
+                                Has the patient's angina changed in frequency, pattern or severity over the past 2 months?
+                            </p>
+                            <div class="option" onclick="selectIndication('Worsening Angina', 'worsening-angina')">
+                                <input type="radio" name="angina-change-type" id="worsening-angina" value="Worsening Angina">
+                                <label for="worsening-angina" class="has-tooltip">Yes - Worsening Angina
+                                    <span class="tooltip">The patient has a history of angina that has changed in frequency, pattern or severity over the past 2 months.</span>
+                                </label>
+                            </div>
+                            <div class="option" onclick="selectIndication('Stable Known CAD', 'stable-cad-angina')">
+                                <input type="radio" name="angina-change-type" id="stable-cad-angina" value="Stable Known CAD">
+                                <label for="stable-cad-angina" class="has-tooltip">No - Stable Known CAD
+                                    <span class="tooltip">The patient has a history of angina, MI, PCI, or CABG but their angina has not changed in frequency, pattern or severity over the past 2 months.</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="option" onclick="toggleRadioGroup('angina', 'no')">
@@ -728,8 +743,9 @@
             updateArrowState(1, step1Complete);
 
             // Step 2: Angina - check if any angina option is selected
-            const step2Complete = document.getElementById('worsening-angina')?.checked || 
+            const step2Complete = document.getElementById('worsening-angina')?.checked ||
                                   document.getElementById('new-onset-angina')?.checked ||
+                                  document.getElementById('stable-cad-angina')?.checked ||
                                   document.getElementById('angina-no')?.checked;
             updateArrowState(2, step2Complete);
 
@@ -802,11 +818,42 @@
                     historyGroup.style.display = 'block';
                 } else {
                     historyGroup.style.display = 'none';
+                    // Hide nested change group
+                    const changeGroup = document.getElementById('angina-change-group');
+                    changeGroup.style.display = 'none';
                     // Clear angina selections
-                    document.getElementById('worsening-angina').checked = false;
-                    document.getElementById('new-onset-angina').checked = false;
+                    const newOnsetAngina = document.getElementById('new-onset-angina');
+                    const anginaHistoryYes = document.getElementById('angina-history-yes');
+                    const worseningAngina = document.getElementById('worsening-angina');
+                    const stableCadAngina = document.getElementById('stable-cad-angina');
+                    if (newOnsetAngina) newOnsetAngina.checked = false;
+                    if (anginaHistoryYes) anginaHistoryYes.checked = false;
+                    if (worseningAngina) worseningAngina.checked = false;
+                    if (stableCadAngina) stableCadAngina.checked = false;
                     removeIndication('Worsening Angina');
                     removeIndication('New Onset Angina <= 2 months');
+                    removeIndication('Stable Known CAD');
+                }
+            }
+
+            // Handle Angina History radio group (nested under Angina Yes)
+            if (groupName === 'angina-history') {
+                const changeGroup = document.getElementById('angina-change-group');
+                if (value === 'yes') {
+                    changeGroup.style.display = 'block';
+                    // Clear the "New Onset Angina" selection if it was selected
+                    const newOnsetAngina = document.getElementById('new-onset-angina');
+                    if (newOnsetAngina) newOnsetAngina.checked = false;
+                    removeIndication('New Onset Angina <= 2 months');
+                } else {
+                    changeGroup.style.display = 'none';
+                    // Clear nested selections
+                    const worseningAngina = document.getElementById('worsening-angina');
+                    const stableCadAngina = document.getElementById('stable-cad-angina');
+                    if (worseningAngina) worseningAngina.checked = false;
+                    if (stableCadAngina) stableCadAngina.checked = false;
+                    removeIndication('Worsening Angina');
+                    removeIndication('Stable Known CAD');
                 }
             }
 
