@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.2*
+*Version: 2.3*
 
 ## Project Overview
 
@@ -406,7 +406,8 @@ Expected: All selections cleared, form returns to initial state
 ## Recent Changes History
 
 ### 2025-11-24 (Current Version)
-- Updated CLAUDE.md to version 2.2 with accurate line counts and section breakdowns
+- **Arrow Behavior Fix** (PR #16): Fixed arrow completion indicators to only reflect selections made within each specific step, preventing arrows from showing complete status based on selections in other steps
+- Updated CLAUDE.md to version 2.3 with latest changes documented
 - Updated line count to 1202 lines (current state)
 - Updated line number breakdowns for CSS, HTML, and JavaScript sections
 - Documented recent UI and content improvements from prior merges
