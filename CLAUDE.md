@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.2*
+*Version: 2.3*
 
 ## Project Overview
 
@@ -38,7 +38,7 @@ cathpci-decision-tree/
 
 - **index.html** (1202 lines): Complete self-contained application
   - Lines 10-372: CSS styling with gradient backgrounds, responsive design, and orange section headings
-  - Lines 374-691: HTML structure for 7-step decision tree interface with section headings
+  - Lines 373-691: HTML structure for 7-step decision tree interface with section headings
   - Lines 692-1202: JavaScript logic for state management, validation, and PCI determination
 
 ---
@@ -48,7 +48,7 @@ cathpci-decision-tree/
 ### Technology Stack
 
 - **Frontend**: Pure HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **Fonts**: Space Grotesk from Google Fonts
+- **Fonts**: Manrope from Google Fonts
 - **Styling**: CSS Grid, Flexbox, Gradient backgrounds, Orange accent color (#FF6720)
 - **Visual Design**: Orange section headings for each decision tree step, left border accents
 - **State Management**: JavaScript Set for selections, Object for sub-answers
@@ -253,7 +253,7 @@ Examples from git history:
 4. **Maintain State Management**: Respect the `selectedIndications` Set and `pciSubAnswers` object
 5. **Keep It Simple**: No frameworks, no build process, no dependencies
 6. **Responsive Design**: Ensure changes work on desktop, tablet, and mobile
-7. **Consistent Styling**: Follow existing Space Grotesk font, gradient color scheme, and orange accent color (#FF6720) for section headings and highlights
+7. **Consistent Styling**: Follow existing Manrope font, gradient color scheme, and orange accent color (#FF6720) for section headings and highlights
 8. **Comment Complex Logic**: Add comments for any non-obvious clinical decision logic
 9. **Update This Doc**: If you make significant architectural changes, update CLAUDE.md
 
@@ -405,24 +405,28 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24 (Current Version)
-- Updated CLAUDE.md to version 2.2 with accurate line counts and section breakdowns
-- Updated line count to 1202 lines (current state)
-- Updated line number breakdowns for CSS, HTML, and JavaScript sections
-- Documented recent UI and content improvements from prior merges
+### 2025-11-24 (Current Version - v2.3)
+- Updated CLAUDE.md to version 2.3 with verified accuracy against repository state
+- **Font Update**: Application now uses Manrope font (updated from Space Grotesk)
+- Corrected HTML section line range in documentation (373-691, not 374-691)
+- Verified all line counts and section breakdowns are accurate (1202 total lines)
+- Updated all font references in documentation from Space Grotesk to Manrope
 
-### Recent Updates (Prior Merges)
+### Previous Updates (v2.2)
+- Updated CLAUDE.md to version 2.2 with accurate line counts and section breakdowns
+- **Spacing Improvement**: Added extra line space in first section between question and list (PR #19)
+- **Title Update**: Changed title to "Cath Lab Indications & PCI Indication Decision Guide" with header background #013349 (PR #18)
+- **Documentation Update**: Comprehensive CLAUDE.md improvements (PR #17)
+- **Arrow Behavior Fix**: Fixed arrow behavior to only reflect step-specific selections (PR #15)
+
+### Earlier Updates
 - **Angina Prompt Update**: Updated angina prompt wording to clarify "recent or ongoing chest pain" and explicitly documented anginal equivalents
 - **ACS Section Update**: Modified ACS section text to list STEMI, NSTEMI, and Unstable Angina on separate lines for better readability
 - **Orange Section Headings**: Added orange-themed section headings to all 7 decision tree steps for improved visual hierarchy
 - **Tooltip Fix**: Fixed tooltip positioning to appear next to label text instead of at edge of container
-- **Angina Question Update**: Updated Angina question text to clarify patient presentation and format history criteria as a list
+- **Question Tab Color**: Changed question tab left border color from blue to orange (#FF6720) for brand consistency
 
-### 2025-11-22
-- Changed question tab left border color from blue to orange (#FF6720)
-- Updated visual design for better brand consistency
-
-### Previous
+### Initial Development
 - Set up GitHub Pages deployment with GitHub Actions
 - Created initial Claude integration guide (claude.md)
 - Initial application development with 7-step decision tree
