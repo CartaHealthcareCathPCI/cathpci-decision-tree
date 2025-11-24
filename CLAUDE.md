@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1121 lines): Complete self-contained application
-  - Lines 10-287: CSS styling with gradient backgrounds and responsive design
-  - Lines 289-660: HTML structure for 7-step decision tree interface
-  - Lines 661-1121: JavaScript logic for state management, validation, and PCI determination
+- **index.html** (1149 lines): Complete self-contained application
+  - Lines 10-362: CSS styling with gradient backgrounds and responsive design
+  - Lines 364-661: HTML structure for 7-step decision tree interface
+  - Lines 662-1148: JavaScript logic for state management, validation, and PCI determination
 
 ---
 
@@ -385,6 +385,8 @@ Expected: All selections cleared, form returns to initial state
 ## Recent Changes History
 
 ### 2025-11-24
+- **Latest**: Fixed tooltip positioning to appear next to label text instead of at edge of container (PR #6)
+- Updated Angina question text to clarify patient presentation and format history criteria as a list (PR #5)
 - Updated CLAUDE.md with comprehensive development guidelines
 - Added detailed technical architecture documentation
 - Expanded AI assistant guidelines with testing scenarios
