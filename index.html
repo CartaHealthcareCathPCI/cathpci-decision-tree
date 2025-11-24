@@ -468,7 +468,7 @@
                 <div class="option-group">
                     <div class="option" onclick="toggleRadioGroup('cad-history', 'yes')">
                         <input type="radio" name="cad-history" id="cad-yes" value="yes">
-                        <label for="cad-yes">Yes - Consider stability:</label>
+                        <label for="cad-yes">Yes</label>
                     </div>
                     <div class="sub-option-group" id="cad-stability-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient CURRENTLY stable (no signs/symptoms of ACS, New Onset or Worsening Angina, or hemodynamic instability) AND has known CAD ≥50% in at least one vessel?</p>
@@ -480,17 +480,21 @@
                         </div>
                         <div class="option" onclick="toggleRadioGroup('cad-stable', 'no')">
                             <input type="radio" name="cad-stable" id="cad-stable-no" value="no">
-                            <label for="cad-stable-no">No - Do not select</label>
+                            <label for="cad-stable-no">No</label>
+                        </div>
+                        <div class="sub-option-group" id="cad-stable-no-text" style="display: none; margin-top: 10px; padding-left: 30px;">
+                            <p style="color: #555; font-style: italic;">If the patient has a known history of CAD but is NOT currently stable, no selection here applies, move onto the next question</p>
                         </div>
                     </div>
                     <div class="option" onclick="toggleRadioGroup('cad-history', 'no')">
                         <input type="radio" name="cad-history" id="cad-no" value="no">
-                        <label for="cad-no">No - Consider Suspected CAD:</label>
+                        <label for="cad-no">No</label>
                     </div>
                     <div class="sub-option-group" id="suspected-cad-group" style="display: none;">
-                        <div class="option" onclick="toggleCheckbox('suspected-cad-cb')">
-                            <input type="checkbox" id="suspected-cad-cb" onchange="handleCheckboxChange('Suspected CAD', this)">
-                            <label for="suspected-cad-cb" class="has-tooltip">Suspected CAD (if applicable)
+                        <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider adding Suspected CAD if appropriate</p>
+                        <div class="option" onclick="selectIndication('Suspected CAD', 'suspected-cad')">
+                            <input type="radio" name="suspected-cad-option" id="suspected-cad" value="Suspected CAD">
+                            <label for="suspected-cad" class="has-tooltip">Suspected CAD
                                 <span class="tooltip">Suspected Coronary Artery Disease, no prior documentation of CAD ≥50% in a vessel.</span>
                             </label>
                         </div>
@@ -726,9 +730,9 @@
             updateArrowState(2, step2Complete);
 
             // Step 3: CAD - check if any CAD option is selected
-            const step3Complete = document.getElementById('stable-cad')?.checked || 
+            const step3Complete = document.getElementById('stable-cad')?.checked ||
                                   document.getElementById('cad-stable-no')?.checked ||
-                                  document.getElementById('suspected-cad-cb')?.checked ||
+                                  document.getElementById('suspected-cad')?.checked ||
                                   document.getElementById('cad-no')?.checked;
             updateArrowState(3, step3Complete);
 
@@ -806,14 +810,18 @@
             if (groupName === 'cad-history') {
                 const stabilityGroup = document.getElementById('cad-stability-group');
                 const suspectedGroup = document.getElementById('suspected-cad-group');
+                const cadStableNoText = document.getElementById('cad-stable-no-text');
                 if (value === 'yes') {
                     stabilityGroup.style.display = 'block';
                     suspectedGroup.style.display = 'none';
-                    document.getElementById('suspected-cad-cb').checked = false;
+                    if (cadStableNoText) cadStableNoText.style.display = 'none';
+                    const suspectedCadRadio = document.getElementById('suspected-cad');
+                    if (suspectedCadRadio) suspectedCadRadio.checked = false;
                     removeIndication('Suspected CAD');
                 } else {
                     stabilityGroup.style.display = 'none';
                     suspectedGroup.style.display = 'block';
+                    if (cadStableNoText) cadStableNoText.style.display = 'none';
                     document.getElementById('stable-cad').checked = false;
                     removeIndication('Stable Known CAD');
                 }
@@ -821,9 +829,13 @@
 
             // Handle CAD stable radio group
             if (groupName === 'cad-stable') {
+                const cadStableNoText = document.getElementById('cad-stable-no-text');
                 if (value === 'no') {
                     document.getElementById('stable-cad').checked = false;
                     removeIndication('Stable Known CAD');
+                    if (cadStableNoText) cadStableNoText.style.display = 'block';
+                } else {
+                    if (cadStableNoText) cadStableNoText.style.display = 'none';
                 }
             }
 
@@ -1165,6 +1177,7 @@
             document.getElementById('angina-history-group').style.display = 'none';
             document.getElementById('cad-stability-group').style.display = 'none';
             document.getElementById('suspected-cad-group').style.display = 'none';
+            document.getElementById('cad-stable-no-text').style.display = 'none';
 
             // Hide all reminders
             document.querySelectorAll('.reminder').forEach(reminder => {
