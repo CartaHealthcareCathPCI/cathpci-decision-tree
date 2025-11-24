@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1121 lines)
+├── index.html                    # Main application (1127 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1121 lines): Complete self-contained application
-  - Lines 10-287: CSS styling with gradient backgrounds and responsive design
-  - Lines 289-660: HTML structure for 7-step decision tree interface
-  - Lines 661-1121: JavaScript logic for state management, validation, and PCI determination
+- **index.html** (1127 lines): Complete self-contained application
+  - Lines 10-357: CSS styling with gradient backgrounds and responsive design
+  - Lines 358-639: HTML structure for 7-step decision tree interface
+  - Lines 640-1127: JavaScript logic for state management, validation, and PCI determination
 
 ---
 
@@ -384,7 +384,9 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24
+### 2025-11-24 (Latest)
+- Updated Angina question text to clarify patient presentation
+- Formatted history criteria as a bullet list for better readability
 - Updated CLAUDE.md with comprehensive development guidelines
 - Added detailed technical architecture documentation
 - Expanded AI assistant guidelines with testing scenarios
