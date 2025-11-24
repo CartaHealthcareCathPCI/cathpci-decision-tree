@@ -401,7 +401,7 @@
             <div class="step-section">
                 <div class="step-title">
                     <span class="step-number" id="step-arrow-2">➔</span>
-                    Angina: Is chest pain or a documented anginal equivalent documented as an indication for this Cath Lab visit?
+                    Angina: Is the patient being brought to the Cath Lab for chest pain or a documented anginal equivalent?
                 </div>
                 <div class="option-group">
                     <div class="option" onclick="toggleRadioGroup('angina', 'yes')">
@@ -409,7 +409,13 @@
                         <label for="angina-yes">Yes</label>
                     </div>
                     <div class="sub-option-group" id="angina-history-group" style="display: none;">
-                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Does the patient have a history of prior MI, prior PCI, CABG, or a history of angina that has increased in severity or frequency within the last 2 months?</p>
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
+                            Does the patient have a history of:<br>
+                            • Prior MI<br>
+                            • Prior PCI<br>
+                            • CABG<br>
+                            or a history of angina that has increased in severity or frequency within the last 2 months?
+                        </p>
                         <div class="option has-tooltip" onclick="selectIndication('Worsening Angina', 'worsening-angina')">
                             <input type="radio" name="angina-type" id="worsening-angina" value="Worsening Angina">
                             <label for="worsening-angina">Yes - Worsening Angina</label>
