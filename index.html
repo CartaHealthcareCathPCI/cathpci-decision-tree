@@ -741,18 +741,18 @@
                                   document.getElementById('cardiac-arrest-no')?.checked;
             updateArrowState(4, step4Complete);
 
-            // Step 5: Non-Ischemic - check if any option is selected or implicitly skipped
+            // Step 5: Non-Ischemic - check if any option is selected
             const step5Options = ['valvular', 'pericardial', 'arrhythmia', 'cardiomyopathy', 'lv-dysfunction', 'syncope', 'post-transplant'];
-            const step5Complete = step5Options.some(id => document.getElementById(id)?.checked) || step4Complete;
+            const step5Complete = step5Options.some(id => document.getElementById(id)?.checked);
             updateArrowState(5, step5Complete);
 
-            // Step 6: Non-Cardiac - check if any option is selected or implicitly skipped
-            const step6Complete = document.getElementById('pre-op')?.checked || 
-                                  document.getElementById('exercise')?.checked || step5Complete;
+            // Step 6: Non-Cardiac - check if any option is selected
+            const step6Complete = document.getElementById('pre-op')?.checked ||
+                                  document.getElementById('exercise')?.checked;
             updateArrowState(6, step6Complete);
 
             // Step 7: Other - check if selected
-            const step7Complete = document.getElementById('other')?.checked || selectedIndications.size > 0;
+            const step7Complete = document.getElementById('other')?.checked;
             updateArrowState(7, step7Complete);
         }
 
