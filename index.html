@@ -397,7 +397,7 @@
                         <label for="acs-yes">Yes</label>
                     </div>
                     <div class="sub-option-group" id="acs-timing-group" style="display: none;">
-                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Consider the timing:</p>
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">The time lapse from ACS diagnosis to Cath Lab presentation should guide which selection is indicated. To clarify: Because the definition is focused on when the patient "has" ACS (unstable angina, NSTEMI or STEMI), please use the diagnosis date/time - NCDR ACD#24910</p>
                         <div class="option" onclick="selectIndication('ACS <= 24 hrs', 'acs-24')">
                             <input type="radio" name="acs-timing" id="acs-24" value="ACS <= 24 hrs">
                             <label for="acs-24" class="has-tooltip">ACS ≤ 24 hrs
@@ -409,6 +409,10 @@
                             <label for="acs-24plus" class="has-tooltip">ACS > 24 hrs
                                 <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI ≤7 days from symptoms). Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
                             </label>
+                        </div>
+                        <div class="reminder" id="acs-24plus-reminder" style="display: none;">
+                            <strong>⚠️ Reminder:</strong>
+                            A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit – NCDR ACD# 25073
                         </div>
                     </div>
                     <div class="option" onclick="toggleRadioGroup('acs', 'no')">
@@ -901,6 +905,7 @@
 
         function showReminder(indication) {
             const reminderMap = {
+                'ACS > 24 hrs': 'acs-24plus-reminder',
                 'Valvular Disease': 'valvular-reminder',
                 'Cardiac arrhythmia': 'arrhythmia-reminder',
                 'Cardiomyopathy': 'cardiomyopathy-reminder',
@@ -918,6 +923,7 @@
 
         function hideReminder(indication) {
             const reminderMap = {
+                'ACS > 24 hrs': 'acs-24plus-reminder',
                 'Valvular Disease': 'valvular-reminder',
                 'Cardiac arrhythmia': 'arrhythmia-reminder',
                 'Cardiomyopathy': 'cardiomyopathy-reminder',
