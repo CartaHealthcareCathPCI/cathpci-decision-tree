@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.0*
+*Version: 2.1*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1121 lines): Complete self-contained application
-  - Lines 10-287: CSS styling with gradient backgrounds and responsive design
-  - Lines 289-660: HTML structure for 7-step decision tree interface
-  - Lines 661-1121: JavaScript logic for state management, validation, and PCI determination
+- **index.html** (1149 lines): Complete self-contained application
+  - Lines 10-362: CSS styling with gradient backgrounds and responsive design
+  - Lines 363-661: HTML structure for 7-step decision tree interface
+  - Lines 662-1149: JavaScript logic for state management, validation, and PCI determination
 
 ---
 
@@ -384,18 +384,26 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24
-- Updated CLAUDE.md with comprehensive development guidelines
+### 2025-11-24 (Latest)
+- **PR #6**: Fixed tooltip positioning to appear next to label text instead of at edge of container
+  - Moved has-tooltip class from option div to label elements
+  - Nested tooltip spans inside labels for proper positioning
+  - Added CSS rule for label.has-tooltip with display: inline-block
+  - Fixes issue where tooltips were cut off at container edges
+- **PR #5**: Updated Angina question text to clarify patient presentation
+  - Reformatted history criteria as a bulleted list for better readability
+  - Improved clinical clarity for Step 2 question
+- Updated CLAUDE.md with comprehensive development guidelines (Version 2.0)
 - Added detailed technical architecture documentation
 - Expanded AI assistant guidelines with testing scenarios
 
 ### 2025-11-22
-- Changed question tab left border color from blue to orange (#FF6720)
+- **PR #3**: Changed question tab left border color from blue to orange (#FF6720)
 - Updated visual design for better brand consistency
 
 ### Previous
-- Set up GitHub Pages deployment with GitHub Actions
-- Created initial Claude integration guide (claude.md)
+- **PR #2**: Set up GitHub Pages deployment with GitHub Actions
+- **PR #1**: Created initial Claude integration guide (claude.md)
 - Initial application development with 7-step decision tree
 
 ---
