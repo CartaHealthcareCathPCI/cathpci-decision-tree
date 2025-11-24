@@ -448,7 +448,7 @@
                                 <span class="tooltip">The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.</span>
                             </label>
                         </div>
-                        <div class="option" onclick="toggleRadioGroup('angina-history', 'yes')">
+                        <div class="option" onclick="toggleRadioGroup('angina-history-type', 'yes')">
                             <input type="radio" name="angina-history-type" id="angina-history-yes" value="yes">
                             <label for="angina-history-yes">Yes</label>
                         </div>
@@ -837,7 +837,7 @@
             }
 
             // Handle Angina History radio group (nested under Angina Yes)
-            if (groupName === 'angina-history') {
+            if (groupName === 'angina-history-type') {
                 const changeGroup = document.getElementById('angina-change-group');
                 if (value === 'yes') {
                     changeGroup.style.display = 'block';
