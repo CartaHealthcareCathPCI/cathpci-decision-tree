@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-24*
-*Version: 2.0*
+*Version: 2.1*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1121 lines)
+├── index.html                    # Main application (1169 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1121 lines): Complete self-contained application
-  - Lines 10-287: CSS styling with gradient backgrounds and responsive design
-  - Lines 289-660: HTML structure for 7-step decision tree interface
-  - Lines 661-1121: JavaScript logic for state management, validation, and PCI determination
+- **index.html** (1169 lines): Complete self-contained application
+  - Lines 10-372: CSS styling with gradient backgrounds, responsive design, and orange section headings
+  - Lines 374-660: HTML structure for 7-step decision tree interface with section headings
+  - Lines 661-1169: JavaScript logic for state management, validation, and PCI determination
 
 ---
 
@@ -49,7 +49,8 @@ cathpci-decision-tree/
 
 - **Frontend**: Pure HTML5, CSS3, Vanilla JavaScript (ES6+)
 - **Fonts**: Space Grotesk from Google Fonts
-- **Styling**: CSS Grid, Flexbox, Gradient backgrounds
+- **Styling**: CSS Grid, Flexbox, Gradient backgrounds, Orange accent color (#FF6720)
+- **Visual Design**: Orange section headings for each decision tree step, left border accents
 - **State Management**: JavaScript Set for selections, Object for sub-answers
 - **Deployment**: GitHub Pages with GitHub Actions CI/CD
 - **Version Control**: Git with feature branch workflow
@@ -69,13 +70,17 @@ This is intentional design:
 
 ### 7-Step Decision Process
 
-1. **Step 1: ACS Screening** - Acute Coronary Syndrome evaluation with timing (<24hrs vs >24hrs)
-2. **Step 2: Angina Evaluation** - New onset vs worsening angina with history assessment
-3. **Step 3: CAD History** - Stable known CAD vs suspected CAD evaluation
+Each step is visually organized with an orange section heading for improved navigation:
+
+1. **Step 1: Acute Coronary Syndrome** - ACS evaluation with timing (<24hrs vs >24hrs)
+   - Lists STEMI, NSTEMI, and Unstable Angina on separate lines
+2. **Step 2: Angina** - Recent or ongoing chest pain or explicitly documented anginal equivalents
+   - New onset vs worsening angina with history assessment
+3. **Step 3: Coronary Artery Disease History** - Stable known CAD vs suspected CAD evaluation
 4. **Step 4: Cardiac Arrest** - Resuscitated cardiac arrest screening
-5. **Step 5: Non-ischemic/Structural** - Multiple selections allowed (valvular, pericardial, arrhythmia, cardiomyopathy, LV dysfunction, syncope, post-transplant)
-6. **Step 6: Non-cardiac/Evaluation** - Pre-operative evaluation or exercise clearance
-7. **Step 7: Other** - Catch-all for indications not covered above
+5. **Step 5: Non-Ischemic/Structural Heart Disease** - Multiple selections allowed (valvular, pericardial, arrhythmia, cardiomyopathy, LV dysfunction, syncope, post-transplant)
+6. **Step 6: Non-Cardiac/Evaluation** - Pre-operative evaluation or exercise clearance
+7. **Step 7: Other Indications** - Catch-all for indications not covered above
 
 ### Indication Priority Hierarchy
 
@@ -248,7 +253,7 @@ Examples from git history:
 4. **Maintain State Management**: Respect the `selectedIndications` Set and `pciSubAnswers` object
 5. **Keep It Simple**: No frameworks, no build process, no dependencies
 6. **Responsive Design**: Ensure changes work on desktop, tablet, and mobile
-7. **Consistent Styling**: Follow existing Space Grotesk font and gradient color scheme
+7. **Consistent Styling**: Follow existing Space Grotesk font, gradient color scheme, and orange accent color (#FF6720) for section headings and highlights
 8. **Comment Complex Logic**: Add comments for any non-obvious clinical decision logic
 9. **Update This Doc**: If you make significant architectural changes, update CLAUDE.md
 
@@ -265,6 +270,7 @@ Examples from git history:
 
 ### Code Style Conventions
 
+**JavaScript:**
 ```javascript
 // Use descriptive variable names
 const selectedIndications = new Set();
@@ -285,6 +291,21 @@ options.forEach(option => {
 // ACS ≤24hrs has highest priority per NCDR guidelines
 if (selectedIndications.has('ACS ≤ 24 hrs')) {
     return determinePCIForACS();
+}
+```
+
+**CSS:**
+```css
+/* Use the established orange accent color for highlights and section headings */
+.section-heading {
+    background: #FF6720;  /* Orange brand color */
+    color: white;
+    padding: 10px 20px;
+}
+
+/* Maintain consistent border styling with orange accents */
+.step-section {
+    border-left: 4px solid #FF6720;
 }
 ```
 
@@ -384,10 +405,17 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24
-- Updated CLAUDE.md with comprehensive development guidelines
-- Added detailed technical architecture documentation
-- Expanded AI assistant guidelines with testing scenarios
+### 2025-11-24 (Current Version)
+- Updated CLAUDE.md to version 2.1 with current codebase state
+- Updated line count from 1121 to 1169 lines
+- Documented recent UI and content improvements
+
+### Recent Updates (Prior Merges)
+- **Angina Prompt Update**: Updated angina prompt wording to clarify "recent or ongoing chest pain" and explicitly documented anginal equivalents
+- **ACS Section Update**: Modified ACS section text to list STEMI, NSTEMI, and Unstable Angina on separate lines for better readability
+- **Orange Section Headings**: Added orange-themed section headings to all 7 decision tree steps for improved visual hierarchy
+- **Tooltip Fix**: Fixed tooltip positioning to appear next to label text instead of at edge of container
+- **Angina Question Update**: Updated Angina question text to clarify patient presentation and format history criteria as a list
 
 ### 2025-11-22
 - Changed question tab left border color from blue to orange (#FF6720)
