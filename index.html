@@ -241,7 +241,98 @@
             font-size: 14px;
             color: #721c24;
         }
-        
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: #dc3545;
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header-icon {
+            font-size: 24px;
+        }
+
+        .modal-header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-error-item {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #721c24;
+        }
+
+        .modal-error-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .modal-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-button:hover {
+            background: #c82333;
+        }
+
+        .modal-button:active {
+            transform: translateY(1px);
+        }
+
         .summary-section {
             background: #e8f5e9;
             border: 2px solid #4caf50;
@@ -708,6 +799,22 @@
         </div>
     </div>
 
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-header-icon">⚠️</span>
+                <div class="modal-header-title">Selection Conflict Detected</div>
+            </div>
+            <div class="modal-body" id="modal-error-list">
+                <!-- Error messages will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeErrorModal()">Go back and update selection</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Store selected indications
         let selectedIndications = new Set();
@@ -790,8 +897,58 @@
         function toggleRadioGroup(groupName, value) {
             const radio = document.querySelector(`input[name="${groupName}"][value="${value}"]`);
             if (radio) {
-                radio.checked = true;
-                handleRadioChange(groupName, value);
+                // If radio is already checked, uncheck it (deselection)
+                if (radio.checked) {
+                    radio.checked = false;
+                    // Clear associated selections based on group
+                    if (groupName === 'acs') {
+                        // Clear all ACS-related selections
+                        document.getElementById('acs-24').checked = false;
+                        document.getElementById('acs-24plus').checked = false;
+                        removeIndication('ACS <= 24 hrs');
+                        removeIndication('ACS > 24 hrs');
+                        document.getElementById('acs-timing-group').style.display = 'none';
+                    } else if (groupName === 'angina') {
+                        // Clear all angina-related selections
+                        const historyGroup = document.getElementById('angina-history-group');
+                        const changeGroup = document.getElementById('angina-change-group');
+                        historyGroup.style.display = 'none';
+                        changeGroup.style.display = 'none';
+                        const newOnsetAngina = document.getElementById('new-onset-angina');
+                        const anginaHistoryYes = document.getElementById('angina-history-yes');
+                        const worseningAngina = document.getElementById('worsening-angina');
+                        const stableCadAngina = document.getElementById('stable-cad-angina');
+                        if (newOnsetAngina) newOnsetAngina.checked = false;
+                        if (anginaHistoryYes) anginaHistoryYes.checked = false;
+                        if (worseningAngina) worseningAngina.checked = false;
+                        if (stableCadAngina) stableCadAngina.checked = false;
+                        removeIndication('Worsening Angina');
+                        removeIndication('New Onset Angina <= 2 months');
+                        removeIndication('Stable Known CAD');
+                    } else if (groupName === 'cad-history') {
+                        // Clear CAD history selections
+                        document.getElementById('cad-stability-group').style.display = 'none';
+                        document.getElementById('suspected-cad-group').style.display = 'none';
+                        const cadStableNoText = document.getElementById('cad-stable-no-text');
+                        if (cadStableNoText) cadStableNoText.style.display = 'none';
+                        const stableCad = document.getElementById('stable-cad');
+                        const suspectedCad = document.getElementById('suspected-cad');
+                        if (stableCad) stableCad.checked = false;
+                        if (suspectedCad) suspectedCad.checked = false;
+                        removeIndication('Stable Known CAD');
+                        removeIndication('Suspected CAD');
+                    } else if (groupName === 'cardiac-arrest') {
+                        // Clear cardiac arrest selections
+                        document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
+                        document.getElementById('resuscitated-cardiac-arrest').checked = false;
+                        removeIndication('Resuscitated Cardiac Arrest');
+                    }
+                    updateArrows();
+                } else {
+                    // Check the radio and handle normally
+                    radio.checked = true;
+                    handleRadioChange(groupName, value);
+                }
             }
         }
 
@@ -1051,16 +1208,32 @@
 
         function displayErrors(errors) {
             const errorDiv = document.getElementById('validation-errors');
+            const modal = document.getElementById('error-modal');
+            const modalErrorList = document.getElementById('modal-error-list');
+
             if (errors.length === 0) {
                 errorDiv.innerHTML = '';
+                modal.classList.remove('show');
                 return;
             }
 
+            // Build error list for modal
             let html = '';
             errors.forEach(error => {
-                html += `<div class="validation-error">⚠️ ${error}</div>`;
+                html += `<div class="modal-error-item">⚠️ ${error}</div>`;
             });
-            errorDiv.innerHTML = html;
+            modalErrorList.innerHTML = html;
+
+            // Show modal
+            modal.classList.add('show');
+
+            // Clear inline errors (no longer used)
+            errorDiv.innerHTML = '';
+        }
+
+        function closeErrorModal() {
+            const modal = document.getElementById('error-modal');
+            modal.classList.remove('show');
         }
 
         function updateSummary() {
