@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-11-24*
-*Version: 2.3*
+*Last Updated: 2025-11-25*
+*Version: 2.4*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1202 lines): Complete self-contained application
-  - Lines 10-372: CSS styling with gradient backgrounds, responsive design, and orange section headings
-  - Lines 373-691: HTML structure for 7-step decision tree interface with section headings
-  - Lines 692-1202: JavaScript logic for state management, validation, and PCI determination
+- **index.html** (1472 lines): Complete self-contained application
+  - Lines 10-463: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
+  - Lines 465-817: HTML structure for 7-step decision tree interface with section headings and error modal
+  - Lines 818-1471: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -139,6 +139,8 @@ const validationRules = {
 };
 ```
 
+**Error Modal**: When validation errors occur, a modal popup displays the conflict with a clear explanation and allows the user to dismiss and update their selection. This provides better user feedback than inline error messages.
+
 ---
 
 ## Key JavaScript Functions
@@ -153,7 +155,8 @@ const validationRules = {
 ### Validation & Logic
 
 - `validateSelections()` - Checks for incompatible indication combinations
-- `displayErrors(errors)` - Shows validation errors to user
+- `displayErrors(errors)` - Shows validation errors in modal popup
+- `closeErrorModal()` - Closes the validation error modal
 - `determinePCIIndication()` - Calculates appropriate PCI indication based on priority
 - `showPCISubQuestion(questionType)` - Displays conditional sub-questions
 - `handlePCISubAnswer(questionType, answer)` - Processes sub-question responses
@@ -162,8 +165,10 @@ const validationRules = {
 
 - `updateArrows()` - Updates completion arrows for all steps
 - `updateArrowState(stepNum, isComplete)` - Sets individual step completion state
-- `toggleRadioGroup(groupName, value)` - Handles radio button selections
+- `toggleRadioGroup(groupName, value)` - Handles radio button selections with deselection support (clicking a selected radio button will deselect it)
+- `handleRadioChange(groupName, value)` - Process radio button change events
 - `toggleCheckbox(checkboxId)` - Handles checkbox selections
+- `handleCheckboxChange(indication, checkbox)` - Process checkbox change events
 
 ### Reminders
 
@@ -405,7 +410,17 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-24 (Current Version - v2.3)
+### 2025-11-25 (Current Version - v2.4)
+- Updated CLAUDE.md to version 2.4 with corrected line counts reflecting current repository state
+- **Corrected Line Counts**: Updated from 1202 to 1472 total lines with accurate section boundaries
+- **Error Modal Feature** (PR #26): Added modal popup for validation conflicts with improved UX
+- **Radio Button Deselection** (PRs #26, #27): Users can now click a selected radio button to deselect it
+- **Angina Logic Improvements** (PR #25): Made angina indications mutually exclusive and fixed Stable Known CAD selection
+- **UI Bug Fixes** (PR #24): Fixed angina nested question display bug
+- **Angina Section Updates** (PR #23): Revised prompt wording and improved nested history logic
+- Documented new functions: `closeErrorModal()`, `handleRadioChange()`, `handleCheckboxChange()`
+
+### 2025-11-24 (Previous Version - v2.3)
 - Updated CLAUDE.md to version 2.3 with verified accuracy against repository state
 - **Font Update**: Application now uses Manrope font (updated from Space Grotesk)
 - Corrected HTML section line range in documentation (373-691, not 374-691)
@@ -504,7 +519,8 @@ If you're tasked with integrating this application with external systems:
 
 ### Validation Functions
 - `validateSelections()` - Check for incompatible combinations
-- `displayErrors(errors)` - Show validation errors
+- `displayErrors(errors)` - Show validation errors in modal popup
+- `closeErrorModal()` - Close the validation error modal
 
 ### PCI Determination Functions
 - `determinePCIIndication()` - Calculate PCI indication based on priority
