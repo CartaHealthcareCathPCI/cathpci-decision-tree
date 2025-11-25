@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-25*
-*Version: 2.4*
+*Version: 2.5*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1202 lines)
+├── index.html                    # Main application (1571 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1472 lines): Complete self-contained application
-  - Lines 10-463: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
-  - Lines 465-817: HTML structure for 7-step decision tree interface with section headings and error modal
-  - Lines 818-1471: JavaScript logic for state management, validation, error handling, and PCI determination
+- **index.html** (1571 lines): Complete self-contained application
+  - Lines 10-461: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
+  - Lines 463-815: HTML structure for 7-step decision tree interface with section headings and error modal
+  - Lines 816-1570: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -169,6 +169,7 @@ const validationRules = {
 - `handleRadioChange(groupName, value)` - Process radio button change events
 - `toggleCheckbox(checkboxId)` - Handles checkbox selections
 - `handleCheckboxChange(indication, checkbox)` - Process checkbox change events
+- `attachInputEventListeners()` - Attaches event listeners to radio buttons and checkboxes using data attributes to prevent duplicates
 
 ### Reminders
 
@@ -410,9 +411,17 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-25 (Current Version - v2.4)
-- Updated CLAUDE.md to version 2.4 with corrected line counts reflecting current repository state
-- **Corrected Line Counts**: Updated from 1202 to 1472 total lines with accurate section boundaries
+### 2025-11-25 (Current Version - v2.5)
+- Updated CLAUDE.md to version 2.5 with corrected line counts (1571 lines) reflecting latest changes
+- **Click Handling Improvements** (PRs #29, #30): Fixed radio button and checkbox click event listeners
+  - PR #30: Fixed click handlers using data attributes instead of cloning elements to preserve label-input connections
+  - PR #29: Made selections only clickable via circles (radio/checkbox inputs), not text labels or containers
+  - Resolved double-toggle issues and ensured all circles remain clickable
+- Enhanced event listener management with `attachInputEventListeners()` function using data attributes
+- Corrected section boundaries: CSS (10-461), HTML (463-815), JavaScript (816-1570)
+
+### 2025-11-25 (Previous Version - v2.4)
+- Updated CLAUDE.md to version 2.4 with corrected line counts reflecting repository state at that time
 - **Error Modal Feature** (PR #26): Added modal popup for validation conflicts with improved UX
 - **Radio Button Deselection** (PRs #26, #27): Users can now click a selected radio button to deselect it
 - **Angina Logic Improvements** (PR #25): Made angina indications mutually exclusive and fixed Stable Known CAD selection
@@ -536,6 +545,7 @@ If you're tasked with integrating this application with external systems:
 - `handleRadioChange(groupName, value)` - Process radio button change
 - `toggleCheckbox(checkboxId)` - Handle checkbox selection
 - `handleCheckboxChange(indication, checkbox)` - Process checkbox change
+- `attachInputEventListeners()` - Attach event listeners to inputs using data attributes
 
 ### Helper Functions
 - `showReminder(indication)` - Display contextual reminder
