@@ -895,8 +895,10 @@
         }
 
         function toggleRadioGroup(groupName, value, event) {
-            // Prevent click from propagating to the input element
-            if (event) event.stopPropagation();
+            // If the click came from the input itself, let the browser handle it naturally
+            if (event && event.target.tagName === 'INPUT') {
+                return;
+            }
 
             const radio = document.querySelector(`input[name="${groupName}"][value="${value}"]`);
             if (radio) {
@@ -1067,8 +1069,10 @@
         }
 
         function toggleCheckbox(checkboxId, event) {
-            // Prevent click from propagating to the input element
-            if (event) event.stopPropagation();
+            // If the click came from the input itself, let the browser handle it naturally
+            if (event && event.target.tagName === 'INPUT') {
+                return;
+            }
 
             const checkbox = document.getElementById(checkboxId);
             checkbox.checked = !checkbox.checked;
@@ -1084,8 +1088,10 @@
         }
 
         function selectIndication(indication, elementId, event) {
-            // Prevent click from propagating to the input element
-            if (event) event.stopPropagation();
+            // If the click came from the input itself, let the browser handle it naturally
+            if (event && event.target.tagName === 'INPUT') {
+                return;
+            }
 
             // Define mutually exclusive angina indications
             const anginaIndications = [
