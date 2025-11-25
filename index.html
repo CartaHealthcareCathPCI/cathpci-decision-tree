@@ -921,9 +921,18 @@
         }
 
         function selectIndication(indication, elementId) {
-            // Check if this is a radio button selection
+            // Define mutually exclusive angina indications
+            const anginaIndications = [
+                'New Onset Angina <= 2 months',
+                'Worsening Angina',
+                'Stable Known CAD'
+            ];
+
+            // Ensure the radio button is checked
             const element = document.getElementById(elementId);
             if (element && element.type === 'radio') {
+                element.checked = true;
+
                 // For radio buttons in the same group, remove other selections
                 const radioName = element.name;
                 const radios = document.querySelectorAll(`input[name="${radioName}"]`);
@@ -932,6 +941,26 @@
                         const val = radio.value;
                         if (priorityOrder.includes(val)) {
                             removeIndication(val);
+                        }
+                    }
+                });
+            }
+
+            // Special handling: Ensure angina indications are mutually exclusive
+            if (anginaIndications.includes(indication)) {
+                anginaIndications.forEach(anginaInd => {
+                    if (anginaInd !== indication && selectedIndications.has(anginaInd)) {
+                        removeIndication(anginaInd);
+                        // Also uncheck the corresponding radio button
+                        if (anginaInd === 'New Onset Angina <= 2 months') {
+                            const radio = document.getElementById('new-onset-angina');
+                            if (radio) radio.checked = false;
+                        } else if (anginaInd === 'Worsening Angina') {
+                            const radio = document.getElementById('worsening-angina');
+                            if (radio) radio.checked = false;
+                        } else if (anginaInd === 'Stable Known CAD') {
+                            const radio = document.getElementById('stable-cad-angina');
+                            if (radio) radio.checked = false;
                         }
                     }
                 });
@@ -995,19 +1024,25 @@
                 errors.push('Cannot select both "ACS ≤ 24 hrs" and "ACS > 24 hrs"');
             }
 
-            // Cannot select New Onset Angina with Worsening Angina
-            if (indications.includes('New Onset Angina <= 2 months') && indications.includes('Worsening Angina')) {
-                errors.push('Cannot select both "New Onset Angina ≤ 2 months" and "Worsening Angina"');
+            // Angina indications are mutually exclusive
+            const anginaIndications = ['New Onset Angina <= 2 months', 'Worsening Angina', 'Stable Known CAD'];
+            const selectedAngina = anginaIndications.filter(ind => indications.includes(ind));
+            if (selectedAngina.length > 1) {
+                errors.push(`Cannot select multiple angina indications: ${selectedAngina.join(', ')}`);
             }
 
-            // Stable Known CAD restrictions
+            // Stable Known CAD cannot be selected with certain acute conditions
             if (indications.includes('Stable Known CAD')) {
-                const incompatible = ['ACS <= 24 hrs', 'ACS > 24 hrs', 'New Onset Angina <= 2 months', 
-                                     'Worsening Angina', 'Suspected CAD', 'Resuscitated Cardiac Arrest'];
+                const incompatible = ['ACS <= 24 hrs', 'ACS > 24 hrs', 'Suspected CAD', 'Resuscitated Cardiac Arrest'];
                 const conflicts = incompatible.filter(ind => indications.includes(ind));
                 if (conflicts.length > 0) {
                     errors.push(`Cannot select "Stable Known CAD" with: ${conflicts.join(', ')}`);
                 }
+            }
+
+            // Suspected CAD cannot be selected with Stable Known CAD
+            if (indications.includes('Suspected CAD') && indications.includes('Stable Known CAD')) {
+                errors.push('Cannot select both "Suspected CAD" and "Stable Known CAD"');
             }
 
             displayErrors(errors);
