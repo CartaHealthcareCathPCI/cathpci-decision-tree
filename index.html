@@ -113,16 +113,16 @@
             padding: 12px 15px;
             margin-bottom: 10px;
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
+            cursor: pointer;
             position: relative;
+            user-select: none;
         }
 
         .option:hover {
             border-color: #FF6720;
             background: #f0f4ff;
         }
-        
+
         .option.selected {
             border-color: #FF6720;
             background: #e8edff;
@@ -194,33 +194,7 @@
             }
         }
         
-        .option input[type="checkbox"],
-        .option input[type="radio"] {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            margin-right: 12px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            border: 2px solid #999;
-            border-radius: 50%;
-            background: white;
-            position: relative;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-
-        .option input[type="checkbox"]:hover,
-        .option input[type="radio"]:hover {
-            border-color: #013349;
-        }
-
-        .option input[type="checkbox"]:checked,
-        .option input[type="radio"]:checked {
-            background: #013349;
-            border-color: #013349;
-        }
+        /* Removed input styling - options are now directly clickable */
         
         .sub-option-group {
             margin-left: 35px;
@@ -495,32 +469,26 @@
                     Unstable Angina
                 </div>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="radio" name="acs" id="acs-yes" value="yes">
-                        <label for="acs-yes">Yes</label>
+                    <div class="option" data-type="radio" data-group="acs" data-value="yes" id="acs-yes">
+                        Yes
                     </div>
                     <div class="sub-option-group" id="acs-timing-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">The time lapse from ACS diagnosis to Cath Lab presentation should guide which selection is indicated. To clarify: Because the definition is focused on when the patient "has" ACS (unstable angina, NSTEMI or STEMI), please use the diagnosis date/time - NCDR ACD#24910</p>
-                        <div class="option">
-                            <input type="radio" name="acs-timing" id="acs-24" value="ACS <= 24 hrs">
-                            <label for="acs-24" class="has-tooltip">ACS ≤ 24 hrs
-                                <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is ≤ 24 hours prior to cath lab presentation. Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="ACS <= 24 hrs" id="acs-24">
+                            ACS ≤ 24 hrs
+                            <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is ≤ 24 hours prior to cath lab presentation. Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
                         </div>
-                        <div class="option">
-                            <input type="radio" name="acs-timing" id="acs-24plus" value="ACS > 24 hrs">
-                            <label for="acs-24plus" class="has-tooltip">ACS > 24 hrs
-                                <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI ≤7 days from symptoms). Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="ACS > 24 hrs" id="acs-24plus">
+                            ACS > 24 hrs
+                            <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI ≤7 days from symptoms). Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
                         </div>
                         <div class="reminder" id="acs-24plus-reminder" style="display: none;">
                             <strong>⚠️ Reminder:</strong>
                             A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit – NCDR ACD# 25073
                         </div>
                     </div>
-                    <div class="option">
-                        <input type="radio" name="acs" id="acs-no" value="no">
-                        <label for="acs-no">No - Move to next question</label>
+                    <div class="option" data-type="radio" data-group="acs" data-value="no" id="acs-no">
+                        No - Move to next question
                     </div>
                 </div>
             </div>
@@ -533,9 +501,8 @@
                     In the last 2 months, has the patient experienced Chest Pain or a documented anginal equivalent?
                 </div>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="radio" name="angina" id="angina-yes" value="yes">
-                        <label for="angina-yes">Yes</label>
+                    <div class="option" data-type="radio" data-group="angina" data-value="yes" id="angina-yes">
+                        Yes
                     </div>
                     <div class="sub-option-group" id="angina-history-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
@@ -545,37 +512,29 @@
                             Prior CABG<br>
                             History of Angina
                         </p>
-                        <div class="option">
-                            <input type="radio" name="angina-history-type" id="new-onset-angina" value="New Onset Angina <= 2 months">
-                            <label for="new-onset-angina" class="has-tooltip">No - New Onset Angina
-                                <span class="tooltip">The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="New Onset Angina <= 2 months" id="new-onset-angina">
+                            No - New Onset Angina
+                            <span class="tooltip">The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.</span>
                         </div>
-                        <div class="option">
-                            <input type="radio" name="angina-history-type" id="angina-history-yes" value="yes">
-                            <label for="angina-history-yes">Yes</label>
+                        <div class="option" data-type="radio" data-group="angina-history-type" data-value="yes" id="angina-history-yes">
+                            Yes
                         </div>
                         <div class="sub-option-group" id="angina-change-group" style="display: none;">
                             <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
                                 Has the patient's angina changed in frequency, pattern or severity over the past 2 months?
                             </p>
-                            <div class="option">
-                                <input type="radio" name="angina-change-type" id="worsening-angina" value="Worsening Angina">
-                                <label for="worsening-angina" class="has-tooltip">Yes - Worsening Angina
-                                    <span class="tooltip">The patient has a history of angina that has changed in frequency, pattern or severity over the past 2 months.</span>
-                                </label>
+                            <div class="option has-tooltip" data-type="indication" data-indication="Worsening Angina" id="worsening-angina">
+                                Yes - Worsening Angina
+                                <span class="tooltip">The patient has a history of angina that has changed in frequency, pattern or severity over the past 2 months.</span>
                             </div>
-                            <div class="option">
-                                <input type="radio" name="angina-change-type" id="stable-cad-angina" value="Stable Known CAD">
-                                <label for="stable-cad-angina" class="has-tooltip">No - Stable Known CAD
-                                    <span class="tooltip">The patient has a history of angina, MI, PCI, or CABG but their angina has not changed in frequency, pattern or severity over the past 2 months.</span>
-                                </label>
+                            <div class="option has-tooltip" data-type="indication" data-indication="Stable Known CAD" id="stable-cad-angina">
+                                No - Stable Known CAD
+                                <span class="tooltip">The patient has a history of angina, MI, PCI, or CABG but their angina has not changed in frequency, pattern or severity over the past 2 months.</span>
                             </div>
                         </div>
                     </div>
-                    <div class="option">
-                        <input type="radio" name="angina" id="angina-no" value="no">
-                        <label for="angina-no">No - Move to next question</label>
+                    <div class="option" data-type="radio" data-group="angina" data-value="no" id="angina-no">
+                        No - Move to next question
                     </div>
                 </div>
             </div>
@@ -588,37 +547,30 @@
                     Does the patient have a history of CAD (Coronary Artery Disease)?
                 </div>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="radio" name="cad-history" id="cad-yes" value="yes">
-                        <label for="cad-yes">Yes</label>
+                    <div class="option" data-type="radio" data-group="cad-history" data-value="yes" id="cad-yes">
+                        Yes
                     </div>
                     <div class="sub-option-group" id="cad-stability-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient CURRENTLY stable (no signs/symptoms of ACS, New Onset or Worsening Angina, or hemodynamic instability) AND has known CAD ≥50% in at least one vessel?</p>
-                        <div class="option">
-                            <input type="radio" name="cad-stable" id="stable-cad" value="Stable Known CAD">
-                            <label for="stable-cad" class="has-tooltip">Yes - Stable Known CAD
-                                <span class="tooltip">The patient is stable (without signs or symptoms of acute coronary syndrome, new onset or worsening angina or hemodynamic instability) and has known coronary artery disease ≥50% in at least one vessel.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="Stable Known CAD" id="stable-cad">
+                            Yes - Stable Known CAD
+                            <span class="tooltip">The patient is stable (without signs or symptoms of acute coronary syndrome, new onset or worsening angina or hemodynamic instability) and has known coronary artery disease ≥50% in at least one vessel.</span>
                         </div>
-                        <div class="option">
-                            <input type="radio" name="cad-stable" id="cad-stable-no" value="no">
-                            <label for="cad-stable-no">No</label>
+                        <div class="option" data-type="radio" data-group="cad-stable" data-value="no" id="cad-stable-no">
+                            No
                         </div>
                         <div class="sub-option-group" id="cad-stable-no-text" style="display: none; margin-top: 10px; padding-left: 30px;">
                             <p style="color: #555; font-style: italic;">If the patient has a known history of CAD but is NOT currently stable, no selection here applies, move onto the next question</p>
                         </div>
                     </div>
-                    <div class="option">
-                        <input type="radio" name="cad-history" id="cad-no" value="no">
-                        <label for="cad-no">No</label>
+                    <div class="option" data-type="radio" data-group="cad-history" data-value="no" id="cad-no">
+                        No
                     </div>
                     <div class="sub-option-group" id="suspected-cad-group" style="display: none;">
                         <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider adding Suspected CAD if appropriate</p>
-                        <div class="option">
-                            <input type="radio" name="suspected-cad-option" id="suspected-cad" value="Suspected CAD">
-                            <label for="suspected-cad" class="has-tooltip">Suspected CAD
-                                <span class="tooltip">Suspected Coronary Artery Disease, no prior documentation of CAD ≥50% in a vessel.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="Suspected CAD" id="suspected-cad">
+                            Suspected CAD
+                            <span class="tooltip">Suspected Coronary Artery Disease, no prior documentation of CAD ≥50% in a vessel.</span>
                         </div>
                     </div>
                 </div>
@@ -632,21 +584,17 @@
                     Is the patient being brought to the Cath Lab following a Cardiac Arrest?
                 </div>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="radio" name="cardiac-arrest" id="cardiac-arrest-yes" value="yes">
-                        <label for="cardiac-arrest-yes">Yes</label>
+                    <div class="option" data-type="radio" data-group="cardiac-arrest" data-value="yes" id="cardiac-arrest-yes">
+                        Yes
                     </div>
                     <div class="sub-option-group" id="cardiac-arrest-sub-group" style="display: none;">
-                        <div class="option">
-                            <input type="radio" name="cardiac-arrest-type" id="resuscitated-cardiac-arrest" value="Resuscitated Cardiac Arrest">
-                            <label for="resuscitated-cardiac-arrest" class="has-tooltip">Resuscitated Cardiac Arrest
-                                <span class="tooltip">The patient presents status post cardiac arrest.</span>
-                            </label>
+                        <div class="option has-tooltip" data-type="indication" data-indication="Resuscitated Cardiac Arrest" id="resuscitated-cardiac-arrest">
+                            Resuscitated Cardiac Arrest
+                            <span class="tooltip">The patient presents status post cardiac arrest.</span>
                         </div>
                     </div>
-                    <div class="option">
-                        <input type="radio" name="cardiac-arrest" id="cardiac-arrest-no" value="no">
-                        <label for="cardiac-arrest-no">No - Move to next question</label>
+                    <div class="option" data-type="radio" data-group="cardiac-arrest" data-value="no" id="cardiac-arrest-no">
+                        No - Move to next question
                     </div>
                 </div>
             </div>
@@ -660,73 +608,59 @@
                 </div>
                 <p class="instruction">Select all that apply:</p>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="checkbox" id="valvular">
-                        <label for="valvular" class="has-tooltip">Valvular Disease
-                            <span class="tooltip">There is disease of at least one heart valve.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Valvular Disease" id="valvular">
+                        Valvular Disease
+                        <span class="tooltip">There is disease of at least one heart valve.</span>
                     </div>
                     <div class="reminder" id="valvular-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="pericardial">
-                        <label for="pericardial" class="has-tooltip">Pericardial Disease
-                            <span class="tooltip">Pericardial disease is inflammation of the pericardial sac.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Pericardial Disease" id="pericardial">
+                        Pericardial Disease
+                        <span class="tooltip">Pericardial disease is inflammation of the pericardial sac.</span>
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="arrhythmia">
-                        <label for="arrhythmia" class="has-tooltip">Cardiac Arrhythmia
-                            <span class="tooltip">Cardiac arrhythmia is also known as cardiac dysrhythmia or irregular heartbeat, a group of conditions in which the heartbeat is irregular, too fast, or too slow.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Cardiac arrhythmia" id="arrhythmia">
+                        Cardiac Arrhythmia
+                        <span class="tooltip">Cardiac arrhythmia is also known as cardiac dysrhythmia or irregular heartbeat, a group of conditions in which the heartbeat is irregular, too fast, or too slow.</span>
                     </div>
                     <div class="reminder" id="arrhythmia-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="cardiomyopathy">
-                        <label for="cardiomyopathy" class="has-tooltip">Cardiomyopathy
-                            <span class="tooltip">Cardiomyopathy is a disease of the heart muscle. Types include: hypertrophic cardiomyopathy, dilated cardiomyopathy, restrictive cardiomyopathy, arrhythmogenic right ventricular dysplasia and Takotsubo cardiomyopathy.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Cardiomyopathy" id="cardiomyopathy">
+                        Cardiomyopathy
+                        <span class="tooltip">Cardiomyopathy is a disease of the heart muscle. Types include: hypertrophic cardiomyopathy, dilated cardiomyopathy, restrictive cardiomyopathy, arrhythmogenic right ventricular dysplasia and Takotsubo cardiomyopathy.</span>
                     </div>
                     <div class="reminder" id="cardiomyopathy-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         Cardiomyopathy must be explicitly stated as an indication by the physician.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="lv-dysfunction">
-                        <label for="lv-dysfunction" class="has-tooltip">LV Dysfunction
-                            <span class="tooltip">In left-sided or left ventricular heart failure, the left side of the heart must work harder to pump the same amount of blood. The two types of LV dysfunction are systolic and diastolic heart failure.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="LV Dysfunction" id="lv-dysfunction">
+                        LV Dysfunction
+                        <span class="tooltip">In left-sided or left ventricular heart failure, the left side of the heart must work harder to pump the same amount of blood. The two types of LV dysfunction are systolic and diastolic heart failure.</span>
                     </div>
                     <div class="reminder" id="lv-dysfunction-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="syncope">
-                        <label for="syncope" class="has-tooltip">Syncope
-                            <span class="tooltip">Syncope presents with an abrupt, transient, complete loss of consciousness, associated with inability to maintain postural tone, with rapid and spontaneous recovery.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Syncope" id="syncope">
+                        Syncope
+                        <span class="tooltip">Syncope presents with an abrupt, transient, complete loss of consciousness, associated with inability to maintain postural tone, with rapid and spontaneous recovery.</span>
                     </div>
                     <div class="reminder" id="syncope-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="post-transplant">
-                        <label for="post-transplant" class="has-tooltip">Post Cardiac Transplant
-                            <span class="tooltip">A cardiac transplant is a heart transplanted from a donor.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Post Cardiac Transplant" id="post-transplant">
+                        Post Cardiac Transplant
+                        <span class="tooltip">A cardiac transplant is a heart transplanted from a donor.</span>
                     </div>
                 </div>
             </div>
@@ -740,22 +674,18 @@
                 </div>
                 <p class="instruction">Select all that apply:</p>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="checkbox" id="pre-op">
-                        <label for="pre-op" class="has-tooltip">Pre-Operative Evaluation
-                            <span class="tooltip">Cardiac evaluation of the coronary arteries and/or LV function.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Pre-operative Evaluation" id="pre-op">
+                        Pre-Operative Evaluation
+                        <span class="tooltip">Cardiac evaluation of the coronary arteries and/or LV function.</span>
                     </div>
                     <div class="reminder" id="pre-op-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
                     </div>
 
-                    <div class="option">
-                        <input type="checkbox" id="exercise">
-                        <label for="exercise" class="has-tooltip">Evaluation for Exercise Clearance
-                            <span class="tooltip">The patient presents for clearance to participate in an exercise program or cardiac rehab.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Evaluation for Exercise Clearance" id="exercise">
+                        Evaluation for Exercise Clearance
+                        <span class="tooltip">The patient presents for clearance to participate in an exercise program or cardiac rehab.</span>
                     </div>
                 </div>
             </div>
@@ -768,11 +698,9 @@
                     If NO OTHER INDICATIONS apply to this Cath Lab scenario:
                 </div>
                 <div class="option-group">
-                    <div class="option">
-                        <input type="checkbox" id="other">
-                        <label for="other" class="has-tooltip">Other
-                            <span class="tooltip">Use only when no other Cath Lab indications apply to the patient's situation.</span>
-                        </label>
+                    <div class="option has-tooltip" data-type="checkbox" data-indication="Other" id="other">
+                        Other
+                        <span class="tooltip">Use only when no other Cath Lab indications apply to the patient's situation.</span>
                     </div>
                     <div class="reminder" id="other-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
@@ -856,42 +784,42 @@
         // Function to update arrow states based on selections in each step
         function updateArrows() {
             // Step 1: ACS - check if any ACS option is selected
-            const step1Complete = document.getElementById('acs-24')?.checked || 
-                                  document.getElementById('acs-24plus')?.checked ||
-                                  document.getElementById('acs-no')?.checked;
+            const step1Complete = document.getElementById('acs-24')?.classList.contains('selected') ||
+                                  document.getElementById('acs-24plus')?.classList.contains('selected') ||
+                                  document.getElementById('acs-no')?.classList.contains('selected');
             updateArrowState(1, step1Complete);
 
             // Step 2: Angina - check if any angina option is selected
-            const step2Complete = document.getElementById('worsening-angina')?.checked ||
-                                  document.getElementById('new-onset-angina')?.checked ||
-                                  document.getElementById('stable-cad-angina')?.checked ||
-                                  document.getElementById('angina-no')?.checked;
+            const step2Complete = document.getElementById('worsening-angina')?.classList.contains('selected') ||
+                                  document.getElementById('new-onset-angina')?.classList.contains('selected') ||
+                                  document.getElementById('stable-cad-angina')?.classList.contains('selected') ||
+                                  document.getElementById('angina-no')?.classList.contains('selected');
             updateArrowState(2, step2Complete);
 
             // Step 3: CAD - check if any CAD option is selected
-            const step3Complete = document.getElementById('stable-cad')?.checked ||
-                                  document.getElementById('cad-stable-no')?.checked ||
-                                  document.getElementById('suspected-cad')?.checked ||
-                                  document.getElementById('cad-no')?.checked;
+            const step3Complete = document.getElementById('stable-cad')?.classList.contains('selected') ||
+                                  document.getElementById('cad-stable-no')?.classList.contains('selected') ||
+                                  document.getElementById('suspected-cad')?.classList.contains('selected') ||
+                                  document.getElementById('cad-no')?.classList.contains('selected');
             updateArrowState(3, step3Complete);
 
             // Step 4: Cardiac Arrest - check if any cardiac arrest option is selected
-            const step4Complete = document.getElementById('resuscitated-cardiac-arrest')?.checked ||
-                                  document.getElementById('cardiac-arrest-no')?.checked;
+            const step4Complete = document.getElementById('resuscitated-cardiac-arrest')?.classList.contains('selected') ||
+                                  document.getElementById('cardiac-arrest-no')?.classList.contains('selected');
             updateArrowState(4, step4Complete);
 
             // Step 5: Non-Ischemic - check if any option is selected
             const step5Options = ['valvular', 'pericardial', 'arrhythmia', 'cardiomyopathy', 'lv-dysfunction', 'syncope', 'post-transplant'];
-            const step5Complete = step5Options.some(id => document.getElementById(id)?.checked);
+            const step5Complete = step5Options.some(id => document.getElementById(id)?.classList.contains('selected'));
             updateArrowState(5, step5Complete);
 
             // Step 6: Non-Cardiac - check if any option is selected
-            const step6Complete = document.getElementById('pre-op')?.checked ||
-                                  document.getElementById('exercise')?.checked;
+            const step6Complete = document.getElementById('pre-op')?.classList.contains('selected') ||
+                                  document.getElementById('exercise')?.classList.contains('selected');
             updateArrowState(6, step6Complete);
 
             // Step 7: Other - check if selected
-            const step7Complete = document.getElementById('other')?.checked;
+            const step7Complete = document.getElementById('other')?.classList.contains('selected');
             updateArrowState(7, step7Complete);
         }
 
@@ -906,63 +834,6 @@
             }
         }
 
-        function toggleRadioGroup(groupName, value) {
-            const radio = document.querySelector(`input[name="${groupName}"][value="${value}"]`);
-            if (radio) {
-                // If radio is already checked, uncheck it (deselection)
-                if (radio.checked) {
-                    radio.checked = false;
-                    // Clear associated selections based on group
-                    if (groupName === 'acs') {
-                        // Clear all ACS-related selections
-                        document.getElementById('acs-24').checked = false;
-                        document.getElementById('acs-24plus').checked = false;
-                        removeIndication('ACS <= 24 hrs');
-                        removeIndication('ACS > 24 hrs');
-                        document.getElementById('acs-timing-group').style.display = 'none';
-                    } else if (groupName === 'angina') {
-                        // Clear all angina-related selections
-                        const historyGroup = document.getElementById('angina-history-group');
-                        const changeGroup = document.getElementById('angina-change-group');
-                        historyGroup.style.display = 'none';
-                        changeGroup.style.display = 'none';
-                        const newOnsetAngina = document.getElementById('new-onset-angina');
-                        const anginaHistoryYes = document.getElementById('angina-history-yes');
-                        const worseningAngina = document.getElementById('worsening-angina');
-                        const stableCadAngina = document.getElementById('stable-cad-angina');
-                        if (newOnsetAngina) newOnsetAngina.checked = false;
-                        if (anginaHistoryYes) anginaHistoryYes.checked = false;
-                        if (worseningAngina) worseningAngina.checked = false;
-                        if (stableCadAngina) stableCadAngina.checked = false;
-                        removeIndication('Worsening Angina');
-                        removeIndication('New Onset Angina <= 2 months');
-                        removeIndication('Stable Known CAD');
-                    } else if (groupName === 'cad-history') {
-                        // Clear CAD history selections
-                        document.getElementById('cad-stability-group').style.display = 'none';
-                        document.getElementById('suspected-cad-group').style.display = 'none';
-                        const cadStableNoText = document.getElementById('cad-stable-no-text');
-                        if (cadStableNoText) cadStableNoText.style.display = 'none';
-                        const stableCad = document.getElementById('stable-cad');
-                        const suspectedCad = document.getElementById('suspected-cad');
-                        if (stableCad) stableCad.checked = false;
-                        if (suspectedCad) suspectedCad.checked = false;
-                        removeIndication('Stable Known CAD');
-                        removeIndication('Suspected CAD');
-                    } else if (groupName === 'cardiac-arrest') {
-                        // Clear cardiac arrest selections
-                        document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
-                        document.getElementById('resuscitated-cardiac-arrest').checked = false;
-                        removeIndication('Resuscitated Cardiac Arrest');
-                    }
-                    updateArrows();
-                } else {
-                    // Check the radio and handle normally
-                    radio.checked = true;
-                    handleRadioChange(groupName, value);
-                }
-            }
-        }
 
         function handleRadioChange(groupName, value) {
             // Handle ACS radio group
@@ -1075,16 +946,7 @@
             updateArrows();
         }
 
-        function handleCheckboxChange(indication, checkbox) {
-            if (checkbox.checked) {
-                selectIndication(indication, checkbox.id);
-            } else {
-                removeIndication(indication);
-            }
-        }
-
         function selectIndication(indication, elementId) {
-
             // Define mutually exclusive angina indications
             const anginaIndications = [
                 'New Onset Angina <= 2 months',
@@ -1092,39 +954,21 @@
                 'Stable Known CAD'
             ];
 
-            // Ensure the radio button is checked
-            const element = document.getElementById(elementId);
-            if (element && element.type === 'radio') {
-                element.checked = true;
-
-                // For radio buttons in the same group, remove other selections
-                const radioName = element.name;
-                const radios = document.querySelectorAll(`input[name="${radioName}"]`);
-                radios.forEach(radio => {
-                    if (radio.id !== elementId && radio.value) {
-                        const val = radio.value;
-                        if (priorityOrder.includes(val)) {
-                            removeIndication(val);
-                        }
-                    }
-                });
-            }
-
             // Special handling: Ensure angina indications are mutually exclusive
             if (anginaIndications.includes(indication)) {
                 anginaIndications.forEach(anginaInd => {
                     if (anginaInd !== indication && selectedIndications.has(anginaInd)) {
                         removeIndication(anginaInd);
-                        // Also uncheck the corresponding radio button
+                        // Also remove the selected class from the corresponding element
                         if (anginaInd === 'New Onset Angina <= 2 months') {
-                            const radio = document.getElementById('new-onset-angina');
-                            if (radio) radio.checked = false;
+                            const elem = document.getElementById('new-onset-angina');
+                            if (elem) elem.classList.remove('selected');
                         } else if (anginaInd === 'Worsening Angina') {
-                            const radio = document.getElementById('worsening-angina');
-                            if (radio) radio.checked = false;
+                            const elem = document.getElementById('worsening-angina');
+                            if (elem) elem.classList.remove('selected');
                         } else if (anginaInd === 'Stable Known CAD') {
-                            const radio = document.getElementById('stable-cad-angina');
-                            if (radio) radio.checked = false;
+                            const elem = document.getElementById('stable-cad-angina');
+                            if (elem) elem.classList.remove('selected');
                         }
                     }
                 });
@@ -1305,39 +1149,31 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-stemi-yes-24" value="yes" data-handler="handlePCISubAnswer" data-params='["stemi-acs24", "yes"]'>
-                            <label for="pci-stemi-yes-24">Yes - Consider timing:</label>
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="yes" id="pci-stemi-yes-24">
+                            Yes - Consider timing:
                         </div>
                         <div class="sub-option-group" id="pci-stemi-timing-24" style="display: none;">
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-immediate" value="STEMI - Immediate PCI for Acute STEMI" data-handler="selectPCIOption" data-params='["STEMI - Immediate PCI for Acute STEMI"]'>
-                                <label for="stemi-immediate">STEMI - Immediate PCI for Acute STEMI</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Immediate PCI for Acute STEMI" id="stemi-immediate">
+                                STEMI - Immediate PCI for Acute STEMI
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-stable-12" value="STEMI - Stable (<= 12 hrs from Sx)" data-handler="selectPCIOption" data-params='["STEMI - Stable (<= 12 hrs from Sx)"]'>
-                                <label for="stemi-stable-12">STEMI - Stable (≤ 12 hrs from Sx)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (<= 12 hrs from Sx)" id="stemi-stable-12">
+                                STEMI - Stable (≤ 12 hrs from Sx)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-stable-12plus" value="STEMI - Stable (> 12 hrs from Sx)" data-handler="selectPCIOption" data-params='["STEMI - Stable (> 12 hrs from Sx)"]'>
-                                <label for="stemi-stable-12plus">STEMI - Stable (> 12 hrs from Sx)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="stemi-stable-12plus">
+                                STEMI - Stable (> 12 hrs from Sx)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-unstable" value="STEMI - Unstable (> 12 hrs from Sx)" data-handler="selectPCIOption" data-params='["STEMI - Unstable (> 12 hrs from Sx)"]'>
-                                <label for="stemi-unstable">STEMI - Unstable (> 12 hrs from Sx)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="stemi-unstable">
+                                STEMI - Unstable (> 12 hrs from Sx)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-success-lytic" value="STEMI (after successful lytics)" data-handler="selectPCIOption" data-params='["STEMI (after successful lytics)"]'>
-                                <label for="stemi-success-lytic">STEMI (after successful lytics)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="stemi-success-lytic">
+                                STEMI (after successful lytics)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24" id="stemi-rescue" value="STEMI - Rescue (After unsuccessful lytics)" data-handler="selectPCIOption" data-params='["STEMI - Rescue (After unsuccessful lytics)"]'>
-                                <label for="stemi-rescue">STEMI - Rescue (After unsuccessful lytics)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="stemi-rescue">
+                                STEMI - Rescue (After unsuccessful lytics)
                             </div>
                         </div>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-stemi-no-24" value="no" data-handler="handlePCISubAnswer" data-params='["stemi-acs24", "no"]'>
-                            <label for="pci-stemi-no-24">No - NSTE-ACS</label>
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="no" id="pci-stemi-no-24">
+                            No - NSTE-ACS
                         </div>
                     </div>
                 `;
@@ -1346,31 +1182,25 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-stemi-yes-24plus" value="yes" data-handler="handlePCISubAnswer" data-params='["stemi-acs24plus", "yes"]'>
-                            <label for="pci-stemi-yes-24plus">Yes - Consider timing:</label>
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="yes" id="pci-stemi-yes-24plus">
+                            Yes - Consider timing:
                         </div>
                         <div class="sub-option-group" id="pci-stemi-timing-24plus" style="display: none;">
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24plus" id="stemi-stable-12plus-2" value="STEMI - Stable (> 12 hrs from Sx)" data-handler="selectPCIOption" data-params='["STEMI - Stable (> 12 hrs from Sx)"]'>
-                                <label for="stemi-stable-12plus-2">STEMI - Stable (> 12 hrs from Sx)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="stemi-stable-12plus-2">
+                                STEMI - Stable (> 12 hrs from Sx)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24plus" id="stemi-unstable-2" value="STEMI - Unstable (> 12 hrs from Sx)" data-handler="selectPCIOption" data-params='["STEMI - Unstable (> 12 hrs from Sx)"]'>
-                                <label for="stemi-unstable-2">STEMI - Unstable (> 12 hrs from Sx)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="stemi-unstable-2">
+                                STEMI - Unstable (> 12 hrs from Sx)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24plus" id="stemi-success-lytic-2" value="STEMI (after successful lytics)" data-handler="selectPCIOption" data-params='["STEMI (after successful lytics)"]'>
-                                <label for="stemi-success-lytic-2">STEMI (after successful lytics)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="stemi-success-lytic-2">
+                                STEMI (after successful lytics)
                             </div>
-                            <div class="option">
-                                <input type="radio" name="stemi-timing-24plus" id="stemi-rescue-2" value="STEMI - Rescue (After unsuccessful lytics)" data-handler="selectPCIOption" data-params='["STEMI - Rescue (After unsuccessful lytics)"]'>
-                                <label for="stemi-rescue-2">STEMI - Rescue (After unsuccessful lytics)</label>
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="stemi-rescue-2">
+                                STEMI - Rescue (After unsuccessful lytics)
                             </div>
                         </div>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-stemi-no-24plus" value="no" data-handler="handlePCISubAnswer" data-params='["stemi-acs24plus", "no"]'>
-                            <label for="pci-stemi-no-24plus">No - NSTE-ACS</label>
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="no" id="pci-stemi-no-24plus">
+                            No - NSTE-ACS
                         </div>
                     </div>
                 `;
@@ -1379,13 +1209,11 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Is the patient experiencing angina/anginal equivalent symptoms?</p>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-angina-yes" value="yes" data-handler="handlePCISubAnswer" data-params='["stable-angina", "yes"]'>
-                            <label for="pci-angina-yes">Yes - Stable Angina</label>
+                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="yes" id="pci-angina-yes">
+                            Yes - Stable Angina
                         </div>
-                        <div class="option">
-                            <input type="radio" name="pci-sub" id="pci-angina-no" value="no" data-handler="handlePCISubAnswer" data-params='["stable-angina", "no"]'>
-                            <label for="pci-angina-no">No - CAD (without ischemic Sx)</label>
+                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="no" id="pci-angina-no">
+                            No - CAD (without ischemic Sx)
                         </div>
                     </div>
                 `;
@@ -1430,22 +1258,19 @@
             selectedIndications.clear();
             pciSubAnswers = {};
 
-            // Reset all radio buttons
-            document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                radio.checked = false;
-            });
-
-            // Reset all checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
+            // Remove 'selected' class from all options
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
             });
 
             // Hide all sub-groups
             document.getElementById('acs-timing-group').style.display = 'none';
             document.getElementById('angina-history-group').style.display = 'none';
+            document.getElementById('angina-change-group').style.display = 'none';
             document.getElementById('cad-stability-group').style.display = 'none';
             document.getElementById('suspected-cad-group').style.display = 'none';
             document.getElementById('cad-stable-no-text').style.display = 'none';
+            document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
 
             // Hide all reminders
             document.querySelectorAll('.reminder').forEach(reminder => {
@@ -1462,124 +1287,166 @@
 
             // Clear validation errors
             document.getElementById('validation-errors').innerHTML = '';
+            closeErrorModal();
 
             // Reset summary
             updateSummary();
         }
 
-        // Function to attach event listeners to all radio buttons and checkboxes
-        function attachInputEventListeners() {
-            // Handle all radio buttons
-            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        // Function to attach click event listeners to all option boxes
+        function attachOptionClickListeners() {
+            document.querySelectorAll('.option').forEach(option => {
                 // Skip if already has listener attached
-                if (radio.getAttribute('data-listener-attached') === 'true') {
+                if (option.getAttribute('data-listener-attached') === 'true') {
                     return;
                 }
 
                 // Mark as having listener attached
-                radio.setAttribute('data-listener-attached', 'true');
+                option.setAttribute('data-listener-attached', 'true');
 
-                // Add event listener
-                radio.addEventListener('change', function() {
-                    const radioName = this.name;
-                    const radioValue = this.value;
-                    const radioId = this.id;
-
-                    // Check for data attributes (for dynamically generated PCI sub-questions)
-                    const handler = this.getAttribute('data-handler');
-                    const params = this.getAttribute('data-params');
-
-                    if (handler && params) {
-                        // Call the specified handler with parameters
-                        const parsedParams = JSON.parse(params);
-                        if (handler === 'handlePCISubAnswer') {
-                            handlePCISubAnswer(parsedParams[0], parsedParams[1]);
-                        } else if (handler === 'selectPCIOption') {
-                            selectPCIOption(parsedParams[0]);
-                        }
+                // Add click event listener
+                option.addEventListener('click', function(e) {
+                    // Don't trigger if clicking on tooltip
+                    if (e.target.classList.contains('tooltip')) {
                         return;
                     }
 
-                    // Handle main form radio buttons based on their name
-                    if (radioName === 'acs') {
-                        toggleRadioGroup('acs', radioValue);
-                    } else if (radioName === 'acs-timing') {
-                        selectIndication(radioValue, radioId);
-                    } else if (radioName === 'angina') {
-                        toggleRadioGroup('angina', radioValue);
-                    } else if (radioName === 'angina-history-type') {
-                        if (radioId === 'new-onset-angina') {
-                            selectIndication(radioValue, radioId);
-                        } else {
-                            toggleRadioGroup('angina-history-type', radioValue);
-                        }
-                    } else if (radioName === 'angina-change-type') {
-                        selectIndication(radioValue, radioId);
-                    } else if (radioName === 'cad-history') {
-                        toggleRadioGroup('cad-history', radioValue);
-                    } else if (radioName === 'cad-stable') {
-                        if (radioId === 'stable-cad') {
-                            selectIndication(radioValue, radioId);
-                        } else {
-                            toggleRadioGroup('cad-stable', radioValue);
-                        }
-                    } else if (radioName === 'suspected-cad-option') {
-                        selectIndication(radioValue, radioId);
-                    } else if (radioName === 'cardiac-arrest') {
-                        toggleRadioGroup('cardiac-arrest', radioValue);
-                    } else if (radioName === 'cardiac-arrest-type') {
-                        selectIndication(radioValue, radioId);
+                    const type = this.getAttribute('data-type');
+
+                    if (type === 'radio') {
+                        handleRadioClick(this);
+                    } else if (type === 'checkbox') {
+                        handleCheckboxClick(this);
+                    } else if (type === 'indication') {
+                        handleIndicationClick(this);
+                    } else if (type === 'pci-radio') {
+                        handlePCIRadioClick(this);
+                    } else if (type === 'pci-option') {
+                        handlePCIOptionClick(this);
                     }
-                });
-            });
-
-            // Handle all checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                // Skip if already has listener attached
-                if (checkbox.getAttribute('data-listener-attached') === 'true') {
-                    return;
-                }
-
-                // Mark as having listener attached
-                checkbox.setAttribute('data-listener-attached', 'true');
-
-                // Get the indication name from checkbox ID
-                const checkboxId = checkbox.id;
-
-                // Map checkbox IDs to their indication names
-                const checkboxMap = {
-                    'valvular': 'Valvular Disease',
-                    'pericardial': 'Pericardial Disease',
-                    'arrhythmia': 'Cardiac arrhythmia',
-                    'cardiomyopathy': 'Cardiomyopathy',
-                    'lv-dysfunction': 'LV Dysfunction',
-                    'syncope': 'Syncope',
-                    'post-transplant': 'Post Cardiac Transplant',
-                    'pre-op': 'Pre-operative Evaluation',
-                    'exercise': 'Evaluation for Exercise Clearance',
-                    'other': 'Other'
-                };
-
-                const indication = checkboxMap[checkboxId] || '';
-
-                // Add event listener
-                checkbox.addEventListener('change', function() {
-                    handleCheckboxChange(indication, this);
                 });
             });
         }
 
+        function handleRadioClick(element) {
+            const group = element.getAttribute('data-group');
+            const value = element.getAttribute('data-value');
+            const id = element.id;
+
+            // If already selected, deselect (toggle behavior)
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                handleRadioDeselect(group, value);
+                updateArrows();
+                return;
+            }
+
+            // Deselect all other options in the same group
+            document.querySelectorAll(`[data-type="radio"][data-group="${group}"]`).forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Select this option
+            element.classList.add('selected');
+            handleRadioChange(group, value);
+        }
+
+        function handleRadioDeselect(group, value) {
+            // Handle deselection logic
+            if (group === 'acs') {
+                document.getElementById('acs-timing-group').style.display = 'none';
+                removeIndication('ACS <= 24 hrs');
+                removeIndication('ACS > 24 hrs');
+            } else if (group === 'angina') {
+                document.getElementById('angina-history-group').style.display = 'none';
+                document.getElementById('angina-change-group').style.display = 'none';
+                removeIndication('New Onset Angina <= 2 months');
+                removeIndication('Worsening Angina');
+                removeIndication('Stable Known CAD');
+            } else if (group === 'cad-history') {
+                document.getElementById('cad-stability-group').style.display = 'none';
+                document.getElementById('suspected-cad-group').style.display = 'none';
+                document.getElementById('cad-stable-no-text').style.display = 'none';
+                removeIndication('Stable Known CAD');
+                removeIndication('Suspected CAD');
+            } else if (group === 'cardiac-arrest') {
+                document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
+                removeIndication('Resuscitated Cardiac Arrest');
+            }
+        }
+
+        function handleCheckboxClick(element) {
+            const indication = element.getAttribute('data-indication');
+
+            // Toggle selection
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                removeIndication(indication);
+            } else {
+                element.classList.add('selected');
+                selectIndication(indication, element.id);
+            }
+        }
+
+        function handleIndicationClick(element) {
+            const indication = element.getAttribute('data-indication');
+            const id = element.id;
+
+            // For indication type, only allow single selection (like radio)
+            // Find all indications in the same parent group
+            const parentGroup = element.parentElement;
+            parentGroup.querySelectorAll('[data-type="indication"]').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Select this one
+            element.classList.add('selected');
+            selectIndication(indication, id);
+        }
+
+        function handlePCIRadioClick(element) {
+            const question = element.getAttribute('data-question');
+            const value = element.getAttribute('data-value');
+
+            // Deselect all other options in the same question group
+            document.querySelectorAll(`[data-type="pci-radio"][data-question="${question}"]`).forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Select this option
+            element.classList.add('selected');
+
+            // Handle the PCI sub answer
+            handlePCISubAnswer(question, value);
+        }
+
+        function handlePCIOptionClick(element) {
+            const indication = element.getAttribute('data-pci-indication');
+
+            // Deselect all other PCI options in the same group
+            const parentGroup = element.parentElement;
+            parentGroup.querySelectorAll('[data-type="pci-option"]').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Select this option
+            element.classList.add('selected');
+
+            // Set the PCI indication
+            selectPCIOption(indication);
+        }
+
         // Attach event listeners when the page loads
         document.addEventListener('DOMContentLoaded', function() {
-            attachInputEventListeners();
+            attachOptionClickListeners();
         });
 
         // Modify showPCISubQuestion to attach event listeners after adding dynamic content
         const originalShowPCISubQuestion = showPCISubQuestion;
         showPCISubQuestion = function(questionType) {
             originalShowPCISubQuestion(questionType);
-            // Attach event listeners to the newly added radio buttons
-            setTimeout(attachInputEventListeners, 0);
+            // Attach event listeners to the newly added options
+            setTimeout(attachOptionClickListeners, 0);
         };
     </script>
 </body>
