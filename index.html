@@ -897,9 +897,19 @@
         function toggleRadioGroup(groupName, value) {
             const radio = document.querySelector(`input[name="${groupName}"][value="${value}"]`);
             if (radio) {
-                // If radio is already checked, uncheck it (deselection)
-                if (radio.checked) {
+                // Store previous checked state BEFORE any browser changes
+                const wasCheckedBefore = radio.hasAttribute('data-was-checked');
+
+                // If it was already checked (marked by our code), uncheck it (deselection)
+                if (wasCheckedBefore) {
                     radio.checked = false;
+                    radio.removeAttribute('data-was-checked');
+
+                    // Clear all radios in this group's data attribute
+                    document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                        r.removeAttribute('data-was-checked');
+                    });
+
                     // Clear associated selections based on group
                     if (groupName === 'acs') {
                         // Clear all ACS-related selections
@@ -947,6 +957,15 @@
                 } else {
                     // Check the radio and handle normally
                     radio.checked = true;
+
+                    // Clear data attribute from other radios in the group
+                    document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                        r.removeAttribute('data-was-checked');
+                    });
+
+                    // Mark this radio as checked by our code
+                    radio.setAttribute('data-was-checked', 'true');
+
                     handleRadioChange(groupName, value);
                 }
             }
