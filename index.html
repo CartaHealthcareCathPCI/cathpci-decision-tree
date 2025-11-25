@@ -1457,14 +1457,16 @@
         function attachInputEventListeners() {
             // Handle all radio buttons
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                // Remove existing listeners by cloning and replacing
-                const newRadio = radio.cloneNode(true);
-                if (radio.parentNode) {
-                    radio.parentNode.replaceChild(newRadio, radio);
+                // Skip if already has listener attached
+                if (radio.getAttribute('data-listener-attached') === 'true') {
+                    return;
                 }
 
-                // Add new event listener
-                newRadio.addEventListener('change', function() {
+                // Mark as having listener attached
+                radio.setAttribute('data-listener-attached', 'true');
+
+                // Add event listener
+                radio.addEventListener('change', function() {
                     const radioName = this.name;
                     const radioValue = this.value;
                     const radioId = this.id;
@@ -1519,15 +1521,16 @@
 
             // Handle all checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                // Remove existing listeners by cloning and replacing
-                const newCheckbox = checkbox.cloneNode(true);
-                if (checkbox.parentNode) {
-                    checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+                // Skip if already has listener attached
+                if (checkbox.getAttribute('data-listener-attached') === 'true') {
+                    return;
                 }
 
-                // Get the indication name from the existing onchange attribute
-                const checkboxId = newCheckbox.id;
-                let indication = '';
+                // Mark as having listener attached
+                checkbox.setAttribute('data-listener-attached', 'true');
+
+                // Get the indication name from checkbox ID
+                const checkboxId = checkbox.id;
 
                 // Map checkbox IDs to their indication names
                 const checkboxMap = {
@@ -1543,11 +1546,10 @@
                     'other': 'Other'
                 };
 
-                indication = checkboxMap[checkboxId] || '';
+                const indication = checkboxMap[checkboxId] || '';
 
-                // The onchange attribute calls handleCheckboxChange, so keep that intact
-                // by triggering it manually when the checkbox changes
-                newCheckbox.addEventListener('change', function() {
+                // Add event listener
+                checkbox.addEventListener('change', function() {
                     handleCheckboxChange(indication, this);
                 });
             });
