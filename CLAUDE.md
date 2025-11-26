@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-11-25*
-*Version: 2.5*
+*Last Updated: 2025-11-26*
+*Version: 2.6*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1571 lines): Complete self-contained application
-  - Lines 10-461: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
-  - Lines 463-815: HTML structure for 7-step decision tree interface with section headings and error modal
-  - Lines 816-1570: JavaScript logic for state management, validation, error handling, and PCI determination
+- **index.html** (1452 lines): Complete self-contained application
+  - Lines 10-449: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
+  - Lines 451-758: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 758-1451: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -51,9 +51,30 @@ cathpci-decision-tree/
 - **Fonts**: Manrope from Google Fonts
 - **Styling**: CSS Grid, Flexbox, Gradient backgrounds, Orange accent color (#FF6720)
 - **Visual Design**: Orange section headings for each decision tree step, left border accents
-- **State Management**: JavaScript Set for selections, Object for sub-answers
+- **Interaction Model**: Clickable div elements with data attributes (no traditional form inputs)
+- **State Management**: JavaScript Set for selections, Object for sub-answers, CSS classes for visual state
 - **Deployment**: GitHub Pages with GitHub Actions CI/CD
 - **Version Control**: Git with feature branch workflow
+
+### UI Interaction Architecture
+
+**Data-Driven Clickable Elements:**
+The application uses a unique interaction model where selections are made by clicking on `<div>` elements rather than traditional `<input>` elements:
+
+- **Radio Buttons**: `<div class="option" data-type="radio" data-group="..." data-value="...">`
+- **Checkboxes**: `<div class="option" data-type="checkbox" data-indication="...">`
+- **Indications**: `<div class="option" data-type="indication" data-indication="...">`
+
+**Visual State Management:**
+- Selected state indicated by `selected` CSS class
+- Color changes and border styling provide visual feedback
+- No reliance on native input element `:checked` pseudo-class
+
+**Benefits of This Approach:**
+- More flexible styling without fighting browser defaults
+- Simplified event handling with unified click handlers
+- Easier to add custom behaviors and animations
+- Better control over visual appearance across browsers
 
 ### Why No Frameworks?
 
@@ -161,15 +182,18 @@ const validationRules = {
 - `showPCISubQuestion(questionType)` - Displays conditional sub-questions
 - `handlePCISubAnswer(questionType, answer)` - Processes sub-question responses
 
-### UI State
+### UI State & Event Handling
 
 - `updateArrows()` - Updates completion arrows for all steps
 - `updateArrowState(stepNum, isComplete)` - Sets individual step completion state
-- `toggleRadioGroup(groupName, value)` - Handles radio button selections with deselection support (clicking a selected radio button will deselect it)
-- `handleRadioChange(groupName, value)` - Process radio button change events
-- `toggleCheckbox(checkboxId)` - Handles checkbox selections
-- `handleCheckboxChange(indication, checkbox)` - Process checkbox change events
-- `attachInputEventListeners()` - Attaches event listeners to radio buttons and checkboxes using data attributes to prevent duplicates
+- `attachOptionClickListeners()` - Attaches click listeners to all option divs using data attributes
+- `handleRadioClick(element)` - Handles click events on radio-type option divs
+- `handleRadioDeselect(group, value)` - Deselects a radio option (supports clicking selected radio to deselect)
+- `handleCheckboxClick(element)` - Handles click events on checkbox-type option divs
+- `handleIndicationClick(element)` - Handles click events on indication-type option divs
+- `handlePCIRadioClick(element)` - Handles click events on PCI-specific radio options
+- `handlePCIOptionClick(element)` - Handles click events on PCI-specific options
+- `handleRadioChange(groupName, value)` - Processes radio button selection changes (called by click handlers)
 
 ### Reminders
 
@@ -257,24 +281,45 @@ Examples from git history:
 2. **Preserve Clinical Logic**: All validation rules are based on NCDR CathPCI registry requirements - don't modify without clinical justification
 3. **Test Validation**: After changes, mentally walk through test cases to ensure validation still works
 4. **Maintain State Management**: Respect the `selectedIndications` Set and `pciSubAnswers` object
-5. **Keep It Simple**: No frameworks, no build process, no dependencies
-6. **Responsive Design**: Ensure changes work on desktop, tablet, and mobile
-7. **Consistent Styling**: Follow existing Manrope font, gradient color scheme, and orange accent color (#FF6720) for section headings and highlights
-8. **Comment Complex Logic**: Add comments for any non-obvious clinical decision logic
-9. **Update This Doc**: If you make significant architectural changes, update CLAUDE.md
+5. **Use Data Attributes**: Follow the data-attribute pattern (`data-type`, `data-group`, `data-value`, `data-indication`) for all option elements
+6. **CSS Class State**: Use the `selected` CSS class to indicate selected options (don't use `:checked` pseudo-class)
+7. **Keep It Simple**: No frameworks, no build process, no dependencies
+8. **Responsive Design**: Ensure changes work on desktop, tablet, and mobile
+9. **Consistent Styling**: Follow existing Manrope font, gradient color scheme, and orange accent color (#FF6720) for section headings and highlights
+10. **Comment Complex Logic**: Add comments for any non-obvious clinical decision logic
+11. **Update This Doc**: If you make significant architectural changes, update CLAUDE.md
 
 #### ❌ DON'T:
 
 1. **Don't Add Frameworks**: No React, Vue, Angular, jQuery, etc.
 2. **Don't Add Build Tools**: No npm, webpack, vite, etc.
-3. **Don't Break Validation**: Don't remove validation rules without understanding clinical implications
-4. **Don't Change Priority Logic**: The indication priority order is clinically defined
-5. **Don't Create Separate Files**: Keep everything in `index.html` (unless there's a very good reason)
-6. **Don't Remove Comments**: Preserve existing code comments that explain clinical logic
-7. **Don't Push to Main**: Always use feature branches and pull requests
-8. **Don't Ignore Responsive Design**: Test that UI works on small screens
+3. **Don't Revert to Input Elements**: The application intentionally uses data-attribute divs instead of `<input>` elements
+4. **Don't Break Validation**: Don't remove validation rules without understanding clinical implications
+5. **Don't Change Priority Logic**: The indication priority order is clinically defined
+6. **Don't Create Separate Files**: Keep everything in `index.html` (unless there's a very good reason)
+7. **Don't Remove Comments**: Preserve existing code comments that explain clinical logic
+8. **Don't Push to Main**: Always use feature branches and pull requests
+9. **Don't Ignore Responsive Design**: Test that UI works on small screens
 
 ### Code Style Conventions
+
+**HTML - Data Attribute Pattern:**
+```html
+<!-- Radio button-style option -->
+<div class="option" data-type="radio" data-group="acs" data-value="yes" id="acs-yes">
+    Yes
+</div>
+
+<!-- Checkbox-style option -->
+<div class="option" data-type="checkbox" data-indication="Valvular Disease" id="valvular">
+    Valvular Disease
+</div>
+
+<!-- Indication option (appears after parent selection) -->
+<div class="option" data-type="indication" data-indication="ACS <= 24 hrs" id="acs-24">
+    ACS ≤ 24 hrs
+</div>
+```
 
 **JavaScript:**
 ```javascript
@@ -298,6 +343,15 @@ options.forEach(option => {
 if (selectedIndications.has('ACS ≤ 24 hrs')) {
     return determinePCIForACS();
 }
+
+// Access data attributes on elements
+const dataType = element.getAttribute('data-type');
+const indication = element.getAttribute('data-indication');
+
+// Use CSS classes for state management
+element.classList.add('selected');
+element.classList.remove('selected');
+const isSelected = element.classList.contains('selected');
 ```
 
 **CSS:**
@@ -312,6 +366,12 @@ if (selectedIndications.has('ACS ≤ 24 hrs')) {
 /* Maintain consistent border styling with orange accents */
 .step-section {
     border-left: 4px solid #FF6720;
+}
+
+/* Style selected state with CSS class */
+.option.selected {
+    border-color: #FF6720;
+    background-color: rgba(255, 103, 32, 0.1);
 }
 ```
 
@@ -411,7 +471,23 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-25 (Current Version - v2.5)
+### 2025-11-26 (Current Version - v2.6)
+- Updated CLAUDE.md to version 2.6 with accurate line counts (1452 lines) reflecting architectural changes from PR #33
+- **Major Architectural Change** (PR #33): Complete UI interaction model overhaul
+  - Removed all HTML `<input type="radio">` and `<input type="checkbox">` elements
+  - Replaced with clickable `<div>` elements using `data-type`, `data-group`, `data-value`, and `data-indication` attributes
+  - Converted to CSS class-based state management (using `selected` class instead of `:checked` pseudo-class)
+  - Simplified click handling with unified handlers: `handleRadioClick()`, `handleCheckboxClick()`, `handleIndicationClick()`
+  - Renamed `attachInputEventListeners()` to `attachOptionClickListeners()` to reflect div-based approach
+  - Added `handleRadioDeselect()` for radio button deselection functionality
+  - Added `handlePCIRadioClick()` and `handlePCIOptionClick()` for PCI-specific interactions
+  - Removed old input-dependent functions: `toggleRadioGroup()`, `toggleCheckbox()`, `handleCheckboxChange()`
+  - Reduced file size from 1571 lines to 1452 lines (119-line reduction)
+  - More flexible styling and better cross-browser consistency
+- Updated section boundaries: CSS (10-449), HTML (451-758), JavaScript (758-1451)
+- Documented new UI Interaction Architecture section explaining data-driven clickable elements
+
+### 2025-11-25 (Previous Version - v2.5)
 - Updated CLAUDE.md to version 2.5 with corrected line counts (1571 lines) reflecting latest changes
 - **Click Handling Improvements** (PRs #29, #30): Fixed radio button and checkbox click event listeners
   - PR #30: Fixed click handlers using data attributes instead of cloning elements to preserve label-input connections
@@ -538,14 +614,17 @@ If you're tasked with integrating this application with external systems:
 - `selectPCIOption(indication)` - Select specific PCI indication
 - `setPCIIndication(indication)` - Set final PCI indication
 
-### UI Update Functions
+### UI Update & Event Handling Functions
 - `updateArrows()` - Update all step completion arrows
 - `updateArrowState(stepNum, isComplete)` - Update single step arrow
-- `toggleRadioGroup(groupName, value)` - Handle radio button selection
-- `handleRadioChange(groupName, value)` - Process radio button change
-- `toggleCheckbox(checkboxId)` - Handle checkbox selection
-- `handleCheckboxChange(indication, checkbox)` - Process checkbox change
-- `attachInputEventListeners()` - Attach event listeners to inputs using data attributes
+- `attachOptionClickListeners()` - Attach click listeners to all option divs
+- `handleRadioClick(element)` - Handle click on radio-type option div
+- `handleRadioDeselect(group, value)` - Deselect a radio option
+- `handleCheckboxClick(element)` - Handle click on checkbox-type option div
+- `handleIndicationClick(element)` - Handle click on indication-type option div
+- `handlePCIRadioClick(element)` - Handle click on PCI radio option
+- `handlePCIOptionClick(element)` - Handle click on PCI option
+- `handleRadioChange(groupName, value)` - Process radio selection changes
 
 ### Helper Functions
 - `showReminder(indication)` - Display contextual reminder
