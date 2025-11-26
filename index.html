@@ -129,73 +129,6 @@
             font-weight: 600;
         }
         
-        /* Tooltip styles */
-        .has-tooltip {
-            position: relative;
-        }
-
-        label.has-tooltip {
-            display: inline-block;
-        }
-        
-        .has-tooltip .tooltip {
-            visibility: hidden;
-            opacity: 0;
-            position: absolute;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            margin-left: 10px;
-            background: #2c3e50;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: normal;
-            width: 300px;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-            line-height: 1.5;
-        }
-        
-        .has-tooltip .tooltip::before {
-            content: "";
-            position: absolute;
-            right: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            border-width: 8px;
-            border-style: solid;
-            border-color: transparent #2c3e50 transparent transparent;
-        }
-        
-        .has-tooltip:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        @media (max-width: 900px) {
-            .has-tooltip .tooltip {
-                left: 0;
-                top: 100%;
-                transform: none;
-                margin-left: 0;
-                margin-top: 10px;
-                width: 250px;
-            }
-            
-            .has-tooltip .tooltip::before {
-                right: auto;
-                left: 20px;
-                top: -16px;
-                transform: none;
-                border-color: transparent transparent #2c3e50 transparent;
-            }
-        }
-        
-        /* Removed input styling - options are now directly clickable */
-        
         .sub-option-group {
             margin-left: 35px;
             margin-top: 10px;
@@ -446,6 +379,99 @@
         .hidden {
             display: none;
         }
+
+        /* Definition and Reference Link Styles */
+        .definition-link, .reference-link {
+            color: #999;
+            font-size: 13px;
+            font-weight: normal;
+            cursor: pointer;
+            text-decoration: none;
+            margin-left: 8px;
+            display: inline-block;
+            transition: color 0.2s;
+        }
+
+        .definition-link:hover, .reference-link:hover {
+            color: #666;
+            text-decoration: underline;
+        }
+
+        .reference-link {
+            display: block;
+            margin-top: 8px;
+            margin-left: 0;
+        }
+
+        /* Definition/Reference Popup Modal */
+        .info-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-modal-overlay.show {
+            display: flex;
+        }
+
+        .info-modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-modal-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .info-modal-header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .info-modal-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            line-height: 1;
+        }
+
+        .info-modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .info-modal-body {
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -474,17 +500,18 @@
                     </div>
                     <div class="sub-option-group" id="acs-timing-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">The time lapse from ACS diagnosis to Cath Lab presentation should guide which selection is indicated. To clarify: Because the definition is focused on when the patient "has" ACS (unstable angina, NSTEMI or STEMI), please use the diagnosis date/time - NCDR ACD#24910</p>
-                        <div class="option has-tooltip" data-type="indication" data-indication="ACS <= 24 hrs" id="acs-24">
+                        <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" id="acs-24">
                             ACS ≤ 24 hrs
-                            <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is ≤ 24 hours prior to cath lab presentation. Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
+                            <a class="definition-link" onclick="showDefinition('ACS <= 24 hrs'); event.stopPropagation();">View Definition</a>
                         </div>
-                        <div class="option has-tooltip" data-type="indication" data-indication="ACS > 24 hrs" id="acs-24plus">
+                        <div class="option" data-type="indication" data-indication="ACS > 24 hrs" id="acs-24plus">
                             ACS > 24 hrs
-                            <span class="tooltip">Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI ≤7 days from symptoms). Note: For patients presenting with ACS choose the most applicable selection between 'ACS ≤24hrs' and 'ACS >24hrs' - these options may not be selected together.</span>
+                            <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
                         </div>
                         <div class="reminder" id="acs-24plus-reminder" style="display: none;">
                             <strong>⚠️ Reminder:</strong>
                             A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit – NCDR ACD# 25073
+                            <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
                         </div>
                     </div>
                     <div class="option" data-type="radio" data-group="acs" data-value="no" id="acs-no">
@@ -512,9 +539,9 @@
                             Prior CABG<br>
                             History of Angina
                         </p>
-                        <div class="option has-tooltip" data-type="indication" data-indication="New Onset Angina <= 2 months" id="new-onset-angina">
+                        <div class="option" data-type="indication" data-indication="New Onset Angina <= 2 months" id="new-onset-angina">
                             No - New Onset Angina
-                            <span class="tooltip">The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.</span>
+                            <a class="definition-link" onclick="showDefinition('New Onset Angina <= 2 months'); event.stopPropagation();">View Definition</a>
                         </div>
                         <div class="option" data-type="radio" data-group="angina-history-type" data-value="yes" id="angina-history-yes">
                             Yes
@@ -523,13 +550,13 @@
                             <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
                                 Has the patient's angina changed in frequency, pattern or severity over the past 2 months?
                             </p>
-                            <div class="option has-tooltip" data-type="indication" data-indication="Worsening Angina" id="worsening-angina">
+                            <div class="option" data-type="indication" data-indication="Worsening Angina" id="worsening-angina">
                                 Yes - Worsening Angina
-                                <span class="tooltip">The patient has a history of angina that has changed in frequency, pattern or severity over the past 2 months.</span>
+                                <a class="definition-link" onclick="showDefinition('Worsening Angina'); event.stopPropagation();">View Definition</a>
                             </div>
-                            <div class="option has-tooltip" data-type="indication" data-indication="Stable Known CAD" id="stable-cad-angina">
+                            <div class="option" data-type="indication" data-indication="Stable Known CAD" id="stable-cad-angina">
                                 No - Stable Known CAD
-                                <span class="tooltip">The patient has a history of angina, MI, PCI, or CABG but their angina has not changed in frequency, pattern or severity over the past 2 months.</span>
+                                <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
                             </div>
                         </div>
                     </div>
@@ -552,9 +579,9 @@
                     </div>
                     <div class="sub-option-group" id="cad-stability-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient CURRENTLY stable (no signs/symptoms of ACS, New Onset or Worsening Angina, or hemodynamic instability) AND has known CAD ≥50% in at least one vessel?</p>
-                        <div class="option has-tooltip" data-type="indication" data-indication="Stable Known CAD" id="stable-cad">
+                        <div class="option" data-type="indication" data-indication="Stable Known CAD" id="stable-cad">
                             Yes - Stable Known CAD
-                            <span class="tooltip">The patient is stable (without signs or symptoms of acute coronary syndrome, new onset or worsening angina or hemodynamic instability) and has known coronary artery disease ≥50% in at least one vessel.</span>
+                            <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
                         </div>
                         <div class="option" data-type="radio" data-group="cad-stable" data-value="no" id="cad-stable-no">
                             No
@@ -568,9 +595,9 @@
                     </div>
                     <div class="sub-option-group" id="suspected-cad-group" style="display: none;">
                         <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider adding Suspected CAD if appropriate</p>
-                        <div class="option has-tooltip" data-type="indication" data-indication="Suspected CAD" id="suspected-cad">
+                        <div class="option" data-type="indication" data-indication="Suspected CAD" id="suspected-cad">
                             Suspected CAD
-                            <span class="tooltip">Suspected Coronary Artery Disease, no prior documentation of CAD ≥50% in a vessel.</span>
+                            <a class="definition-link" onclick="showDefinition('Suspected CAD'); event.stopPropagation();">View Definition</a>
                         </div>
                     </div>
                 </div>
@@ -588,9 +615,9 @@
                         Yes
                     </div>
                     <div class="sub-option-group" id="cardiac-arrest-sub-group" style="display: none;">
-                        <div class="option has-tooltip" data-type="indication" data-indication="Resuscitated Cardiac Arrest" id="resuscitated-cardiac-arrest">
+                        <div class="option" data-type="indication" data-indication="Resuscitated Cardiac Arrest" id="resuscitated-cardiac-arrest">
                             Resuscitated Cardiac Arrest
-                            <span class="tooltip">The patient presents status post cardiac arrest.</span>
+                            <a class="definition-link" onclick="showDefinition('Resuscitated Cardiac Arrest'); event.stopPropagation();">View Definition</a>
                         </div>
                     </div>
                     <div class="option" data-type="radio" data-group="cardiac-arrest" data-value="no" id="cardiac-arrest-no">
@@ -608,59 +635,64 @@
                 </div>
                 <p class="instruction">Select all that apply:</p>
                 <div class="option-group">
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Valvular Disease" id="valvular">
+                    <div class="option" data-type="checkbox" data-indication="Valvular Disease" id="valvular">
                         Valvular Disease
-                        <span class="tooltip">There is disease of at least one heart valve.</span>
+                        <a class="definition-link" onclick="showDefinition('Valvular Disease'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="valvular-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.
+                        <a class="reference-link" onclick="showReference('Valvular Disease'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Pericardial Disease" id="pericardial">
+                    <div class="option" data-type="checkbox" data-indication="Pericardial Disease" id="pericardial">
                         Pericardial Disease
-                        <span class="tooltip">Pericardial disease is inflammation of the pericardial sac.</span>
+                        <a class="definition-link" onclick="showDefinition('Pericardial Disease'); event.stopPropagation();">View Definition</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Cardiac arrhythmia" id="arrhythmia">
+                    <div class="option" data-type="checkbox" data-indication="Cardiac arrhythmia" id="arrhythmia">
                         Cardiac Arrhythmia
-                        <span class="tooltip">Cardiac arrhythmia is also known as cardiac dysrhythmia or irregular heartbeat, a group of conditions in which the heartbeat is irregular, too fast, or too slow.</span>
+                        <a class="definition-link" onclick="showDefinition('Cardiac arrhythmia'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="arrhythmia-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
+                        <a class="reference-link" onclick="showReference('Cardiac arrhythmia'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Cardiomyopathy" id="cardiomyopathy">
+                    <div class="option" data-type="checkbox" data-indication="Cardiomyopathy" id="cardiomyopathy">
                         Cardiomyopathy
-                        <span class="tooltip">Cardiomyopathy is a disease of the heart muscle. Types include: hypertrophic cardiomyopathy, dilated cardiomyopathy, restrictive cardiomyopathy, arrhythmogenic right ventricular dysplasia and Takotsubo cardiomyopathy.</span>
+                        <a class="definition-link" onclick="showDefinition('Cardiomyopathy'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="cardiomyopathy-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         Cardiomyopathy must be explicitly stated as an indication by the physician.
+                        <a class="reference-link" onclick="showReference('Cardiomyopathy'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="LV Dysfunction" id="lv-dysfunction">
+                    <div class="option" data-type="checkbox" data-indication="LV Dysfunction" id="lv-dysfunction">
                         LV Dysfunction
-                        <span class="tooltip">In left-sided or left ventricular heart failure, the left side of the heart must work harder to pump the same amount of blood. The two types of LV dysfunction are systolic and diastolic heart failure.</span>
+                        <a class="definition-link" onclick="showDefinition('LV Dysfunction'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="lv-dysfunction-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.
+                        <a class="reference-link" onclick="showReference('LV Dysfunction'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Syncope" id="syncope">
+                    <div class="option" data-type="checkbox" data-indication="Syncope" id="syncope">
                         Syncope
-                        <span class="tooltip">Syncope presents with an abrupt, transient, complete loss of consciousness, associated with inability to maintain postural tone, with rapid and spontaneous recovery.</span>
+                        <a class="definition-link" onclick="showDefinition('Syncope'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="syncope-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
+                        <a class="reference-link" onclick="showReference('Syncope'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Post Cardiac Transplant" id="post-transplant">
+                    <div class="option" data-type="checkbox" data-indication="Post Cardiac Transplant" id="post-transplant">
                         Post Cardiac Transplant
-                        <span class="tooltip">A cardiac transplant is a heart transplanted from a donor.</span>
+                        <a class="definition-link" onclick="showDefinition('Post Cardiac Transplant'); event.stopPropagation();">View Definition</a>
                     </div>
                 </div>
             </div>
@@ -674,18 +706,19 @@
                 </div>
                 <p class="instruction">Select all that apply:</p>
                 <div class="option-group">
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Pre-operative Evaluation" id="pre-op">
+                    <div class="option" data-type="checkbox" data-indication="Pre-operative Evaluation" id="pre-op">
                         Pre-Operative Evaluation
-                        <span class="tooltip">Cardiac evaluation of the coronary arteries and/or LV function.</span>
+                        <a class="definition-link" onclick="showDefinition('Pre-operative Evaluation'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="pre-op-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
+                        <a class="reference-link" onclick="showReference('Pre-operative Evaluation'); event.stopPropagation();">Reference</a>
                     </div>
 
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Evaluation for Exercise Clearance" id="exercise">
+                    <div class="option" data-type="checkbox" data-indication="Evaluation for Exercise Clearance" id="exercise">
                         Evaluation for Exercise Clearance
-                        <span class="tooltip">The patient presents for clearance to participate in an exercise program or cardiac rehab.</span>
+                        <a class="definition-link" onclick="showDefinition('Evaluation for Exercise Clearance'); event.stopPropagation();">View Definition</a>
                     </div>
                 </div>
             </div>
@@ -698,13 +731,14 @@
                     If NO OTHER INDICATIONS apply to this Cath Lab scenario:
                 </div>
                 <div class="option-group">
-                    <div class="option has-tooltip" data-type="checkbox" data-indication="Other" id="other">
+                    <div class="option" data-type="checkbox" data-indication="Other" id="other">
                         Other
-                        <span class="tooltip">Use only when no other Cath Lab indications apply to the patient's situation.</span>
+                        <a class="definition-link" onclick="showDefinition('Other'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="other-reminder" style="display: none;">
                         <strong>⚠️ Reminder:</strong>
                         Other should be used very rarely and ONLY when no other indications apply. If the only reason listed for Cath Lab Indication is "Abnormal Stress Test", this does NOT support coding Other. The abstractor should review the patient condition prompting the Stress Test for more information.
+                        <a class="reference-link" onclick="showReference('Other'); event.stopPropagation();">Reference</a>
                     </div>
                 </div>
             </div>
@@ -751,6 +785,19 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-button" onclick="closeErrorModal()">Go back and update selection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Definition/Reference Info Modal -->
+    <div id="info-modal" class="info-modal-overlay">
+        <div class="info-modal-content">
+            <div class="info-modal-header">
+                <div class="info-modal-header-title" id="info-modal-title">Definition</div>
+                <button class="info-modal-close" onclick="closeInfoModal()">&times;</button>
+            </div>
+            <div class="info-modal-body" id="info-modal-body">
+                <!-- Definition or reference content will be inserted here -->
             </div>
         </div>
     </div>
@@ -1085,6 +1132,67 @@
         function closeErrorModal() {
             const modal = document.getElementById('error-modal');
             modal.classList.remove('show');
+        }
+
+        // Definition and Reference data
+        const definitions = {
+            'ACS <= 24 hrs': 'Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is ≤ 24 hours prior to cath lab presentation. Note: For patients presenting with ACS choose the most applicable selection between \'ACS ≤24hrs\' and \'ACS >24hrs\' - these options may not be selected together.',
+            'ACS > 24 hrs': 'Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI ≤7 days from symptoms). Note: For patients presenting with ACS choose the most applicable selection between \'ACS ≤24hrs\' and \'ACS >24hrs\' - these options may not be selected together.',
+            'New Onset Angina <= 2 months': 'The patient is experiencing new onset angina within the last 2 months with no prior history of angina, MI, PCI, or CABG.',
+            'Worsening Angina': 'The patient has a history of angina that has changed in frequency, pattern or severity over the past 2 months.',
+            'Stable Known CAD': 'The patient is stable (without signs or symptoms of acute coronary syndrome, new onset or worsening angina or hemodynamic instability) and has known coronary artery disease ≥50% in at least one vessel.',
+            'Suspected CAD': 'Suspected Coronary Artery Disease, no prior documentation of CAD ≥50% in a vessel.',
+            'Resuscitated Cardiac Arrest': 'The patient presents status post cardiac arrest.',
+            'Valvular Disease': 'There is disease of at least one heart valve.',
+            'Pericardial Disease': 'Pericardial disease is inflammation of the pericardial sac.',
+            'Cardiac arrhythmia': 'Cardiac arrhythmia is also known as cardiac dysrhythmia or irregular heartbeat, a group of conditions in which the heartbeat is irregular, too fast, or too slow.',
+            'Cardiomyopathy': 'Cardiomyopathy is a disease of the heart muscle. Types include: hypertrophic cardiomyopathy, dilated cardiomyopathy, restrictive cardiomyopathy, arrhythmogenic right ventricular dysplasia and Takotsubo cardiomyopathy.',
+            'LV Dysfunction': 'In left-sided or left ventricular heart failure, the left side of the heart must work harder to pump the same amount of blood. The two types of LV dysfunction are systolic and diastolic heart failure.',
+            'Syncope': 'Syncope presents with an abrupt, transient, complete loss of consciousness, associated with inability to maintain postural tone, with rapid and spontaneous recovery.',
+            'Post Cardiac Transplant': 'A cardiac transplant is a heart transplanted from a donor.',
+            'Pre-operative Evaluation': 'Cardiac evaluation of the coronary arteries and/or LV function.',
+            'Evaluation for Exercise Clearance': 'The patient presents for clearance to participate in an exercise program or cardiac rehab.',
+            'Other': 'Use only when no other Cath Lab indications apply to the patient\'s situation.'
+        };
+
+        const references = {
+            'ACS > 24 hrs': 'A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered \'over\' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit – NCDR ACD# 25073',
+            'Valvular Disease': 'Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.',
+            'Cardiac arrhythmia': 'A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.',
+            'Cardiomyopathy': 'Cardiomyopathy must be explicitly stated as an indication by the physician.',
+            'LV Dysfunction': 'This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.',
+            'Syncope': 'A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.',
+            'Pre-operative Evaluation': 'TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.',
+            'Other': 'Other should be used very rarely and ONLY when no other indications apply. If the only reason listed for Cath Lab Indication is "Abnormal Stress Test", this does NOT support coding Other. The abstractor should review the patient condition prompting the Stress Test for more information.'
+        };
+
+        function showInfoModal(title, content) {
+            const modal = document.getElementById('info-modal');
+            const modalTitle = document.getElementById('info-modal-title');
+            const modalBody = document.getElementById('info-modal-body');
+
+            modalTitle.textContent = title;
+            modalBody.textContent = content;
+            modal.classList.add('show');
+        }
+
+        function closeInfoModal() {
+            const modal = document.getElementById('info-modal');
+            modal.classList.remove('show');
+        }
+
+        function showDefinition(indication) {
+            const definition = definitions[indication];
+            if (definition) {
+                showInfoModal('Definition', definition);
+            }
+        }
+
+        function showReference(indication) {
+            const reference = references[indication];
+            if (reference) {
+                showInfoModal('Reference', reference);
+            }
         }
 
         function updateSummary() {
