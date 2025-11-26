@@ -1392,6 +1392,14 @@
             const indication = element.getAttribute('data-indication');
             const id = element.id;
 
+            // If already selected, deselect (toggle behavior)
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                removeIndication(indication);
+                updateArrows();
+                return;
+            }
+
             // For indication type, only allow single selection (like radio)
             // Find all indications in the same parent group
             const parentGroup = element.parentElement;
@@ -1408,6 +1416,31 @@
             const question = element.getAttribute('data-question');
             const value = element.getAttribute('data-value');
 
+            // If already selected, deselect (toggle behavior)
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                // Clear the PCI indication and hide timing options
+                delete pciSubAnswers[question];
+                if (question === 'stemi-acs24') {
+                    const timingGroup = document.getElementById('pci-stemi-timing-24');
+                    timingGroup.style.display = 'none';
+                    // Clear any selected timing options
+                    timingGroup.querySelectorAll('[data-type="pci-option"]').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                } else if (question === 'stemi-acs24plus') {
+                    const timingGroup = document.getElementById('pci-stemi-timing-24plus');
+                    timingGroup.style.display = 'none';
+                    // Clear any selected timing options
+                    timingGroup.querySelectorAll('[data-type="pci-option"]').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                }
+                document.getElementById('pci-indication').innerHTML =
+                    '<span class="no-selection">Please answer the question above</span>';
+                return;
+            }
+
             // Deselect all other options in the same question group
             document.querySelectorAll(`[data-type="pci-radio"][data-question="${question}"]`).forEach(opt => {
                 opt.classList.remove('selected');
@@ -1422,6 +1455,14 @@
 
         function handlePCIOptionClick(element) {
             const indication = element.getAttribute('data-pci-indication');
+
+            // If already selected, deselect (toggle behavior)
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                document.getElementById('pci-indication').innerHTML =
+                    '<span class="no-selection">Please select an option above</span>';
+                return;
+            }
 
             // Deselect all other PCI options in the same group
             const parentGroup = element.parentElement;
