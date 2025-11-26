@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-26*
-*Version: 2.7*
+*Version: 2.8*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1601 lines): Complete self-contained application
+- **index.html** (1618 lines): Complete self-contained application
   - Lines 10-475: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
   - Lines 476-804: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 805-1601: JavaScript logic for state management, validation, error handling, and PCI determination
+  - Lines 805-1618: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -474,7 +474,28 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-26 (Current Version - v2.7)
+### 2025-11-26 (Current Version - v2.8)
+- Updated CLAUDE.md to version 2.8 with accurate line counts (1618 lines) reflecting all changes through PR #41
+- **CAD History Section Enhancement** (PR #41): Comprehensive improvements to Step 3 clinical guidance
+  - Expanded main question text to list specific CAD history criteria (Prior MI, Prior PCI, Prior CABG, >=50% stenosis, Obstructive CAD on CTA)
+  - Enhanced stability question with detailed multi-line definition including:
+    - No signs or symptoms of ACS
+    - No new-onset or worsening angina
+    - No hemodynamic instability
+    - If angina present, unchanged in pattern/frequency/severity for at least 6 weeks
+  - Converted "No" selection italic text to proper reminder format with warning icon
+  - Updated reminder text to emphasize KNOWN history and UNSTABLE status
+  - Changed wording from "move onto" to "move on to" for consistency
+  - Updated Suspected CAD prompt: "Consider adding" → "Consider including", "if appropriate" → "if applicable"
+  - Added duplicate Stable Known CAD validation with error modal
+  - Updated element ID from 'cad-stable-no-text' to 'cad-stable-no-reminder' with JavaScript references updated
+- **ACS > 24 hrs Reference Update** (PR #40): Improved citation presentation
+  - Removed inline citation from reminder text for cleaner presentation
+  - Updated reference modal to show full NCDR citation: "NCDR CathPCI Registry® Additional Coding Directive #25073: ncdr.com"
+  - Separates clinical guidance from citation source for better clarity
+- Line count increased from 1601 to 1618 (17-line increase) due to expanded CAD criteria and stability definitions
+
+### 2025-11-26 (Previous Version - v2.7)
 - Updated CLAUDE.md to version 2.7 with accurate line counts (1601 lines) reflecting all changes through PR #38
 - **Definitions and References Modal System** (PR #37): Major new feature for better user guidance
   - Replaced hover-based tooltips with clickable "View Definition" links next to each indication
