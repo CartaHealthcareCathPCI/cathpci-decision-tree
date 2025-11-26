@@ -571,14 +571,24 @@
                 <div class="section-heading">Coronary Artery Disease History</div>
                 <div class="step-title">
                     <span class="step-number" id="step-arrow-3">➔</span>
-                    Does the patient have a history of CAD (Coronary Artery Disease)?
+                    Does the patient have a history of:<br>
+                    Prior MI<br>
+                    Prior PCI<br>
+                    Prior CABG<br>
+                    >= 50% stenosis in at least one vessel that has been confirmed by diagnostic cath<br>
+                    'Obstructive CAD' on Cardiac CTA
                 </div>
                 <div class="option-group">
                     <div class="option" data-type="radio" data-group="cad-history" data-value="yes" id="cad-yes">
                         Yes
                     </div>
                     <div class="sub-option-group" id="cad-stability-group" style="display: none;">
-                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient CURRENTLY stable (no signs/symptoms of ACS, New Onset or Worsening Angina, or hemodynamic instability) AND has known CAD ≥50% in at least one vessel?</p>
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient currently stable?<br>
+                        Stability is defined as:<br>
+                        No signs or symptoms of ACS<br>
+                        No new-onset or worsening angina<br>
+                        No hemodynamic instability<br>
+                        If angina is present, it has remained unchanged in pattern, frequency, and severity for at least 6 weeks</p>
                         <div class="option" data-type="indication" data-indication="Stable Known CAD" id="stable-cad">
                             Yes - Stable Known CAD
                             <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
@@ -586,15 +596,16 @@
                         <div class="option" data-type="radio" data-group="cad-stable" data-value="no" id="cad-stable-no">
                             No
                         </div>
-                        <div class="sub-option-group" id="cad-stable-no-text" style="display: none; margin-top: 10px; padding-left: 30px;">
-                            <p style="color: #555; font-style: italic;">If the patient has a known history of CAD but is NOT currently stable, no selection here applies, move onto the next question</p>
+                        <div class="reminder" id="cad-stable-no-reminder" style="display: none;">
+                            <strong>⚠️ Reminder:</strong>
+                            If the patient has a KNOWN history of CAD, but is UNSTABLE, do not select Stable Known CAD, move on to the next question
                         </div>
                     </div>
                     <div class="option" data-type="radio" data-group="cad-history" data-value="no" id="cad-no">
                         No
                     </div>
                     <div class="sub-option-group" id="suspected-cad-group" style="display: none;">
-                        <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider adding Suspected CAD if appropriate</p>
+                        <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider including Suspected CAD if applicable</p>
                         <div class="option" data-type="indication" data-indication="Suspected CAD" id="suspected-cad">
                             Suspected CAD
                             <a class="definition-link" onclick="showDefinition('Suspected CAD'); event.stopPropagation();">View Definition</a>
@@ -948,7 +959,7 @@
             if (groupName === 'cad-history') {
                 const stabilityGroup = document.getElementById('cad-stability-group');
                 const suspectedGroup = document.getElementById('suspected-cad-group');
-                const cadStableNoText = document.getElementById('cad-stable-no-text');
+                const cadStableNoText = document.getElementById('cad-stable-no-reminder');
                 if (value === 'yes') {
                     stabilityGroup.style.display = 'block';
                     suspectedGroup.style.display = 'none';
@@ -967,7 +978,7 @@
 
             // Handle CAD stable radio group
             if (groupName === 'cad-stable') {
-                const cadStableNoText = document.getElementById('cad-stable-no-text');
+                const cadStableNoText = document.getElementById('cad-stable-no-reminder');
                 if (value === 'no') {
                     document.getElementById('stable-cad').checked = false;
                     removeIndication('Stable Known CAD');
@@ -1377,7 +1388,7 @@
             document.getElementById('angina-change-group').style.display = 'none';
             document.getElementById('cad-stability-group').style.display = 'none';
             document.getElementById('suspected-cad-group').style.display = 'none';
-            document.getElementById('cad-stable-no-text').style.display = 'none';
+            document.getElementById('cad-stable-no-reminder').style.display = 'none';
             document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
 
             // Hide all reminders
@@ -1474,7 +1485,7 @@
             } else if (group === 'cad-history') {
                 document.getElementById('cad-stability-group').style.display = 'none';
                 document.getElementById('suspected-cad-group').style.display = 'none';
-                document.getElementById('cad-stable-no-text').style.display = 'none';
+                document.getElementById('cad-stable-no-reminder').style.display = 'none';
                 removeIndication('Stable Known CAD');
                 removeIndication('Suspected CAD');
             } else if (group === 'cardiac-arrest') {
@@ -1505,6 +1516,12 @@
                 element.classList.remove('selected');
                 removeIndication(indication);
                 updateArrows();
+                return;
+            }
+
+            // Check for duplicate Stable Known CAD selection
+            if (indication === 'Stable Known CAD' && selectedIndications.has('Stable Known CAD')) {
+                displayErrors(['Stable Known CAD already selected, move to next question']);
                 return;
             }
 
