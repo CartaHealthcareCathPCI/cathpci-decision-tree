@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-11-26*
-*Version: 2.6*
+*Version: 2.7*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1571 lines)
+├── index.html                    # Main application (1601 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1452 lines): Complete self-contained application
-  - Lines 10-449: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
-  - Lines 451-758: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 758-1451: JavaScript logic for state management, validation, error handling, and PCI determination
+- **index.html** (1601 lines): Complete self-contained application
+  - Lines 10-475: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
+  - Lines 476-804: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 805-1601: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -195,10 +195,13 @@ const validationRules = {
 - `handlePCIOptionClick(element)` - Handles click events on PCI-specific options
 - `handleRadioChange(groupName, value)` - Processes radio button selection changes (called by click handlers)
 
-### Reminders
+### Reminders & Information
 
 - `showReminder(indication)` - Displays contextual help for specific selections
 - `hideReminder(indication)` - Hides contextual help
+- `showDefinition(indication)` - Displays definition modal for a specific indication
+- `showReference(indication)` - Displays reference information modal for a specific indication
+- `closeInfoModal()` - Closes the information modal (definitions/references)
 
 ---
 
@@ -471,7 +474,27 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-11-26 (Current Version - v2.6)
+### 2025-11-26 (Current Version - v2.7)
+- Updated CLAUDE.md to version 2.7 with accurate line counts (1601 lines) reflecting all changes through PR #38
+- **Definitions and References Modal System** (PR #37): Major new feature for better user guidance
+  - Replaced hover-based tooltips with clickable "View Definition" links next to each indication
+  - Added "Reference" links at the bottom of reminders for additional guidance
+  - Created unified modal popup system for displaying both definitions and references
+  - Removed deprecated tooltip CSS styles
+  - Styled definition/reference links in light gray (#999) with hover effects
+  - Added comprehensive definitions and references data structures in JavaScript
+  - Implemented `showDefinition()`, `showReference()`, and `closeInfoModal()` functions
+  - Added 211 lines, removed 103 lines in this feature
+- **ACS Diagnosis Text Update** (PR #38): Clarified timing guidance in ACS section
+  - Updated instructional text to emphasize using diagnosis date/time
+  - Bolded "diagnosis date/time" for better visibility
+  - Clarified that time from diagnosis to Cath Lab presentation should guide selection
+- **Cath Lab Prompt Update** (PR #36): Updated prompt text to clarify patient symptoms/condition requirements
+- **Deselection Feature Enhancement** (PR #35): Extended deselection functionality to all selection types
+- Corrected section boundaries: CSS (10-475), HTML (476-804), JavaScript (805-1601)
+- Line count increased from 1452 to 1601 (149-line increase) primarily due to definitions/references modal system
+
+### 2025-11-26 (Previous Version - v2.6)
 - Updated CLAUDE.md to version 2.6 with accurate line counts (1452 lines) reflecting architectural changes from PR #33
 - **Major Architectural Change** (PR #33): Complete UI interaction model overhaul
   - Removed all HTML `<input type="radio">` and `<input type="checkbox">` elements
@@ -629,6 +652,9 @@ If you're tasked with integrating this application with external systems:
 ### Helper Functions
 - `showReminder(indication)` - Display contextual reminder
 - `hideReminder(indication)` - Hide contextual reminder
+- `showDefinition(indication)` - Display definition modal
+- `showReference(indication)` - Display reference modal
+- `closeInfoModal()` - Close information modal
 
 ---
 
