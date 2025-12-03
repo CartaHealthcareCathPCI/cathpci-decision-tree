@@ -138,18 +138,23 @@
         }
         
         .reminder {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px 15px;
+            background: #fff8e6;
+            border-left: 4px solid #ff9800;
+            padding: 14px 18px;
             margin: 10px 0 10px 42px;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #856404;
+            border-radius: 6px;
+            font-size: 15px;
+            color: #4a4a4a;
+            line-height: 1.5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        
+
         .reminder strong {
-            display: block;
-            margin-bottom: 5px;
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 18px;
+            vertical-align: middle;
+            color: #ff9800;
         }
         
         .validation-error {
@@ -510,7 +515,7 @@
                             <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
                         </div>
                         <div class="reminder" id="acs-24plus-reminder" style="display: none;">
-                            <strong>⚠️ Reminder:</strong>
+                            <strong>⚠️</strong>
                             A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit
                             <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
                         </div>
@@ -598,7 +603,7 @@
                             No
                         </div>
                         <div class="reminder" id="cad-stable-no-reminder" style="display: none;">
-                            <strong>⚠️ Reminder:</strong>
+                            <strong>⚠️</strong>
                             If the patient has a KNOWN history of CAD, but is UNSTABLE, do not select Stable Known CAD, move on to the next question
                         </div>
                     </div>
@@ -652,7 +657,7 @@
                         <a class="definition-link" onclick="showDefinition('Valvular Disease'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="valvular-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.
                         <a class="reference-link" onclick="showReference('Valvular Disease'); event.stopPropagation();">Reference</a>
                     </div>
@@ -667,7 +672,7 @@
                         <a class="definition-link" onclick="showDefinition('Cardiac arrhythmia'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="arrhythmia-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                         <a class="reference-link" onclick="showReference('Cardiac arrhythmia'); event.stopPropagation();">Reference</a>
                     </div>
@@ -677,7 +682,7 @@
                         <a class="definition-link" onclick="showDefinition('Cardiomyopathy'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="cardiomyopathy-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         Cardiomyopathy must be explicitly stated as an indication by the physician.
                         <a class="reference-link" onclick="showReference('Cardiomyopathy'); event.stopPropagation();">Reference</a>
                     </div>
@@ -687,7 +692,7 @@
                         <a class="definition-link" onclick="showDefinition('LV Dysfunction'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="lv-dysfunction-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.
                         <a class="reference-link" onclick="showReference('LV Dysfunction'); event.stopPropagation();">Reference</a>
                     </div>
@@ -697,7 +702,7 @@
                         <a class="definition-link" onclick="showDefinition('Syncope'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="syncope-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                         <a class="reference-link" onclick="showReference('Syncope'); event.stopPropagation();">Reference</a>
                     </div>
@@ -723,7 +728,7 @@
                         <a class="definition-link" onclick="showDefinition('Pre-operative Evaluation'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="pre-op-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
                         <a class="reference-link" onclick="showReference('Pre-operative Evaluation'); event.stopPropagation();">Reference</a>
                     </div>
@@ -748,7 +753,7 @@
                         <a class="definition-link" onclick="showDefinition('Other'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="other-reminder" style="display: none;">
-                        <strong>⚠️ Reminder:</strong>
+                        <strong>⚠️</strong>
                         Other should be used very rarely and ONLY when no other indications apply. If the only reason listed for Cath Lab Indication is "Abnormal Stress Test", this does NOT support coding Other. The abstractor should review the patient condition prompting the Stress Test for more information.
                         <a class="reference-link" onclick="showReference('Other'); event.stopPropagation();">Reference</a>
                     </div>
