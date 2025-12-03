@@ -902,8 +902,8 @@
                 } else {
                     timingGroup.style.display = 'none';
                     // Clear ACS selections
-                    document.getElementById('acs-24').checked = false;
-                    document.getElementById('acs-24plus').checked = false;
+                    document.getElementById('acs-24').classList.remove('selected');
+                    document.getElementById('acs-24plus').classList.remove('selected');
                     removeIndication('ACS <= 24 hrs');
                     removeIndication('ACS > 24 hrs');
                 }
@@ -924,10 +924,10 @@
                     const anginaHistoryYes = document.getElementById('angina-history-yes');
                     const worseningAngina = document.getElementById('worsening-angina');
                     const stableCadAngina = document.getElementById('stable-cad-angina');
-                    if (newOnsetAngina) newOnsetAngina.checked = false;
-                    if (anginaHistoryYes) anginaHistoryYes.checked = false;
-                    if (worseningAngina) worseningAngina.checked = false;
-                    if (stableCadAngina) stableCadAngina.checked = false;
+                    if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
+                    if (anginaHistoryYes) anginaHistoryYes.classList.remove('selected');
+                    if (worseningAngina) worseningAngina.classList.remove('selected');
+                    if (stableCadAngina) stableCadAngina.classList.remove('selected');
                     removeIndication('Worsening Angina');
                     removeIndication('New Onset Angina <= 2 months');
                     removeIndication('Stable Known CAD');
@@ -941,15 +941,15 @@
                     changeGroup.style.display = 'block';
                     // Clear the "New Onset Angina" selection if it was selected
                     const newOnsetAngina = document.getElementById('new-onset-angina');
-                    if (newOnsetAngina) newOnsetAngina.checked = false;
+                    if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
                     removeIndication('New Onset Angina <= 2 months');
                 } else {
                     changeGroup.style.display = 'none';
                     // Clear nested selections
                     const worseningAngina = document.getElementById('worsening-angina');
                     const stableCadAngina = document.getElementById('stable-cad-angina');
-                    if (worseningAngina) worseningAngina.checked = false;
-                    if (stableCadAngina) stableCadAngina.checked = false;
+                    if (worseningAngina) worseningAngina.classList.remove('selected');
+                    if (stableCadAngina) stableCadAngina.classList.remove('selected');
                     removeIndication('Worsening Angina');
                     removeIndication('Stable Known CAD');
                 }
@@ -965,13 +965,13 @@
                     suspectedGroup.style.display = 'none';
                     if (cadStableNoText) cadStableNoText.style.display = 'none';
                     const suspectedCadRadio = document.getElementById('suspected-cad');
-                    if (suspectedCadRadio) suspectedCadRadio.checked = false;
+                    if (suspectedCadRadio) suspectedCadRadio.classList.remove('selected');
                     removeIndication('Suspected CAD');
                 } else {
                     stabilityGroup.style.display = 'none';
                     suspectedGroup.style.display = 'block';
                     if (cadStableNoText) cadStableNoText.style.display = 'none';
-                    document.getElementById('stable-cad').checked = false;
+                    document.getElementById('stable-cad').classList.remove('selected');
                     removeIndication('Stable Known CAD');
                 }
             }
@@ -980,7 +980,7 @@
             if (groupName === 'cad-stable') {
                 const cadStableNoText = document.getElementById('cad-stable-no-reminder');
                 if (value === 'no') {
-                    document.getElementById('stable-cad').checked = false;
+                    document.getElementById('stable-cad').classList.remove('selected');
                     removeIndication('Stable Known CAD');
                     if (cadStableNoText) cadStableNoText.style.display = 'block';
                 } else {
@@ -996,7 +996,7 @@
                 } else {
                     cardiacArrestSubGroup.style.display = 'none';
                     // Clear cardiac arrest selection
-                    document.getElementById('resuscitated-cardiac-arrest').checked = false;
+                    document.getElementById('resuscitated-cardiac-arrest').classList.remove('selected');
                     removeIndication('Resuscitated Cardiac Arrest');
                 }
             }
