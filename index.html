@@ -63,7 +63,19 @@
         .step-section:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
+        .step-section.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background: #e9ecef;
+            filter: grayscale(0.5);
+        }
+
+        .step-section.disabled .option {
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
         .step-number {
             display: inline-block;
             color: #999;
@@ -573,7 +585,7 @@
             </div>
 
             <!-- Question 3: CAD History -->
-            <div class="step-section">
+            <div class="step-section" id="cad-history-section">
                 <div class="section-heading">Coronary Artery Disease History</div>
                 <div class="step-title">
                     <span class="step-number" id="step-arrow-3">➔</span>
@@ -1522,6 +1534,15 @@
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
                 removeIndication(indication);
+
+                // If deselecting Stable Known CAD from Angina section, re-enable CAD History section
+                if (indication === 'Stable Known CAD' && id === 'stable-cad-angina') {
+                    const cadHistorySection = document.getElementById('cad-history-section');
+                    if (cadHistorySection) {
+                        cadHistorySection.classList.remove('disabled');
+                    }
+                }
+
                 updateArrows();
                 return;
             }
@@ -1553,6 +1574,42 @@
             // Select this one
             element.classList.add('selected');
             selectIndication(indication, id);
+
+            // If selecting Stable Known CAD from Angina section, disable CAD History section
+            if (indication === 'Stable Known CAD' && id === 'stable-cad-angina') {
+                const cadHistorySection = document.getElementById('cad-history-section');
+                if (cadHistorySection) {
+                    cadHistorySection.classList.add('disabled');
+
+                    // Clear any existing selections in the CAD History section
+                    // Deselect radio buttons
+                    const cadYes = document.getElementById('cad-yes');
+                    const cadNo = document.getElementById('cad-no');
+                    const cadStableNo = document.getElementById('cad-stable-no');
+                    if (cadYes) cadYes.classList.remove('selected');
+                    if (cadNo) cadNo.classList.remove('selected');
+                    if (cadStableNo) cadStableNo.classList.remove('selected');
+
+                    // Deselect any indication options and remove from selectedIndications
+                    const stableCadFromHistory = document.getElementById('stable-cad');
+                    const suspectedCad = document.getElementById('suspected-cad');
+                    if (stableCadFromHistory && stableCadFromHistory.classList.contains('selected')) {
+                        stableCadFromHistory.classList.remove('selected');
+                        // Note: Don't remove 'Stable Known CAD' from selectedIndications
+                        // since we just added it from the Angina section
+                    }
+                    if (suspectedCad && suspectedCad.classList.contains('selected')) {
+                        suspectedCad.classList.remove('selected');
+                        removeIndication('Suspected CAD');
+                    }
+
+                    // Hide sub-option groups
+                    const cadStabilityGroup = document.getElementById('cad-stability-group');
+                    const suspectedCadGroup = document.getElementById('suspected-cad-group');
+                    if (cadStabilityGroup) cadStabilityGroup.style.display = 'none';
+                    if (suspectedCadGroup) suspectedCadGroup.style.display = 'none';
+                }
+            }
         }
 
         function handlePCIRadioClick(element) {
