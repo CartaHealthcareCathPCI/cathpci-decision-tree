@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-12-03*
-*Version: 3.0*
+*Version: 3.1*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1631 lines)
+├── index.html                    # Main application (1693 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1631 lines): Complete self-contained application
-  - Lines 10-476: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
-  - Lines 478-816: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 817-1631: JavaScript logic for state management, validation, error handling, and PCI determination
+- **index.html** (1693 lines): Complete self-contained application
+  - Lines 10-493: CSS styling with gradient backgrounds, responsive design, modal dialogs, orange section headings, and reminder alerts
+  - Lines 495-833: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 834-1693: JavaScript logic for state management, validation, error handling, PCI determination, and section gray-out functionality
 
 ---
 
@@ -481,7 +481,73 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-03 (Current Version - v3.0)
+### 2025-12-03 (Current Version - v3.1)
+- **Comprehensive Update**: Documentation refresh reflecting PRs #49-53
+  - Updated line count from 1631 to 1693 (62-line increase) reflecting recent changes
+  - Corrected section boundaries: CSS (10-493), HTML (495-833), JavaScript (834-1693)
+  - Documented all recent functional and UX improvements from PRs #49-53
+
+- **Improve Reminder Alert Styling** (PR #49): Enhanced visual design of reminder alerts
+  - Updated CSS styling for `.reminder` class with cleaner, more modern appearance:
+    - Changed background to softer yellow (#fff8e6) for better readability
+    - Updated border and icon color to orange (#ff9800) for brand consistency
+    - Enhanced spacing and padding for improved visual hierarchy
+    - Added subtle box-shadow for depth perception
+    - Improved line-height for better text readability
+  - Removed "Reminder:" text prefix from all reminder instances throughout the application
+  - Alert icon (⚠️) now stands alone as visual indicator without redundant text label
+  - Icon styled larger (18px) and colored orange for better prominence
+  - Changed icon display from block to inline-block for better text flow
+  - Net change: +23 insertions, -18 deletions (+5 lines)
+  - Result: Cleaner, more modern reminder alerts that are easier to scan
+
+- **Update CAD History Criteria Wording** (PR #50): Improved clinical clarity in Step 3
+  - Changed ">= 50% stenosis" to "At least 50% stenosis in one or more vessels" for better precision
+  - Expanded "diagnostic cath" to "diagnostic catheterization" for formal medical terminology
+  - Reworded CTA criteria: "Cardiac CTA demonstrating Obstructive CAD" for improved clinical accuracy
+  - Location: Lines 584-585 in index.html
+  - Net change: +2 insertions, -2 deletions (no line count change)
+  - Improves readability and clinical clarity without changing underlying logic
+
+- **Indent Stability Definition Items** (PR #51): Enhanced readability of stability criteria
+  - Added indentation to the four stability definition items in CAD History section:
+    - "No signs or symptoms of ACS"
+    - "No new-onset or worsening angina"
+    - "No hemodynamic instability"
+    - "If angina present, unchanged in pattern/frequency/severity for at least 6 weeks"
+  - Improved visual hierarchy and scanning of multi-line definition
+  - Net change: +4 insertions, -4 deletions (no line count change)
+  - Better formatting for clinical decision-making
+
+- **Add CAD History Section Gray-out** (PR #52): Improved UX with conditional section disabling
+  - When "Stable Known CAD" is selected from Angina section (Step 2), the CAD History section (Step 3) is automatically grayed out
+  - CSS Changes:
+    - Added `.step-section.disabled` styling with reduced opacity (0.5), grayscale filter, and `pointer-events: none`
+    - Visual indication that section is unavailable prevents user confusion
+  - HTML Changes:
+    - Added `id="cad-history-section"` to Step 3 for JavaScript targeting
+  - JavaScript Changes:
+    - Modified `handleIndicationClick()` function to detect "Stable Known CAD" selection from Angina
+    - Adds `disabled` class to CAD History section when Stable Known CAD selected
+    - Removes `disabled` class when Stable Known CAD deselected
+    - Clears any existing selections in CAD History section when it becomes disabled
+    - Hides sub-option groups when section is disabled
+  - Net change: +59 insertions, -2 deletions (+57 lines)
+  - Note: Validation rules preventing "New Onset Angina + Stable Known CAD" and "Worsening Angina + Stable Known CAD" were already implemented via angina mutual exclusivity check (lines 1111-1116)
+  - Provides visual feedback improving clinical workflow
+
+- **Make ACS Timing Options Mutually Exclusive** (PR #53): Ensures single ACS indication selection
+  - Added `data-indication-group="acs-indications"` attribute to both ACS indication options:
+    - "ACS ≤ 24 hrs"
+    - "ACS > 24 hrs"
+  - Leverages existing mutual exclusivity logic in `handleIndicationClick()` function
+  - When user switches from one ACS timing option to another, the previously selected option is automatically deselected
+  - Prevents confusing scenario where both ACS timing options could be selected simultaneously
+  - Matches the mutual exclusivity pattern already implemented for Angina indications (PR #44)
+  - Net change: +2 insertions, -2 deletions (no line count change)
+  - Improves clinical accuracy by enforcing single ACS timing selection
+
+### 2025-12-03 (Previous Version - v3.0)
 - **Comprehensive Update**: Documentation refresh reflecting PRs #44-47
   - Updated line count from 1618 to 1631 (13-line increase) reflecting recent changes
   - Corrected section boundaries: CSS (10-476), HTML (478-816), JavaScript (817-1631)
