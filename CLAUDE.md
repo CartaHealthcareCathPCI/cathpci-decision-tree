@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
 *Last Updated: 2025-12-03*
-*Version: 2.9*
+*Version: 3.0*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1601 lines)
+├── index.html                    # Main application (1631 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1618 lines): Complete self-contained application
-  - Lines 10-475: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
-  - Lines 476-804: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 805-1618: JavaScript logic for state management, validation, error handling, and PCI determination
+- **index.html** (1631 lines): Complete self-contained application
+  - Lines 10-476: CSS styling with gradient backgrounds, responsive design, modal dialogs, and orange section headings
+  - Lines 478-816: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 817-1631: JavaScript logic for state management, validation, error handling, and PCI determination
 
 ---
 
@@ -69,6 +69,7 @@ The application uses a unique interaction model where selections are made by cli
 - Selected state indicated by `selected` CSS class
 - Color changes and border styling provide visual feedback
 - No reliance on native input element `:checked` pseudo-class
+- Mutual exclusivity enforced via `data-indication-group` attribute (used in Angina section)
 
 **Benefits of This Approach:**
 - More flexible styling without fighting browser defaults
@@ -322,6 +323,12 @@ Examples from git history:
 <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" id="acs-24">
     ACS ≤ 24 hrs
 </div>
+
+<!-- Indication with mutual exclusivity group (e.g., Angina section) -->
+<div class="option" data-type="indication" data-indication="New Onset Angina <= 2 months"
+     data-indication-group="angina-indications" id="new-onset-angina">
+    New Onset Angina ≤ 2 months
+</div>
 ```
 
 **JavaScript:**
@@ -474,14 +481,51 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-03 (Current Version - v2.9)
+### 2025-12-03 (Current Version - v3.0)
+- **Comprehensive Update**: Documentation refresh reflecting PRs #44-47
+  - Updated line count from 1618 to 1631 (13-line increase) reflecting recent changes
+  - Corrected section boundaries: CSS (10-476), HTML (478-816), JavaScript (817-1631)
+  - Documented all recent functional and UX improvements from PRs #44-47
+
+- **Angina Section Mutual Exclusivity** (PR #44): Ensures only one angina indication can be selected at a time
+  - Added `data-indication-group="angina-indications"` attribute to all three Angina indication options:
+    - New Onset Angina ≤ 2 months
+    - Worsening Angina
+    - Stable Known CAD (from angina path)
+  - Modified `handleIndicationClick()` function to check for `data-indication-group` attribute
+  - When an indication with a group is selected, all other indications in the same group are automatically deselected
+  - Previous behavior preserved for indications without `data-indication-group` attribute
+  - Prevents confusing scenario where multiple mutually exclusive angina types could be selected
+  - Net change: +21 insertions, -9 deletions (+12 lines)
+
+- **Bug Fix: Replaced .checked with classList** (PR #45): Fixed state management inconsistency
+  - Identified and fixed leftover code using `.checked = false` instead of `.classList.remove('selected')`
+  - Replaced all 13 occurrences in `handleRadioChange()` function
+  - Resolved bug where "No - New Onset Angina" and "Yes" (history) selections could both be active simultaneously
+  - Fixed sections: ACS, Angina, CAD history, and Cardiac arrest
+  - Ensures proper deselection when mutually exclusive options are selected
+  - UI state now updates correctly when switching between selections
+  - Net change: 13 replacements (no line count change)
+
+- **Arrow Animation Experiment** (PRs #46 and #47): User experience enhancement tested and reverted
+  - PR #46: Added elongating arrow animation to guide users to next incomplete section
+    - CSS animation extended green line 40px downward from completed arrows
+    - Gradient fade effect with 0.6s smooth animation and 0.3s delay after arrow rotation
+    - Net change: +27 insertions, -1 deletion (+26 lines)
+  - PR #47: Removed elongating arrow animation at user request
+    - Simplified visual presentation while maintaining green checkmark completion indicator
+    - Removed `.step-number.completed::after` CSS rule and `@keyframes elongate` animation
+    - Net change: -25 deletions
+  - Combined effect: Net +1 line from this experiment
+
+### 2025-12-03 (Previous Version - v2.9)
 - **Documentation Review and Verification**: Comprehensive review of CLAUDE.md for accuracy
-  - Verified all line counts against current index.html (1618 lines confirmed)
-  - Confirmed section boundaries: CSS (10-475), HTML (476-804), JavaScript (805-1618)
+  - Verified all line counts against index.html at that time (1618 lines)
+  - Confirmed section boundaries at that time: CSS (10-475), HTML (476-804), JavaScript (805-1618)
   - Validated all function references and architectural descriptions
-  - No code changes since v2.8 - application remains stable and production-ready
+  - No code changes in v2.9 - pure documentation update
   - Reviewed all documentation sections for completeness and accuracy
-  - Confirmed deployment pipeline, git workflow, and development guidelines are current
+  - Confirmed deployment pipeline, git workflow, and development guidelines were current
   - All testing scenarios, code conventions, and AI assistant guidelines validated
 
 ### 2025-11-26 (Previous Version - v2.8)
