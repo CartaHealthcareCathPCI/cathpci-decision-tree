@@ -539,7 +539,7 @@
                             Prior CABG<br>
                             History of Angina
                         </p>
-                        <div class="option" data-type="indication" data-indication="New Onset Angina <= 2 months" id="new-onset-angina">
+                        <div class="option" data-type="indication" data-indication="New Onset Angina <= 2 months" data-indication-group="angina-indications" id="new-onset-angina">
                             No - New Onset Angina
                             <a class="definition-link" onclick="showDefinition('New Onset Angina <= 2 months'); event.stopPropagation();">View Definition</a>
                         </div>
@@ -550,11 +550,11 @@
                             <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
                                 Has the patient's angina changed in frequency, pattern or severity over the past 2 months?
                             </p>
-                            <div class="option" data-type="indication" data-indication="Worsening Angina" id="worsening-angina">
+                            <div class="option" data-type="indication" data-indication="Worsening Angina" data-indication-group="angina-indications" id="worsening-angina">
                                 Yes - Worsening Angina
                                 <a class="definition-link" onclick="showDefinition('Worsening Angina'); event.stopPropagation();">View Definition</a>
                             </div>
-                            <div class="option" data-type="indication" data-indication="Stable Known CAD" id="stable-cad-angina">
+                            <div class="option" data-type="indication" data-indication="Stable Known CAD" data-indication-group="angina-indications" id="stable-cad-angina">
                                 No - Stable Known CAD
                                 <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
                             </div>
@@ -1510,6 +1510,7 @@
         function handleIndicationClick(element) {
             const indication = element.getAttribute('data-indication');
             const id = element.id;
+            const indicationGroup = element.getAttribute('data-indication-group');
 
             // If already selected, deselect (toggle behavior)
             if (element.classList.contains('selected')) {
@@ -1525,12 +1526,23 @@
                 return;
             }
 
-            // For indication type, only allow single selection (like radio)
-            // Find all indications in the same parent group
-            const parentGroup = element.parentElement;
-            parentGroup.querySelectorAll('[data-type="indication"]').forEach(opt => {
-                opt.classList.remove('selected');
-            });
+            // If this indication has a data-indication-group, deselect all other indications in the same group
+            if (indicationGroup) {
+                document.querySelectorAll(`[data-indication-group="${indicationGroup}"]`).forEach(opt => {
+                    if (opt.classList.contains('selected')) {
+                        const optIndication = opt.getAttribute('data-indication');
+                        opt.classList.remove('selected');
+                        removeIndication(optIndication);
+                    }
+                });
+            } else {
+                // For indication type without a group, only allow single selection within the same parent group (like radio)
+                // Find all indications in the same parent group
+                const parentGroup = element.parentElement;
+                parentGroup.querySelectorAll('[data-type="indication"]').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
 
             // Select this one
             element.classList.add('selected');
