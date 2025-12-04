@@ -568,7 +568,6 @@
                             <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
                         </div>
                         <div class="reminder" id="acs-24plus-reminder" style="display: none;">
-                            <strong>ℹ️</strong>
                             A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit
                             <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
                         </div>
@@ -656,7 +655,6 @@
                             No
                         </div>
                         <div class="reminder" id="cad-stable-no-reminder" style="display: none;">
-                            <strong>ℹ️</strong>
                             If the patient has a KNOWN history of CAD, but is UNSTABLE, do not select Stable Known CAD, move on to the next question
                         </div>
                     </div>
@@ -710,7 +708,6 @@
                         <a class="definition-link" onclick="showDefinition('Valvular Disease'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="valvular-reminder" style="display: none;">
-                        <strong>ℹ️</strong>
                         Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.
                         <a class="reference-link" onclick="showReference('Valvular Disease'); event.stopPropagation();">Reference</a>
                     </div>
@@ -725,7 +722,6 @@
                         <a class="definition-link" onclick="showDefinition('Cardiac arrhythmia'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="arrhythmia-reminder" style="display: none;">
-                        <strong>ℹ️</strong>
                         A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                         <a class="reference-link" onclick="showReference('Cardiac arrhythmia'); event.stopPropagation();">Reference</a>
                     </div>
@@ -735,7 +731,6 @@
                         <a class="definition-link" onclick="showDefinition('Cardiomyopathy'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="cardiomyopathy-reminder" style="display: none;">
-                        <strong>ℹ️</strong>
                         Cardiomyopathy must be explicitly stated as an indication by the physician.
                         <a class="reference-link" onclick="showReference('Cardiomyopathy'); event.stopPropagation();">Reference</a>
                     </div>
@@ -745,7 +740,6 @@
                         <a class="definition-link" onclick="showDefinition('LV Dysfunction'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="lv-dysfunction-reminder" style="display: none;">
-                        <strong>⚠️</strong>
                         This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.
                         <a class="reference-link" onclick="showReference('LV Dysfunction'); event.stopPropagation();">Reference</a>
                     </div>
@@ -755,7 +749,6 @@
                         <a class="definition-link" onclick="showDefinition('Syncope'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="syncope-reminder" style="display: none;">
-                        <strong>⚠️</strong>
                         A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
                         <a class="reference-link" onclick="showReference('Syncope'); event.stopPropagation();">Reference</a>
                     </div>
@@ -781,7 +774,6 @@
                         <a class="definition-link" onclick="showDefinition('Pre-operative Evaluation'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="pre-op-reminder" style="display: none;">
-                        <strong>⚠️</strong>
                         TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
                         <a class="reference-link" onclick="showReference('Pre-operative Evaluation'); event.stopPropagation();">Reference</a>
                     </div>
@@ -806,7 +798,6 @@
                         <a class="definition-link" onclick="showDefinition('Other'); event.stopPropagation();">View Definition</a>
                     </div>
                     <div class="reminder" id="other-reminder" style="display: none;">
-                        <strong>⚠️</strong>
                         Other should be used very rarely and ONLY when no other indications apply. If the only reason listed for Cath Lab Indication is "Abnormal Stress Test", this does NOT support coding Other. The abstractor should review the patient condition prompting the Stress Test for more information.
                         <a class="reference-link" onclick="showReference('Other'); event.stopPropagation();">Reference</a>
                     </div>
@@ -857,7 +848,6 @@
     <div id="error-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-header-icon">⚠️</span>
                 <div class="modal-header-title">Selection Conflict Detected</div>
             </div>
             <div class="modal-body" id="modal-error-list">
@@ -1198,7 +1188,7 @@
             // Build error list for modal
             let html = '';
             errors.forEach(error => {
-                html += `<div class="modal-error-item">⚠️ ${error}</div>`;
+                html += `<div class="modal-error-item">${error}</div>`;
             });
             modalErrorList.innerHTML = html;
 
