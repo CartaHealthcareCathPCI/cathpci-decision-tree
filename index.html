@@ -1608,8 +1608,17 @@
                 document.querySelectorAll(`[data-indication-group="${indicationGroup}"]`).forEach(opt => {
                     if (opt.classList.contains('selected')) {
                         const optIndication = opt.getAttribute('data-indication');
+                        const optId = opt.id;
                         opt.classList.remove('selected');
                         removeIndication(optIndication);
+
+                        // If deselecting Stable Known CAD from Angina section due to mutual exclusivity, re-enable CAD History section
+                        if (optIndication === 'Stable Known CAD' && optId === 'stable-cad-angina') {
+                            const cadHistorySection = document.getElementById('cad-history-section');
+                            if (cadHistorySection) {
+                                cadHistorySection.classList.remove('disabled');
+                            }
+                        }
                     }
                 });
             } else {
