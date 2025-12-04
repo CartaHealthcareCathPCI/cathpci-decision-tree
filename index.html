@@ -277,7 +277,17 @@
             padding: 25px;
             margin-top: 30px;
         }
-        
+
+        .summary-columns {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .summary-column {
+            flex: 1;
+        }
+
         .summary-title {
             font-size: 20px;
             font-weight: 600;
@@ -327,20 +337,43 @@
             border-radius: 3px;
         }
         
+        .pci-indication-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .pci-indication-title::before {
+            content: "✓";
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
         .pci-indication {
             background: #fff3e0;
             border: 2px solid #ff9800;
             padding: 15px;
             border-radius: 6px;
-            margin-top: 15px;
         }
-        
+
         .pci-indication-label {
             font-weight: 600;
             color: #e65100;
             margin-bottom: 8px;
         }
-        
+
         .pci-indication-value {
             font-size: 16px;
             color: #2c3e50;
@@ -489,6 +522,13 @@
             font-size: 15px;
             line-height: 1.6;
             color: #2c3e50;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .summary-columns {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -777,23 +817,33 @@
 
             <!-- Summary Section -->
             <div class="summary-section">
-                <div class="summary-title">Selected Indications Summary</div>
-                
-                <div class="summary-content">
-                    <div class="summary-label">Cath Lab Indications:</div>
-                    <ul class="indication-list" id="selected-indications">
-                        <li class="no-selection">No indications selected yet</li>
-                    </ul>
-                </div>
+                <div class="summary-columns">
+                    <!-- Left Column: Selected Indications -->
+                    <div class="summary-column">
+                        <div class="summary-title">Selected Indications Summary</div>
 
-                <div id="pci-indication-section" class="hidden">
-                    <!-- PCI sub-questions will appear here when needed -->
-                </div>
+                        <div class="summary-content">
+                            <div class="summary-label">Cath Lab Indications:</div>
+                            <ul class="indication-list" id="selected-indications">
+                                <li class="no-selection">No indications selected yet</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <div class="pci-indication">
-                    <div class="pci-indication-label">PCI Indication:</div>
-                    <div class="pci-indication-value" id="pci-indication">
-                        <span class="no-selection">Will be determined based on Cath Lab Indications</span>
+                    <!-- Right Column: PCI Indication -->
+                    <div class="summary-column">
+                        <div class="pci-indication-title">PCI Indication</div>
+
+                        <div id="pci-indication-section" class="hidden">
+                            <!-- PCI sub-questions will appear here when needed -->
+                        </div>
+
+                        <div class="pci-indication">
+                            <div class="pci-indication-label">PCI Indication:</div>
+                            <div class="pci-indication-value" id="pci-indication">
+                                <span class="no-selection">Will be determined based on Cath Lab Indications</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
