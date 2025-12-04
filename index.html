@@ -1597,6 +1597,14 @@
                 return;
             }
 
+            // Check if selecting Stable Known CAD from CAD History section when New Onset or Worsening Angina is selected
+            if (indication === 'Stable Known CAD' && id === 'stable-cad') {
+                if (selectedIndications.has('New Onset Angina <= 2 months') || selectedIndications.has('Worsening Angina')) {
+                    displayErrors(['Cannot select "Stable Known CAD" when "New Onset Angina" or "Worsening Angina" is already selected. Please go back to Step 2 and update your angina selections.']);
+                    return;
+                }
+            }
+
             // Check for duplicate Stable Known CAD selection
             if (indication === 'Stable Known CAD' && selectedIndications.has('Stable Known CAD')) {
                 displayErrors(['Stable Known CAD already selected, move to next question']);
