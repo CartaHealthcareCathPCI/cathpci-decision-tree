@@ -1575,8 +1575,59 @@
             element.classList.add('selected');
             selectIndication(indication, id);
 
+            // If selecting New Onset Angina from Angina section, clear nested history selections
+            if (indication === 'New Onset Angina <= 2 months' && id === 'new-onset-angina') {
+                // Deselect the "Yes" radio button in angina-history-type group
+                const anginaHistoryYes = document.getElementById('angina-history-yes');
+                if (anginaHistoryYes && anginaHistoryYes.classList.contains('selected')) {
+                    anginaHistoryYes.classList.remove('selected');
+                }
+
+                // Hide the angina-change-group
+                const anginaChangeGroup = document.getElementById('angina-change-group');
+                if (anginaChangeGroup) {
+                    anginaChangeGroup.style.display = 'none';
+                }
+
+                // Deselect any indications in the angina-change-group
+                const worseningAngina = document.getElementById('worsening-angina');
+                const stableCadAngina = document.getElementById('stable-cad-angina');
+
+                if (worseningAngina && worseningAngina.classList.contains('selected')) {
+                    worseningAngina.classList.remove('selected');
+                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
+                }
+                if (stableCadAngina && stableCadAngina.classList.contains('selected')) {
+                    stableCadAngina.classList.remove('selected');
+                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
+
+                    // Also re-enable CAD History section if it was disabled
+                    const cadHistorySection = document.getElementById('cad-history-section');
+                    if (cadHistorySection) {
+                        cadHistorySection.classList.remove('disabled');
+                    }
+                }
+            }
+
+            // If selecting Worsening Angina from angina-change-group, clear the parent New Onset Angina selection
+            if (indication === 'Worsening Angina' && id === 'worsening-angina') {
+                // Deselect New Onset Angina if it was selected
+                const newOnsetAngina = document.getElementById('new-onset-angina');
+                if (newOnsetAngina && newOnsetAngina.classList.contains('selected')) {
+                    newOnsetAngina.classList.remove('selected');
+                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
+                }
+            }
+
             // If selecting Stable Known CAD from Angina section, disable CAD History section
             if (indication === 'Stable Known CAD' && id === 'stable-cad-angina') {
+                // Deselect New Onset Angina if it was selected
+                const newOnsetAngina = document.getElementById('new-onset-angina');
+                if (newOnsetAngina && newOnsetAngina.classList.contains('selected')) {
+                    newOnsetAngina.classList.remove('selected');
+                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
+                }
+
                 const cadHistorySection = document.getElementById('cad-history-section');
                 if (cadHistorySection) {
                     cadHistorySection.classList.add('disabled');
