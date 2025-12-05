@@ -1170,6 +1170,11 @@
                 errors.push('Cannot select both "Suspected CAD" and "Stable Known CAD"');
             }
 
+            // Worsening Angina cannot be selected with Suspected CAD
+            if (indications.includes('Worsening Angina') && indications.includes('Suspected CAD')) {
+                errors.push('Cannot select both "Worsening Angina" and "Suspected CAD"');
+            }
+
             displayErrors(errors);
             return errors.length === 0;
         }
