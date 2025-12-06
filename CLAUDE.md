@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-12-03*
-*Version: 3.1*
+*Last Updated: 2025-12-06*
+*Version: 3.2*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1693 lines): Complete self-contained application
-  - Lines 10-493: CSS styling with gradient backgrounds, responsive design, modal dialogs, orange section headings, and reminder alerts
-  - Lines 495-833: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 834-1693: JavaScript logic for state management, validation, error handling, PCI determination, and section gray-out functionality
+- **index.html** (1807 lines): Complete self-contained application
+  - Lines 10-534: CSS styling with gradient backgrounds, responsive design, modal dialogs, side-by-side summary layout, light blue selection boxes, and clean icon-free reminder alerts
+  - Lines 536-874: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 875-1807: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
 
 ---
 
@@ -49,8 +49,8 @@ cathpci-decision-tree/
 
 - **Frontend**: Pure HTML5, CSS3, Vanilla JavaScript (ES6+)
 - **Fonts**: Manrope from Google Fonts
-- **Styling**: CSS Grid, Flexbox, Gradient backgrounds, Orange accent color (#FF6720)
-- **Visual Design**: Orange section headings for each decision tree step, left border accents
+- **Styling**: CSS Grid, Flexbox, Gradient backgrounds, Light blue selection boxes (#C6DAE7)
+- **Visual Design**: Orange section headings (#FF6720), side-by-side summary layout with responsive mobile stacking, clean icon-free reminders with light yellow background (#FFF8E6)
 - **Interaction Model**: Clickable div elements with data attributes (no traditional form inputs)
 - **State Management**: JavaScript Set for selections, Object for sub-answers, CSS classes for visual state
 - **Deployment**: GitHub Pages with GitHub Actions CI/CD
@@ -152,12 +152,14 @@ When multiple indications are selected, the PCI indication is determined by the 
 The application enforces clinical validation rules to prevent incompatible selections:
 
 ```javascript
-// Example incompatibility: ACS ≤24hrs cannot coexist with ACS >24hrs
+// Example incompatibility rules enforced by the application
 const validationRules = {
   'ACS ≤ 24 hrs': ['ACS > 24 hrs'],
   'ACS > 24 hrs': ['ACS ≤ 24 hrs'],
-  'Suspected CAD': ['Stable Known CAD'],
-  'Stable Known CAD': ['Suspected CAD']
+  'Suspected CAD': ['Stable Known CAD', 'Worsening Angina'],
+  'Stable Known CAD': ['Suspected CAD', 'New Onset Angina ≤ 2 months', 'Worsening Angina'],
+  'Worsening Angina': ['Stable Known CAD', 'Suspected CAD'],
+  'New Onset Angina ≤ 2 months': ['Stable Known CAD']
 };
 ```
 
@@ -366,7 +368,7 @@ const isSelected = element.classList.contains('selected');
 
 **CSS:**
 ```css
-/* Use the established orange accent color for highlights and section headings */
+/* Use the established orange accent color for section headings */
 .section-heading {
     background: #FF6720;  /* Orange brand color */
     color: white;
@@ -378,10 +380,21 @@ const isSelected = element.classList.contains('selected');
     border-left: 4px solid #FF6720;
 }
 
-/* Style selected state with CSS class */
+/* Style selected state with light blue selection boxes */
 .option.selected {
-    border-color: #FF6720;
-    background-color: rgba(255, 103, 32, 0.1);
+    border-color: #C6DAE7;  /* Light blue selection color */
+    background-color: #C6DAE7;
+}
+
+/* Clean reminder styling with light yellow background */
+.reminder {
+    background-color: #FFF8E6;  /* Light yellow background */
+    border: 1px solid #ff9800;  /* Orange border */
+    padding: 12px 15px;
+    margin-top: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
 }
 ```
 
@@ -481,7 +494,90 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-03 (Current Version - v3.1)
+### 2025-12-06 (Current Version - v3.2)
+- **Comprehensive Update**: Documentation refresh reflecting PRs #55-65
+  - Updated line count from 1693 to 1807 (114-line increase) reflecting recent changes
+  - Corrected section boundaries: CSS (10-534), HTML (536-874), JavaScript (875-1807)
+  - Documented all recent functional and UX improvements from PRs #55-65
+  - Net change since v3.1: +149 insertions, -35 deletions
+
+- **Fix Angina Section Nested Selections Mutual Exclusivity** (PR #55): Enhanced angina selection logic
+  - When "No - New Onset Angina" is selected:
+    - Deselects "Yes" radio button from angina-history-type group
+    - Hides the angina-change-group
+    - Clears any selections in angina-change-group (Worsening Angina/Stable Known CAD)
+    - Re-enables CAD History section if it was disabled
+  - When "Yes - Worsening Angina" is selected:
+    - Deselects New Onset Angina if previously selected
+  - When "No - Stable Known CAD" from angina-change-group is selected:
+    - Deselects New Onset Angina if previously selected
+  - Prevents confusing UI states where both parent and nested child selections appear simultaneously
+  - Ensures proper mutual exclusivity across all angina indications
+  - Net change: +51 insertions
+
+- **Reorganize Summary Section with Side-by-Side Layout** (PR #56): Major UX improvement to summary display
+  - Implemented side-by-side layout for "Selected Indications Summary" and "PCI Indication" sections
+  - Made PCI Indication title same font size (20px) as Selected Indications Summary for visual balance
+  - Added matching checkmark icons (✓) to both section titles for consistency
+  - Implemented responsive design using CSS Grid:
+    - Two-column layout on desktop (60% / 40% split)
+    - Stacks vertically on mobile screens (max-width: 768px)
+  - Preserved all existing colors, fonts, and styling
+  - Improved visual organization and scanability of results
+  - Net change: +69 insertions, -19 deletions (+50 lines)
+
+- **Update Selection Box Color** (PR #57): Visual design update
+  - Changed selected option background color from orange (#FF6720) to light blue (#C6DAE7)
+  - Provides softer, more professional appearance for selected states
+  - Improved visual contrast and readability
+  - Net change: +1 insertion, -1 deletion (no line count change)
+
+- **Fix CAD History Section Re-enabling** (PR #58): Bug fix for section state management
+  - Fixed bug where CAD History section wouldn't properly re-enable when switching from Stable Known CAD
+  - Ensured re-enable logic only runs in direct deselection path, not in mutual exclusivity deselection path
+  - Improved state management consistency
+  - Net change: +9 insertions
+
+- **Add Validation for Stable Known CAD with New Onset/Worsening Angina** (PR #59): Clinical validation enhancement
+  - Prevents users from selecting "Stable Known CAD" in CAD History section (Step 3) when they have already selected "New Onset Angina" or "Worsening Angina" in Angina section (Step 2)
+  - When conflict detected, error modal displays: "You cannot select 'Stable Known CAD' in the CAD History section when 'New Onset Angina ≤ 2 months' or 'Worsening Angina' is selected. Please go back to Step 2 and update your angina selections."
+  - Ensures clinical accuracy by preventing selection of stable CAD status when patient has new onset or worsening anginal symptoms
+  - Net change: +8 insertions
+
+- **Reminder Styling Updates** (PRs #60-64): Series of iterative design refinements
+  - PR #60: Updated reminder alert styling with new color scheme
+  - PR #61: Updated reminder styling with golden yellow background and dark blue text
+  - PR #62: Removed all icons from reminder sections and error modal (see details below)
+  - PR #63: Updated reminder styling with white background and golden border
+  - PR #64: Final update to reminder background - light yellow (#FFF8E6)
+  - Result: Clean, modern reminder alerts with light yellow background, orange border, and improved readability
+  - Net change across all PRs: Various styling refinements
+
+- **Remove All Icons from Reminder Sections and Error Modal** (PR #62): Design simplification
+  - Removed informational icons (ℹ️) from 5 reminder sections:
+    - ACS > 24 hrs reminder
+    - CAD stable no reminder
+    - Valvular reminder
+    - Arrhythmia reminder
+    - Cardiomyopathy reminder
+  - Removed warning icons (⚠️) from 4 reminder sections:
+    - LV Dysfunction reminder
+    - Syncope reminder
+    - Pre-operative Evaluation reminder
+    - Other reminder
+  - Removed warning icon (⚠️) from error modal header
+  - Removed warning icons (⚠️) from individual error items in JavaScript
+  - Clean, minimal design without emoji icons improves professional appearance
+  - Net change: +1 insertion, -12 deletions (-11 lines)
+
+- **Add Validation to Prevent Worsening Angina and Suspected CAD Conflict** (PR #65): Additional clinical validation
+  - Added validation rule preventing simultaneous selection of "Worsening Angina" and "Suspected CAD"
+  - Error modal displays when user attempts incompatible selections
+  - Follows existing validation pattern used for other incompatible indications
+  - Ensures clinical accuracy by preventing contradictory indication combinations
+  - Net change: +5 insertions
+
+### 2025-12-03 (Previous Version - v3.1)
 - **Comprehensive Update**: Documentation refresh reflecting PRs #49-53
   - Updated line count from 1631 to 1693 (62-line increase) reflecting recent changes
   - Corrected section boundaries: CSS (10-493), HTML (495-833), JavaScript (834-1693)
