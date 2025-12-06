@@ -559,6 +559,7 @@
                     </div>
                     <div class="sub-option-group" id="acs-timing-group" style="display: none;">
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Use the ACS <strong>diagnosis date/time</strong> to determine the correct selection. The definition is based on when the patient has ACS (unstable angina, NSTEMI, or STEMI), so the time from diagnosis to Cath Lab presentation should guide your choice.</p>
+                        <a class="reference-link" onclick="showReference('ACS Timing'); event.stopPropagation();" style="display: block; margin-bottom: 10px;">Reference</a>
                         <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" data-indication-group="acs-indications" id="acs-24">
                             ACS ≤ 24 hrs
                             <a class="definition-link" onclick="showDefinition('ACS <= 24 hrs'); event.stopPropagation();">View Definition</a>
@@ -1231,7 +1232,8 @@
         };
 
         const references = {
-            'ACS > 24 hrs': 'NCDR CathPCI Registry® Additional Coding Directive #25073: ncdr.com',
+            'ACS Timing': 'NCDR CathPCI Registry® Additional Coding Directive #24910: <a href="https://www.ncdr.com" target="_blank" style="color: #0066cc; text-decoration: underline;">ncdr.com</a>',
+            'ACS > 24 hrs': 'NCDR CathPCI Registry® Additional Coding Directive #25073: <a href="https://www.ncdr.com" target="_blank" style="color: #0066cc; text-decoration: underline;">ncdr.com</a>',
             'Valvular Disease': 'Include ALL stenosis and regurgitation noted on the most recent echo (within 6 months), not just the vessel prompting the cath lab visit.',
             'Cardiac arrhythmia': 'A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.',
             'Cardiomyopathy': 'Cardiomyopathy must be explicitly stated as an indication by the physician.',
@@ -1247,7 +1249,7 @@
             const modalBody = document.getElementById('info-modal-body');
 
             modalTitle.textContent = title;
-            modalBody.textContent = content;
+            modalBody.innerHTML = content;
             modal.classList.add('show');
         }
 
