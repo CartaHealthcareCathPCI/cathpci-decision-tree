@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-12-06*
-*Version: 3.2*
+*Last Updated: 2025-12-09*
+*Version: 3.3*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1693 lines)
+├── index.html                    # Main application (1810 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1807 lines): Complete self-contained application
+- **index.html** (1810 lines): Complete self-contained application
   - Lines 10-534: CSS styling with gradient backgrounds, responsive design, modal dialogs, side-by-side summary layout, light blue selection boxes, and clean icon-free reminder alerts
-  - Lines 536-874: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 875-1807: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
+  - Lines 536-876: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 877-1810: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
 
 ---
 
@@ -494,7 +494,58 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-06 (Current Version - v3.2)
+### 2025-12-09 (Current Version - v3.3)
+- **Documentation Update**: Updated CLAUDE.md to version 3.3 reflecting PRs #67-74
+  - Updated line count from 1807 to 1810 (3-line increase) reflecting recent text clarifications
+  - Section boundaries remain unchanged: CSS (10-534), HTML (536-876), JavaScript (877-1810)
+  - Documented text improvements and clarifications from PRs #67-74
+  - Net change since v3.2: +12 insertions, -9 deletions
+
+- **Add Reference Link to ACS Diagnosis Timing** (PR #67): Enhanced clinical guidance with reference links
+  - Added clickable Reference link below ACS diagnosis date/time guidance text in Step 1
+  - Created new reference entry for "ACS Timing" with NCDR directive #24910
+  - Made ncdr.com a clickable link in both ACS Timing and ACS > 24 hrs references
+  - Updated `showInfoModal()` to use innerHTML instead of textContent to render HTML links
+  - ncdr.com links open in new tab with target="_blank" for user convenience
+  - Net change: +4 insertions, -2 deletions
+
+- **Update Angina Section Wording** (PRs #68, #69): Improved clarity in Angina section (Step 2)
+  - PR #68: Simplified main question wording
+    - Changed to specify 'more than 2 months prior to this Cath Lab visit' for clearer timeframe
+    - Removed 'History of Angina' from follow-up question criteria list
+    - Follow-up question now lists only Prior MI, Prior PCI, and Prior CABG
+    - Net change: +2 insertions, -3 deletions
+  - PR #69: Further text refinement
+    - Simplified main question to 'prior to this Cath Lab visit'
+    - Added fourth criterion: 'History of angina with onset >2 months prior to Cath Lab visit'
+    - Net change: +3 insertions, -2 deletions
+
+- **Italicize Stability Definition** (PR #70): Visual emphasis in CAD History section
+  - Changed 'Stability is defined as' text to italic formatting in CAD History section (Step 3)
+  - Improves visual hierarchy and readability of stability criteria
+  - Net change: +1 insertion, -1 deletion (no line count change)
+
+- **Update Non-Ischemic/Structural Heart Disease Section** (PR #71): Clarified scope of selections
+  - Changed instruction text from 'Select all that apply:' to 'Select any/all that apply to THIS Cath Lab visit:'
+  - Emphasizes that selections should be specific to current visit
+  - Updated Valvular Disease reminder text with clearer selection criteria
+  - Net change: +4 insertions, -2 deletions
+
+- **Update Valvular Disease Reminder** (PRs #72, #73, #74): Series of refinements to Valvular Disease guidance
+  - PR #72: Enhanced Valvular Disease reminder text with clearer selection criteria
+    - Improved wording to clarify when to select this indication
+    - Net change: +3 insertions, -1 deletion
+  - PR #73: Updated reference link presentation
+    - Changed reference link text from "Reference" to "Abstraction Tip"
+    - Updated abstraction tip content to emphasize including all cardiac valves
+    - New wording clarifies 6-month timeframe and physician diagnosis requirement
+    - Net change: +2 insertions, -2 deletions (no line count change)
+  - PR #74: Final formatting cleanup
+    - Removed 'Abstraction Tip' reference link from Valvular Disease reminder
+    - Replaced bullet points (•) with dashes (-) for consistency with other reminders
+    - Net change: +2 insertions, -3 deletions
+
+### 2025-12-06 (Previous Version - v3.2)
 - **Comprehensive Update**: Documentation refresh reflecting PRs #55-65
   - Updated line count from 1693 to 1807 (114-line increase) reflecting recent changes
   - Corrected section boundaries: CSS (10-534), HTML (536-874), JavaScript (875-1807)
