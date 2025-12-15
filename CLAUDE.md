@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-12-09*
-*Version: 3.3*
+*Last Updated: 2025-12-15*
+*Version: 3.4*
 
 ## Project Overview
 
@@ -36,10 +36,10 @@ cathpci-decision-tree/
 
 ### Key Files
 
-- **index.html** (1810 lines): Complete self-contained application
+- **index.html** (1805 lines): Complete self-contained application
   - Lines 10-534: CSS styling with gradient backgrounds, responsive design, modal dialogs, side-by-side summary layout, light blue selection boxes, and clean icon-free reminder alerts
   - Lines 536-876: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 877-1810: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
+  - Lines 877-1805: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
 
 ---
 
@@ -494,7 +494,32 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-09 (Current Version - v3.3)
+### 2025-12-15 (Current Version - v3.4)
+- **Documentation Update**: Updated CLAUDE.md to version 3.4 reflecting PRs #76-77
+  - Updated line count from 1810 to 1805 (5-line decrease) reflecting reference link removals
+  - Section boundaries remain unchanged: CSS (10-534), HTML (536-876), JavaScript (877-1805)
+  - Documented reference link cleanup and Pre-operative Evaluation reference update from PRs #76-77
+  - Net change since v3.3: +1 insertion, -6 deletions (-5 lines)
+
+- **Remove Reference Links from 5 Reminder Boxes** (PR #76): Streamlined reminder presentation
+  - Removed Reference link from Cardiac Arrhythmia reminder
+  - Removed Reference link from Cardiomyopathy reminder
+  - Removed Reference link from LV Dysfunction reminder
+  - Removed Reference link from Syncope reminder
+  - Removed Reference link from Other reminder
+  - These reminders now display only guidance text without reference links
+  - Simplifies interface by reducing clickable elements in reminder boxes
+  - Net change: -5 lines
+
+- **Update Pre-operative Evaluation Reference** (PR #77): Enhanced clinical guidance reference
+  - Updated Pre-operative Evaluation reference in JavaScript references object
+  - Changed from TAVR-specific guidance to NCDR directive reference
+  - New reference: "NCDR CathPCI Registry® Additional Coding Directive #24892: ncdr.com"
+  - Made ncdr.com a clickable link that opens in new tab
+  - Provides direct access to official NCDR coding directive
+  - Net change: +1 insertion, -1 deletion (no line count change)
+
+### 2025-12-09 (Previous Version - v3.3)
 - **Documentation Update**: Updated CLAUDE.md to version 3.3 reflecting PRs #67-74
   - Updated line count from 1807 to 1810 (3-line increase) reflecting recent text clarifications
   - Section boundaries remain unchanged: CSS (10-534), HTML (536-876), JavaScript (877-1810)
