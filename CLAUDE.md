@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2025-12-15*
-*Version: 3.4*
+*Last Updated: 2026-01-30*
+*Version: 3.5*
 
 ## Project Overview
 
@@ -28,7 +28,7 @@ cathpci-decision-tree/
 ├── .github/
 │   └── workflows/
 │       └── deploy-pages.yml      # GitHub Actions workflow for deployment
-├── index.html                    # Main application (1810 lines)
+├── index.html                    # Main application (1805 lines)
 ├── README.md                     # Project overview and usage documentation
 ├── claude.md                     # Legacy AI integration guide (deprecated)
 └── CLAUDE.md                     # This file - comprehensive AI assistant guide
@@ -38,8 +38,8 @@ cathpci-decision-tree/
 
 - **index.html** (1805 lines): Complete self-contained application
   - Lines 10-534: CSS styling with gradient backgrounds, responsive design, modal dialogs, side-by-side summary layout, light blue selection boxes, and clean icon-free reminder alerts
-  - Lines 536-876: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
-  - Lines 877-1805: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
+  - Lines 536-870: HTML structure for 7-step decision tree interface with clickable div elements (no input elements)
+  - Lines 872-1805: JavaScript logic for state management, validation, error handling, PCI determination, section gray-out functionality, and enhanced angina mutual exclusivity
 
 ---
 
@@ -494,10 +494,18 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2025-12-15 (Current Version - v3.4)
+### 2026-01-30 (Current Version - v3.5)
+- **Documentation Review and Accuracy Update**: Comprehensive review of CLAUDE.md for accuracy
+  - Fixed repository structure tree line count from 1810 to 1805 (matching actual file size)
+  - Corrected HTML section boundary from 536-876 to 536-870 (HTML body content ends at line 870)
+  - Corrected JavaScript section boundary from 877-1805 to 872-1805 (script tag starts at line 872)
+  - No code changes - documentation-only update
+  - Verified all other documentation sections remain accurate and current
+
+### 2025-12-15 (Previous Version - v3.4)
 - **Documentation Update**: Updated CLAUDE.md to version 3.4 reflecting PRs #76-77
   - Updated line count from 1810 to 1805 (5-line decrease) reflecting reference link removals
-  - Section boundaries remain unchanged: CSS (10-534), HTML (536-876), JavaScript (877-1805)
+  - Section boundaries documented as: CSS (10-534), HTML (536-876), JavaScript (877-1805)
   - Documented reference link cleanup and Pre-operative Evaluation reference update from PRs #76-77
   - Net change since v3.3: +1 insertion, -6 deletions (-5 lines)
 
