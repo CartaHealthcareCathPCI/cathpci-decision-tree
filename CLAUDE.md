@@ -1,7 +1,7 @@
 # CathPCI Decision Tree - Claude Integration Guide
 
-*Last Updated: 2026-01-30*
-*Version: 3.5*
+*Last Updated: 2026-03-05*
+*Version: 3.6*
 
 ## Project Overview
 
@@ -494,7 +494,17 @@ Expected: All selections cleared, form returns to initial state
 
 ## Recent Changes History
 
-### 2026-01-30 (Current Version - v3.5)
+### 2026-03-05 (Current Version - v3.6)
+- **Documentation Review and Accuracy Update**: Comprehensive review of CLAUDE.md for accuracy
+  - Verified all section boundaries and line counts remain accurate at 1805 lines:
+    - CSS styling: Lines 10-534
+    - HTML structure: Lines 536-870 (body starts at 536, info modal closes at 870)
+    - JavaScript logic: Lines 872-1804 (`<script>` tag starts at 872, `</script>` at 1804, `</body>` at 1805)
+  - Confirmed repository structure is unchanged: `.github/workflows/deploy-pages.yml`, `index.html`, `README.md`, `claude.md` (legacy), and `CLAUDE.md`
+  - Verified all function references, UI interaction architecture, and clinical logic documentation remain accurate
+  - No code changes - documentation-only update; bumped version from 3.5 to 3.6
+
+### 2026-01-30 (Previous Version - v3.5)
 - **Documentation Review and Accuracy Update**: Comprehensive review of CLAUDE.md for accuracy
   - Fixed repository structure tree line count from 1810 to 1805 (matching actual file size)
   - Corrected HTML section boundary from 536-876 to 536-870 (HTML body content ends at line 870)
