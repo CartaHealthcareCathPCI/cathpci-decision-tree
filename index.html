@@ -525,9 +525,145 @@
             color: #2c3e50;
         }
 
+        /* Pre-screening section styles */
+        .prescreening-section {
+            background: #f0f5f9;
+            border-left: 4px solid #013349;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .prescreening-heading {
+            background: #013349;
+            color: white;
+            padding: 10px 20px;
+            margin: -25px -25px 20px -25px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .prescreening-question {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .visit-count-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .visit-count-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 64px;
+            text-align: center;
+            user-select: none;
+            font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .visit-count-btn:hover {
+            border-color: #013349;
+            background: #e4eef5;
+        }
+
+        .visit-count-btn.selected {
+            border-color: #013349;
+            background: #C6DAE7;
+            font-weight: 700;
+        }
+
+        .visit-types-container {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #c8d8e4;
+        }
+
+        .visit-type-row {
+            margin-bottom: 18px;
+        }
+
+        .visit-type-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .visit-type-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .visit-type-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-size: 14px;
+            font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .visit-type-option:hover {
+            border-color: #013349;
+            background: #e4eef5;
+        }
+
+        .visit-type-option.selected {
+            border-color: #013349;
+            background: #C6DAE7;
+            font-weight: 600;
+        }
+
+        .prescreening-summary-block {
+            background: white;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #013349;
+        }
+
+        .prescreening-summary-label {
+            font-weight: 600;
+            color: #013349;
+            margin-bottom: 8px;
+        }
+
+        .prescreening-summary-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .prescreening-summary-list li {
+            padding: 6px 10px;
+            background: #f0f5f9;
+            border-left: 3px solid #013349;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
             .summary-columns {
+                flex-direction: column;
+            }
+            .visit-type-options {
                 flex-direction: column;
             }
         }
@@ -541,6 +677,21 @@
         </div>
         
         <div class="content">
+
+            <!-- Pre-screening Questions -->
+            <div class="prescreening-section">
+                <div class="prescreening-heading">Encounter Information</div>
+                <div class="prescreening-question">How many Cath Lab visits occurred during this encounter?</div>
+                <div class="visit-count-buttons">
+                    <div class="visit-count-btn" id="visit-count-1" onclick="selectVisitCount(1)">1</div>
+                    <div class="visit-count-btn" id="visit-count-2" onclick="selectVisitCount(2)">2</div>
+                    <div class="visit-count-btn" id="visit-count-3" onclick="selectVisitCount(3)">3+</div>
+                </div>
+                <div class="visit-types-container" id="visit-types-container" style="display: none;">
+                    <!-- Visit type rows will be dynamically inserted here -->
+                </div>
+            </div>
+
             <h2 style="font-size: 24px; color: #2c3e50; margin-bottom: 25px; text-align: center; font-weight: 600;">Indicate the patient symptoms or condition prompting THIS Cath Lab visit</h2>
             
             <!-- Question 1: ACS -->
@@ -806,6 +957,13 @@
 
             <!-- Summary Section -->
             <div class="summary-section">
+                <!-- Pre-screening summary (shown when visit info is selected) -->
+                <div id="prescreening-summary" style="display: none; margin-bottom: 18px;">
+                    <div class="prescreening-summary-block">
+                        <div class="prescreening-summary-label">Encounter Information:</div>
+                        <ul class="prescreening-summary-list" id="prescreening-summary-list"></ul>
+                    </div>
+                </div>
                 <div class="summary-columns">
                     <!-- Left Column: Selected Indications -->
                     <div class="summary-column">
@@ -873,6 +1031,101 @@
         // Store selected indications
         let selectedIndications = new Set();
         let pciSubAnswers = {};
+
+        // Pre-screening state
+        let visitCount = null;
+        let visitTypes = {};
+
+        // Case type labels for visit type selection
+        const caseTypeLabels = {
+            'diagnostic': 'Diagnostic Only',
+            'pci': 'PCI',
+            'attempted': 'Attempted or Aborted PCI'
+        };
+
+        function selectVisitCount(count) {
+            visitCount = count;
+            visitTypes = {};
+
+            // Update button visual state
+            document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(`visit-count-${count}`).classList.add('selected');
+
+            // Build visit type rows
+            const container = document.getElementById('visit-types-container');
+            container.innerHTML = '';
+
+            const visitLabels = count === 1
+                ? ['Visit 1']
+                : count === 2
+                ? ['Visit 1', 'Visit 2']
+                : ['Visit 1', 'Visit 2', 'Visit 3 (and beyond)'];
+
+            visitLabels.forEach((label, index) => {
+                const visitNum = index + 1;
+                const row = document.createElement('div');
+                row.className = 'visit-type-row';
+                row.innerHTML = `
+                    <div class="visit-type-label">${label} — What type of case was this?</div>
+                    <div class="visit-type-options">
+                        <div class="visit-type-option" id="visit-${visitNum}-diagnostic"
+                             onclick="selectVisitType(${visitNum}, 'diagnostic')">
+                            Diagnostic Only
+                        </div>
+                        <div class="visit-type-option" id="visit-${visitNum}-pci"
+                             onclick="selectVisitType(${visitNum}, 'pci')">
+                            PCI
+                        </div>
+                        <div class="visit-type-option" id="visit-${visitNum}-attempted"
+                             onclick="selectVisitType(${visitNum}, 'attempted')">
+                            Attempted or Aborted PCI
+                        </div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            container.style.display = 'block';
+            updatePrescreeningSummary();
+        }
+
+        function selectVisitType(visitNum, typeKey) {
+            visitTypes[visitNum] = typeKey;
+
+            // Update visual selection for this visit's options
+            ['diagnostic', 'pci', 'attempted'].forEach(key => {
+                const el = document.getElementById(`visit-${visitNum}-${key}`);
+                if (el) el.classList.remove('selected');
+            });
+            const selected = document.getElementById(`visit-${visitNum}-${typeKey}`);
+            if (selected) selected.classList.add('selected');
+
+            updatePrescreeningSummary();
+        }
+
+        function updatePrescreeningSummary() {
+            const summaryBlock = document.getElementById('prescreening-summary');
+            const summaryList = document.getElementById('prescreening-summary-list');
+
+            if (!visitCount) {
+                summaryBlock.style.display = 'none';
+                return;
+            }
+
+            const countLabel = visitCount === 3 ? '3+' : String(visitCount);
+            let items = `<li>Cath Lab visits this encounter: <strong>${countLabel}</strong></li>`;
+
+            const numRows = visitCount === 3 ? 3 : visitCount;
+            for (let i = 1; i <= numRows; i++) {
+                const typeKey = visitTypes[i];
+                const typeLabel = typeKey ? caseTypeLabels[typeKey] : '<em>Not yet selected</em>';
+                const visitLabel = (visitCount === 3 && i === 3) ? 'Visit 3 (and beyond)' : `Visit ${i}`;
+                items += `<li>${visitLabel}: <strong>${typeLabel}</strong></li>`;
+            }
+
+            summaryList.innerHTML = items;
+            summaryBlock.style.display = 'block';
+        }
 
         // Indication priority order (highest to lowest)
         const priorityOrder = [
@@ -1438,6 +1691,16 @@
             // Clear all selections
             selectedIndications.clear();
             pciSubAnswers = {};
+
+            // Reset pre-screening
+            visitCount = null;
+            visitTypes = {};
+            document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
+            const visitTypesContainer = document.getElementById('visit-types-container');
+            visitTypesContainer.style.display = 'none';
+            visitTypesContainer.innerHTML = '';
+            document.getElementById('prescreening-summary').style.display = 'none';
+            document.getElementById('prescreening-summary-list').innerHTML = '';
 
             // Remove 'selected' class from all options
             document.querySelectorAll('.option').forEach(option => {
