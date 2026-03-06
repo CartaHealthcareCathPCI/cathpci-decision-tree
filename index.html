@@ -978,7 +978,7 @@
                     </div>
 
                     <!-- Right Column: PCI Indication -->
-                    <div class="summary-column">
+                    <div class="summary-column" id="pci-column">
                         <div class="pci-indication-title">PCI Indication</div>
 
                         <div id="pci-indication-section" class="hidden">
@@ -1087,6 +1087,7 @@
 
             container.style.display = 'block';
             updatePrescreeningSummary();
+            updatePCIIndicationVisibility();
         }
 
         function selectVisitType(visitNum, typeKey) {
@@ -1101,6 +1102,19 @@
             if (selected) selected.classList.add('selected');
 
             updatePrescreeningSummary();
+            updatePCIIndicationVisibility();
+        }
+
+        function updatePCIIndicationVisibility() {
+            const pciColumn = document.getElementById('pci-column');
+            if (!pciColumn) return;
+
+            // Hide PCI Indication column only when there is exactly 1 visit and it is Diagnostic Only
+            if (visitCount === 1 && visitTypes[1] === 'diagnostic') {
+                pciColumn.style.display = 'none';
+            } else {
+                pciColumn.style.display = '';
+            }
         }
 
         function updatePrescreeningSummary() {
@@ -1735,6 +1749,7 @@
 
             // Reset summary
             updateSummary();
+            updatePCIIndicationVisibility();
         }
 
         // Function to attach click event listeners to all option boxes
