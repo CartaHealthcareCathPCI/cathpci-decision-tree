@@ -923,8 +923,8 @@
                 <div id="staging-question-container" style="display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid #c8d8e4;">
                     <div class="visit-type-label">Is Visit 2 a Staged procedure?</div>
                     <div class="visit-type-options">
-                        <div class="visit-type-option" id="staging-initial" onclick="selectStagedProcedure('initial')">Initial</div>
-                        <div class="visit-type-option" id="staging-staged" onclick="selectStagedProcedure('staged')">Staged<span class="hover-tooltip">A planned PCI of another vessel not treated during the initial PCI, occurring within 90 days of the first PCI</span></div>
+                        <div class="visit-type-option" id="staging-initial" onclick="selectStagedProcedure('initial')">No</div>
+                        <div class="visit-type-option" id="staging-staged" onclick="selectStagedProcedure('staged')">Yes<span class="hover-tooltip">A planned PCI of another vessel not treated during the initial PCI, occurring within 90 days of the first PCI</span></div>
                     </div>
                 </div>
             </div>
@@ -1570,7 +1570,7 @@
             const isVisible = container && container.style.display !== 'none';
 
             if (isVisible && stagedProcedure) {
-                const label = stagedProcedure === 'initial' ? 'Initial' : 'Staged';
+                const label = stagedProcedure === 'initial' ? 'No' : 'Yes';
                 if (stagingValue) stagingValue.textContent = label;
                 if (stagingRow) stagingRow.style.display = 'block';
             } else {
