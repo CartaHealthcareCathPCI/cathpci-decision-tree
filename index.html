@@ -347,15 +347,35 @@
         
         .indication-list {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0;
         }
-        
+
         .indication-list li {
-            padding: 8px 12px;
+            padding: 7px 14px;
+            background: #f0f5f8;
+            border: 1px solid #C6DAE7;
+            border-left: 4px solid #FF6720;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .indication-list li.no-selection {
+            border-left: 1px solid #C6DAE7;
+            border-radius: 6px;
             background: #f8f9fa;
-            border-left: 3px solid #FF6720;
-            margin-bottom: 5px;
-            border-radius: 3px;
+            color: #999;
+            font-style: italic;
+            font-weight: 400;
+            white-space: normal;
         }
         
         .pci-indication-title {
@@ -717,6 +737,15 @@
             .visit-type-options {
                 flex-direction: column;
             }
+            .combined-visit-body {
+                flex-direction: column;
+            }
+            .combined-pci-column {
+                min-width: 0;
+            }
+            .indication-list li {
+                white-space: normal;
+            }
         }
 
         /* Combined summary section */
@@ -785,6 +814,19 @@
 
         .combined-visit-body {
             padding: 18px;
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .combined-cath-column {
+            flex: 1.6;
+            min-width: 0;
+        }
+
+        .combined-pci-column {
+            flex: 1;
+            min-width: 180px;
         }
 
         .combined-section-label {
@@ -796,7 +838,7 @@
 
         .combined-section-label.pci-label {
             color: #e65100;
-            margin-top: 16px;
+            margin-top: 0;
         }
 
         .combined-pci-value {
@@ -1126,11 +1168,13 @@
             <div class="combined-visit-block" id="combined-block-1" data-visit="1">
                 <div class="combined-visit-header" id="combined-header-1" style="display: none;"></div>
                 <div class="combined-visit-body">
-                    <div class="combined-section-label">Cath Lab Indication(s):</div>
-                    <ul class="indication-list" id="selected-indications">
-                        <li class="no-selection">No indications selected yet</li>
-                    </ul>
-                    <div id="pci-column">
+                    <div class="combined-cath-column">
+                        <div class="combined-section-label">Cath Lab Indication(s):</div>
+                        <ul class="indication-list" id="selected-indications">
+                            <li class="no-selection">No indications selected yet</li>
+                        </ul>
+                    </div>
+                    <div class="combined-pci-column" id="pci-column">
                         <div id="pci-indication-section" class="hidden"></div>
                         <div class="combined-section-label pci-label">PCI Indication:</div>
                         <div class="combined-pci-value" id="pci-indication">
@@ -1144,11 +1188,13 @@
             <div class="combined-visit-block visit-2" id="combined-block-2" data-visit="2" style="display: none;">
                 <div class="combined-visit-header visit-2-header" id="combined-header-2">Visit 2</div>
                 <div class="combined-visit-body">
-                    <div class="combined-section-label">Cath Lab Indication(s):</div>
-                    <ul class="indication-list" id="v2-selected-indications">
-                        <li class="no-selection">No indications selected yet</li>
-                    </ul>
-                    <div id="v2-pci-column">
+                    <div class="combined-cath-column">
+                        <div class="combined-section-label">Cath Lab Indication(s):</div>
+                        <ul class="indication-list" id="v2-selected-indications">
+                            <li class="no-selection">No indications selected yet</li>
+                        </ul>
+                    </div>
+                    <div class="combined-pci-column" id="v2-pci-column">
                         <div id="v2-pci-indication-section" class="hidden"></div>
                         <div class="combined-section-label pci-label">PCI Indication:</div>
                         <div class="combined-pci-value" id="v2-pci-indication">
