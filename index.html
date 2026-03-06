@@ -657,6 +657,41 @@
             user-select: none;
             font-size: 14px;
             font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+        }
+
+        .visit-type-option .hover-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #013349;
+            color: white;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 280px;
+            white-space: normal;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+
+        .visit-type-option .hover-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #013349;
+        }
+
+        .visit-type-option:hover .hover-tooltip {
+            display: block;
         }
 
         .visit-type-option:hover {
@@ -889,7 +924,7 @@
                     <div class="visit-type-label">Is Visit 2 a Staged procedure?</div>
                     <div class="visit-type-options">
                         <div class="visit-type-option" id="staging-initial" onclick="selectStagedProcedure('initial')">Initial</div>
-                        <div class="visit-type-option" id="staging-staged" onclick="selectStagedProcedure('staged')">Staged</div>
+                        <div class="visit-type-option" id="staging-staged" onclick="selectStagedProcedure('staged')">Staged<span class="hover-tooltip">A planned PCI of another vessel not treated during the initial PCI, occurring within 90 days of the first PCI</span></div>
                     </div>
                 </div>
             </div>
