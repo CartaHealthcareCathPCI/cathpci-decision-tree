@@ -1551,6 +1551,8 @@
                 stagedProcedure = null;
                 document.getElementById('staging-' + value)?.classList.remove('selected');
                 updateStagingSummary();
+                // Re-run visit 2 validation and PCI determination with staging cleared
+                updateSummary(2);
                 return;
             }
 
@@ -1561,6 +1563,8 @@
             });
             document.getElementById('staging-' + value)?.classList.add('selected');
             updateStagingSummary();
+            // Re-run visit 2 validation and PCI determination now that staging is set
+            updateSummary(2);
         }
 
         function updateStagingSummary() {
@@ -1886,6 +1890,29 @@
                 errors.push('Cannot select both "Worsening Angina" and "Suspected CAD"');
             }
 
+            // Staged PCI restrictions for Visit 2 Cath Lab Indications
+            if (n === 2 && stagedProcedure === 'staged') {
+                const stagedForbiddenCathLab = [
+                    'ACS <= 24 hrs',
+                    'New Onset Angina <= 2 months',
+                    'Worsening Angina',
+                    'Resuscitated Cardiac Arrest',
+                    'Suspected CAD'
+                ];
+                const displayNames = {
+                    'ACS <= 24 hrs': 'ACS ≤ 24 hrs',
+                    'New Onset Angina <= 2 months': 'New Onset Angina ≤ 2 months',
+                    'Worsening Angina': 'Worsening Angina',
+                    'Resuscitated Cardiac Arrest': 'Resuscitated Cardiac Arrest',
+                    'Suspected CAD': 'Suspected CAD'
+                };
+                const stagedCathLabConflicts = stagedForbiddenCathLab.filter(ind => indications.includes(ind));
+                if (stagedCathLabConflicts.length > 0) {
+                    const conflictNames = stagedCathLabConflicts.map(ind => `"${displayNames[ind] || ind}"`).join(', ');
+                    errors.push(`Staged PCI cannot be coded with the following Cath Lab Indication(s): ${conflictNames}. A Staged PCI cannot have acute indications (ACS ≤ 24 hrs), New Onset Angina, Worsening Angina, Resuscitated Cardiac Arrest, or Suspected CAD. Please remove this selection or change the staging answer to "No".`);
+                }
+            }
+
             displayErrors(errors, n);
             return errors.length === 0;
         }
@@ -2049,8 +2076,16 @@
             if (!section) return;
             section.classList.remove('hidden');
 
+            // Build a staged PCI warning banner to prepend when applicable
+            const stagedWarningHTML = (n === 2 && stagedProcedure === 'staged')
+                ? `<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:6px;padding:12px 15px;margin-bottom:12px;font-size:14px;color:#856404;font-weight:600;">
+                     Staged PCI Restriction: STEMI (all types) and NSTE-ACS are NOT valid PCI Indications for a Staged procedure. If your selection results in one of these, please review your Cath Lab Indication or change the staging answer to "No".
+                   </div>`
+                : '';
+
             if (questionType === 'stemi-acs24') {
                 section.innerHTML = `
+                    ${stagedWarningHTML}
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
@@ -2084,6 +2119,7 @@
                 `;
             } else if (questionType === 'stemi-acs24plus') {
                 section.innerHTML = `
+                    ${stagedWarningHTML}
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
@@ -2159,7 +2195,27 @@
         function setPCIIndication(indication, n) {
             n = n || 1;
             const el = gel('pci-indication', n);
-            if (el) el.innerHTML = indication;
+            if (!el) return;
+
+            // Staged PCI restrictions: certain PCI indications are not valid for Staged PCI
+            if (n === 2 && stagedProcedure === 'staged') {
+                const stagedForbiddenPCI = [
+                    'STEMI - Immediate PCI for Acute STEMI',
+                    'STEMI - Stable (<= 12 hrs from Sx)',
+                    'STEMI - Stable (> 12 hrs from Sx)',
+                    'STEMI - Unstable (> 12 hrs from Sx)',
+                    'STEMI (after successful lytics)',
+                    'STEMI - Rescue (After unsuccessful lytics)',
+                    'NSTE-ACS',
+                    'New Onset Angina <= 2 months'
+                ];
+                if (stagedForbiddenPCI.includes(indication)) {
+                    el.innerHTML = `<span style="color: #dc3545; font-weight: 600;">Not valid for Staged PCI: "${indication}" cannot be used as a PCI Indication for a Staged procedure. STEMI (all types), NSTE-ACS, and New Onset Angina are not permitted. Please review your Cath Lab Indication selections or change the staging answer to "No".</span>`;
+                    return;
+                }
+            }
+
+            el.innerHTML = indication;
         }
 
         function resetTreeState(n) {
