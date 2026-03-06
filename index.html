@@ -1044,6 +1044,19 @@
         };
 
         function selectVisitCount(count) {
+            // Deselect if already selected
+            if (visitCount === count) {
+                visitCount = null;
+                visitTypes = {};
+                document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
+                const container = document.getElementById('visit-types-container');
+                container.style.display = 'none';
+                container.innerHTML = '';
+                updatePrescreeningSummary();
+                updatePCIIndicationVisibility();
+                return;
+            }
+
             visitCount = count;
             visitTypes = {};
 
@@ -1091,6 +1104,16 @@
         }
 
         function selectVisitType(visitNum, typeKey) {
+            // Deselect if already selected
+            if (visitTypes[visitNum] === typeKey) {
+                delete visitTypes[visitNum];
+                const el = document.getElementById(`visit-${visitNum}-${typeKey}`);
+                if (el) el.classList.remove('selected');
+                updatePrescreeningSummary();
+                updatePCIIndicationVisibility();
+                return;
+            }
+
             visitTypes[visitNum] = typeKey;
 
             // Update visual selection for this visit's options
