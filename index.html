@@ -718,6 +718,108 @@
                 flex-direction: column;
             }
         }
+
+        /* Combined summary section */
+        .combined-summary-section {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .combined-summary-heading {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .combined-summary-heading::before {
+            content: "✓";
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .combined-meta-row {
+            background: white;
+            border-radius: 6px;
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            border-left: 4px solid #4caf50;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+
+        .combined-visit-block {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .combined-visit-header {
+            background: #013349;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .combined-visit-header.visit-2-header {
+            background: #00AEC7;
+        }
+
+        .combined-visit-body {
+            padding: 18px;
+        }
+
+        .combined-section-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .combined-section-label.pci-label {
+            color: #e65100;
+            margin-top: 16px;
+        }
+
+        .combined-pci-value {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .combined-visit-block.visit-2 .indication-list li {
+            border-left-color: #00AEC7;
+        }
+
+        .combined-visit-block.visit-2 .option:hover {
+            border-color: #00AEC7;
+        }
+
+        .combined-visit-block.visit-2 .option.selected {
+            border-color: #00AEC7;
+        }
     </style>
 </head>
 <body>
@@ -1008,52 +1110,56 @@
                 </div>
             </div>
 
-            <!-- Validation Errors -->
-            <div id="validation-errors"></div>
-
-            <!-- Summary Section -->
-            <div class="summary-section">
-                <!-- Pre-screening summary (shown when visit info is selected) -->
-                <div id="prescreening-summary" style="display: none; margin-bottom: 18px;">
-                    <div class="prescreening-summary-block">
-                        <div class="prescreening-summary-label">Encounter Information:</div>
-                        <ul class="prescreening-summary-list" id="prescreening-summary-list"></ul>
-                    </div>
-                </div>
-                <div class="summary-columns">
-                    <!-- Left Column: Selected Indications -->
-                    <div class="summary-column">
-                        <div class="summary-title">Selected Indications Summary</div>
-
-                        <div class="summary-content">
-                            <div class="summary-label">Cath Lab Indications:</div>
-                            <ul class="indication-list" id="selected-indications">
-                                <li class="no-selection">No indications selected yet</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: PCI Indication -->
-                    <div class="summary-column" id="pci-column">
-                        <div class="pci-indication-title">PCI Indication</div>
-
-                        <div id="pci-indication-section" class="hidden">
-                            <!-- PCI sub-questions will appear here when needed -->
-                        </div>
-
-                        <div class="pci-indication">
-                            <div class="pci-indication-label">PCI Indication:</div>
-                            <div class="pci-indication-value" id="pci-indication">
-                                <span class="no-selection">Will be determined based on Cath Lab Indications</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="reset-button" onclick="resetForm()">Reset All Selections</button>
-            </div>
             </div><!-- /tree-container-1 -->
             </div><!-- /trees-wrapper -->
+
+        <!-- Combined Summary Box -->
+        <div class="combined-summary-section" id="combined-summary">
+            <div class="combined-summary-heading">Results Summary</div>
+
+            <!-- Encounter info: number of visits -->
+            <div class="combined-meta-row" id="combined-meta-row" style="display: none;">
+                Cath Lab visits this encounter: <strong id="combined-visit-count"></strong>
+            </div>
+
+            <!-- Visit 1 block -->
+            <div class="combined-visit-block" id="combined-block-1" data-visit="1">
+                <div class="combined-visit-header" id="combined-header-1" style="display: none;"></div>
+                <div class="combined-visit-body">
+                    <div class="combined-section-label">Cath Lab Indication(s):</div>
+                    <ul class="indication-list" id="selected-indications">
+                        <li class="no-selection">No indications selected yet</li>
+                    </ul>
+                    <div id="pci-column">
+                        <div id="pci-indication-section" class="hidden"></div>
+                        <div class="combined-section-label pci-label">PCI Indication:</div>
+                        <div class="combined-pci-value" id="pci-indication">
+                            <span class="no-selection">Will be determined based on Cath Lab Indications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visit 2 block (shown when visitCount = 2) -->
+            <div class="combined-visit-block visit-2" id="combined-block-2" data-visit="2" style="display: none;">
+                <div class="combined-visit-header visit-2-header" id="combined-header-2">Visit 2</div>
+                <div class="combined-visit-body">
+                    <div class="combined-section-label">Cath Lab Indication(s):</div>
+                    <ul class="indication-list" id="v2-selected-indications">
+                        <li class="no-selection">No indications selected yet</li>
+                    </ul>
+                    <div id="v2-pci-column">
+                        <div id="v2-pci-indication-section" class="hidden"></div>
+                        <div class="combined-section-label pci-label">PCI Indication:</div>
+                        <div class="combined-pci-value" id="v2-pci-indication">
+                            <span class="no-selection">Will be determined based on Cath Lab Indications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="reset-button" onclick="resetForm()">Reset All Selections</button>
+        </div>
         </div>
     </div>
 
@@ -1206,15 +1312,25 @@
             updatePCIIndicationVisibility(visitNum);
         }
 
-        // Update the colored header label for a visit tree
+        // Update the colored header label for a visit tree and combined summary
         function updateVisitLabel(visitNum) {
-            const labelEl = document.getElementById(`visit-label-${visitNum}`);
-            if (!labelEl) return;
             const typeKey = visitTypes[visitNum];
             const typeLabel = typeKey ? caseTypeLabels[typeKey] : null;
             const visitLabel = visitNum === 3 ? 'Visit 3 (and beyond)' : `Visit ${visitNum}`;
-            labelEl.textContent = typeLabel ? `${visitLabel} — ${typeLabel}` : visitLabel;
-            labelEl.style.display = 'block';
+            const fullLabel = typeLabel ? `${visitLabel} — ${typeLabel}` : visitLabel;
+
+            // Update tree container header
+            const labelEl = document.getElementById(`visit-label-${visitNum}`);
+            if (labelEl) {
+                labelEl.textContent = fullLabel;
+                labelEl.style.display = 'block';
+            }
+
+            // Update combined summary visit header
+            const combinedHeader = document.getElementById(`combined-header-${visitNum}`);
+            if (combinedHeader) {
+                combinedHeader.textContent = fullLabel;
+            }
         }
 
         // Show/hide tree 2 and adjust layout when visit count changes
@@ -1222,11 +1338,16 @@
             const wrapper = document.getElementById('trees-wrapper');
             const tree1Label = document.getElementById('visit-label-1');
             const existingTree2 = document.getElementById('tree-container-2');
+            const combinedBlock2 = document.getElementById('combined-block-2');
+            const combinedHeader1 = document.getElementById('combined-header-1');
 
             if (visitCount === 2) {
                 // Show visit labels on tree 1
                 if (tree1Label) tree1Label.style.display = 'block';
                 updateVisitLabel(1);
+
+                // Show combined summary visit 1 header
+                if (combinedHeader1) combinedHeader1.style.display = 'block';
 
                 // Create tree 2 if not already present
                 if (!existingTree2) {
@@ -1242,12 +1363,30 @@
                 }
                 updateVisitLabel(2);
                 updatePCIIndicationVisibility(2);
-            } else {
-                // Single tree: hide label on tree 1
+
+                // Show combined summary visit 2 block
+                if (combinedBlock2) combinedBlock2.style.display = '';
+            } else if (visitCount === 3) {
+                // 3+ visits: show tree 1 only, show visit 1 header in combined summary
                 if (tree1Label) tree1Label.style.display = 'none';
+                if (combinedHeader1) combinedHeader1.style.display = 'block';
+                updateVisitLabel(1);
 
                 // Hide tree 2 if present
                 if (existingTree2) existingTree2.style.display = 'none';
+
+                // Hide combined block 2
+                if (combinedBlock2) combinedBlock2.style.display = 'none';
+            } else {
+                // Single tree (1 visit) or no selection: hide all visit headers
+                if (tree1Label) tree1Label.style.display = 'none';
+                if (combinedHeader1) combinedHeader1.style.display = 'none';
+
+                // Hide tree 2 if present
+                if (existingTree2) existingTree2.style.display = 'none';
+
+                // Hide combined block 2
+                if (combinedBlock2) combinedBlock2.style.display = 'none';
             }
 
             // Update PCI column visibility for visit 1
@@ -1270,27 +1409,17 @@
         }
 
         function updatePrescreeningSummary() {
-            const summaryBlock = document.getElementById('prescreening-summary');
-            const summaryList = document.getElementById('prescreening-summary-list');
+            const metaRow = document.getElementById('combined-meta-row');
+            const countEl = document.getElementById('combined-visit-count');
 
             if (!visitCount) {
-                summaryBlock.style.display = 'none';
+                if (metaRow) metaRow.style.display = 'none';
                 return;
             }
 
             const countLabel = visitCount === 3 ? '3+' : String(visitCount);
-            let items = `<li>Cath Lab visits this encounter: <strong>${countLabel}</strong></li>`;
-
-            const numRows = visitCount === 3 ? 3 : visitCount;
-            for (let i = 1; i <= numRows; i++) {
-                const typeKey = visitTypes[i];
-                const typeLabel = typeKey ? caseTypeLabels[typeKey] : '<em>Not yet selected</em>';
-                const visitLabel = (visitCount === 3 && i === 3) ? 'Visit 3 (and beyond)' : `Visit ${i}`;
-                items += `<li>${visitLabel}: <strong>${typeLabel}</strong></li>`;
-            }
-
-            summaryList.innerHTML = items;
-            summaryBlock.style.display = 'block';
+            if (countEl) countEl.textContent = countLabel;
+            if (metaRow) metaRow.style.display = 'block';
         }
 
         // Indication priority order (highest to lowest)
@@ -1874,7 +2003,7 @@
         function setPCIIndication(indication, n) {
             n = n || 1;
             const el = gel('pci-indication', n);
-            if (el) el.innerHTML = `<div class="pci-indication-value">${indication}</div>`;
+            if (el) el.innerHTML = indication;
         }
 
         function resetTreeState(n) {
@@ -1925,8 +2054,14 @@
             const visitTypesContainer = document.getElementById('visit-types-container');
             visitTypesContainer.style.display = 'none';
             visitTypesContainer.innerHTML = '';
-            document.getElementById('prescreening-summary').style.display = 'none';
-            document.getElementById('prescreening-summary-list').innerHTML = '';
+
+            // Reset combined summary meta row and visit headers
+            const metaRow = document.getElementById('combined-meta-row');
+            if (metaRow) metaRow.style.display = 'none';
+            const combinedHeader1 = document.getElementById('combined-header-1');
+            if (combinedHeader1) combinedHeader1.style.display = 'none';
+            const combinedBlock2 = document.getElementById('combined-block-2');
+            if (combinedBlock2) combinedBlock2.style.display = 'none';
 
             // Reset both tree states
             resetTreeState(1);
@@ -2496,33 +2631,6 @@
                 </div>
             </div>
 
-            <!-- Validation Errors -->
-            <div id="v2-validation-errors"></div>
-
-            <!-- Summary Section -->
-            <div class="summary-section">
-                <div class="summary-columns">
-                    <div class="summary-column">
-                        <div class="summary-title">Selected Indications Summary</div>
-                        <div class="summary-content">
-                            <div class="summary-label">Cath Lab Indications:</div>
-                            <ul class="indication-list" id="v2-selected-indications">
-                                <li class="no-selection">No indications selected yet</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="summary-column" id="v2-pci-column">
-                        <div class="pci-indication-title">PCI Indication</div>
-                        <div id="v2-pci-indication-section" class="hidden"></div>
-                        <div class="pci-indication">
-                            <div class="pci-indication-label">PCI Indication:</div>
-                            <div class="pci-indication-value" id="v2-pci-indication">
-                                <span class="no-selection">Will be determined based on Cath Lab Indications</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             `;
         }
 
