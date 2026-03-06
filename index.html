@@ -658,7 +658,38 @@
             font-size: 14px;
         }
 
+        /* Side-by-side trees layout */
+        .trees-wrapper {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .tree-container {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .visit-tree-label {
+            background: #013349;
+            color: white;
+            padding: 11px 20px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.3px;
+            display: none;
+        }
+
         /* Responsive design for smaller screens */
+        @media (max-width: 900px) {
+            .trees-wrapper {
+                flex-direction: column;
+            }
+        }
+
         @media (max-width: 768px) {
             .summary-columns {
                 flex-direction: column;
@@ -691,6 +722,11 @@
                     <!-- Visit type rows will be dynamically inserted here -->
                 </div>
             </div>
+
+            <!-- Trees wrapper: flex when 2 visits side by side -->
+            <div id="trees-wrapper" class="trees-wrapper">
+            <div id="tree-container-1" class="tree-container" data-visit="1">
+                <div class="visit-tree-label" id="visit-label-1">Visit 1</div>
 
             <h2 style="font-size: 24px; color: #2c3e50; margin-bottom: 25px; text-align: center; font-weight: 600;">Indicate the patient symptoms or condition prompting THIS Cath Lab visit</h2>
             
@@ -996,6 +1032,8 @@
 
                 <button class="reset-button" onclick="resetForm()">Reset All Selections</button>
             </div>
+            </div><!-- /tree-container-1 -->
+            </div><!-- /trees-wrapper -->
         </div>
     </div>
 
@@ -1028,13 +1066,31 @@
     </div>
 
     <script>
-        // Store selected indications
-        let selectedIndications = new Set();
-        let pciSubAnswers = {};
+        // Per-visit state (each visit gets its own selections and PCI sub-answers)
+        const visitStates = {
+            1: { selectedIndications: new Set(), pciSubAnswers: {} },
+            2: { selectedIndications: new Set(), pciSubAnswers: {} }
+        };
 
         // Pre-screening state
         let visitCount = null;
         let visitTypes = {};
+
+        // Helper: get element ID prefixed for a given visit (visit 1 = original IDs, visit 2 = v2- prefix)
+        function vid(id, n) {
+            return n === 1 ? id : 'v2-' + id;
+        }
+
+        // Helper: getElementById for a given visit
+        function gel(id, n) {
+            return document.getElementById(vid(id, n));
+        }
+
+        // Helper: get visit number (1 or 2) from a DOM element by walking up to .tree-container
+        function getVisitNum(el) {
+            const container = el.closest('[data-visit]');
+            return container ? parseInt(container.dataset.visit) : 1;
+        }
 
         // Case type labels for visit type selection
         const caseTypeLabels = {
@@ -1053,7 +1109,7 @@
                 container.style.display = 'none';
                 container.innerHTML = '';
                 updatePrescreeningSummary();
-                updatePCIIndicationVisibility();
+                updateTreeLayout();
                 return;
             }
 
@@ -1100,7 +1156,7 @@
 
             container.style.display = 'block';
             updatePrescreeningSummary();
-            updatePCIIndicationVisibility();
+            updateTreeLayout();
         }
 
         function selectVisitType(visitNum, typeKey) {
@@ -1110,7 +1166,8 @@
                 const el = document.getElementById(`visit-${visitNum}-${typeKey}`);
                 if (el) el.classList.remove('selected');
                 updatePrescreeningSummary();
-                updatePCIIndicationVisibility();
+                updateVisitLabel(visitNum);
+                updatePCIIndicationVisibility(visitNum);
                 return;
             }
 
@@ -1125,15 +1182,64 @@
             if (selected) selected.classList.add('selected');
 
             updatePrescreeningSummary();
-            updatePCIIndicationVisibility();
+            updateVisitLabel(visitNum);
+            updatePCIIndicationVisibility(visitNum);
         }
 
-        function updatePCIIndicationVisibility() {
-            const pciColumn = document.getElementById('pci-column');
+        // Update the colored header label for a visit tree
+        function updateVisitLabel(visitNum) {
+            const labelEl = document.getElementById(`visit-label-${visitNum}`);
+            if (!labelEl) return;
+            const typeKey = visitTypes[visitNum];
+            const typeLabel = typeKey ? caseTypeLabels[typeKey] : null;
+            const visitLabel = visitNum === 3 ? 'Visit 3 (and beyond)' : `Visit ${visitNum}`;
+            labelEl.textContent = typeLabel ? `${visitLabel} — ${typeLabel}` : visitLabel;
+            labelEl.style.display = 'block';
+        }
+
+        // Show/hide tree 2 and adjust layout when visit count changes
+        function updateTreeLayout() {
+            const wrapper = document.getElementById('trees-wrapper');
+            const tree1Label = document.getElementById('visit-label-1');
+            const existingTree2 = document.getElementById('tree-container-2');
+
+            if (visitCount === 2) {
+                // Show visit labels on tree 1
+                if (tree1Label) tree1Label.style.display = 'block';
+                updateVisitLabel(1);
+
+                // Create tree 2 if not already present
+                if (!existingTree2) {
+                    const tree2Div = document.createElement('div');
+                    tree2Div.id = 'tree-container-2';
+                    tree2Div.className = 'tree-container';
+                    tree2Div.setAttribute('data-visit', '2');
+                    tree2Div.innerHTML = buildTree2HTML();
+                    wrapper.appendChild(tree2Div);
+                    attachOptionClickListeners();
+                } else {
+                    existingTree2.style.display = '';
+                }
+                updateVisitLabel(2);
+                updatePCIIndicationVisibility(2);
+            } else {
+                // Single tree: hide label on tree 1
+                if (tree1Label) tree1Label.style.display = 'none';
+
+                // Hide tree 2 if present
+                if (existingTree2) existingTree2.style.display = 'none';
+            }
+
+            // Update PCI column visibility for visit 1
+            updatePCIIndicationVisibility(1);
+        }
+
+        function updatePCIIndicationVisibility(visitNum) {
+            const pciColumn = gel('pci-column', visitNum);
             if (!pciColumn) return;
 
-            // Hide PCI Indication column only when there is exactly 1 visit and it is Diagnostic Only
-            if (visitCount === 1 && visitTypes[1] === 'diagnostic') {
+            // Hide PCI Indication column only when this visit is Diagnostic Only
+            if (visitTypes[visitNum] === 'diagnostic') {
                 pciColumn.style.display = 'none';
             } else {
                 pciColumn.style.display = '';
@@ -1186,49 +1292,50 @@
         ];
 
         // Function to update arrow states based on selections in each step
-        function updateArrows() {
+        function updateArrows(n) {
+            n = n || 1;
             // Step 1: ACS - check if any ACS option is selected
-            const step1Complete = document.getElementById('acs-24')?.classList.contains('selected') ||
-                                  document.getElementById('acs-24plus')?.classList.contains('selected') ||
-                                  document.getElementById('acs-no')?.classList.contains('selected');
-            updateArrowState(1, step1Complete);
+            const step1Complete = gel('acs-24', n)?.classList.contains('selected') ||
+                                  gel('acs-24plus', n)?.classList.contains('selected') ||
+                                  gel('acs-no', n)?.classList.contains('selected');
+            updateArrowState(1, step1Complete, n);
 
             // Step 2: Angina - check if any angina option is selected
-            const step2Complete = document.getElementById('worsening-angina')?.classList.contains('selected') ||
-                                  document.getElementById('new-onset-angina')?.classList.contains('selected') ||
-                                  document.getElementById('stable-cad-angina')?.classList.contains('selected') ||
-                                  document.getElementById('angina-no')?.classList.contains('selected');
-            updateArrowState(2, step2Complete);
+            const step2Complete = gel('worsening-angina', n)?.classList.contains('selected') ||
+                                  gel('new-onset-angina', n)?.classList.contains('selected') ||
+                                  gel('stable-cad-angina', n)?.classList.contains('selected') ||
+                                  gel('angina-no', n)?.classList.contains('selected');
+            updateArrowState(2, step2Complete, n);
 
             // Step 3: CAD - check if any CAD option is selected
-            const step3Complete = document.getElementById('stable-cad')?.classList.contains('selected') ||
-                                  document.getElementById('cad-stable-no')?.classList.contains('selected') ||
-                                  document.getElementById('suspected-cad')?.classList.contains('selected') ||
-                                  document.getElementById('cad-no')?.classList.contains('selected');
-            updateArrowState(3, step3Complete);
+            const step3Complete = gel('stable-cad', n)?.classList.contains('selected') ||
+                                  gel('cad-stable-no', n)?.classList.contains('selected') ||
+                                  gel('suspected-cad', n)?.classList.contains('selected') ||
+                                  gel('cad-no', n)?.classList.contains('selected');
+            updateArrowState(3, step3Complete, n);
 
             // Step 4: Cardiac Arrest - check if any cardiac arrest option is selected
-            const step4Complete = document.getElementById('resuscitated-cardiac-arrest')?.classList.contains('selected') ||
-                                  document.getElementById('cardiac-arrest-no')?.classList.contains('selected');
-            updateArrowState(4, step4Complete);
+            const step4Complete = gel('resuscitated-cardiac-arrest', n)?.classList.contains('selected') ||
+                                  gel('cardiac-arrest-no', n)?.classList.contains('selected');
+            updateArrowState(4, step4Complete, n);
 
             // Step 5: Non-Ischemic - check if any option is selected
             const step5Options = ['valvular', 'pericardial', 'arrhythmia', 'cardiomyopathy', 'lv-dysfunction', 'syncope', 'post-transplant'];
-            const step5Complete = step5Options.some(id => document.getElementById(id)?.classList.contains('selected'));
-            updateArrowState(5, step5Complete);
+            const step5Complete = step5Options.some(id => gel(id, n)?.classList.contains('selected'));
+            updateArrowState(5, step5Complete, n);
 
             // Step 6: Non-Cardiac - check if any option is selected
-            const step6Complete = document.getElementById('pre-op')?.classList.contains('selected') ||
-                                  document.getElementById('exercise')?.classList.contains('selected');
-            updateArrowState(6, step6Complete);
+            const step6Complete = gel('pre-op', n)?.classList.contains('selected') ||
+                                  gel('exercise', n)?.classList.contains('selected');
+            updateArrowState(6, step6Complete, n);
 
             // Step 7: Other - check if selected
-            const step7Complete = document.getElementById('other')?.classList.contains('selected');
-            updateArrowState(7, step7Complete);
+            const step7Complete = gel('other', n)?.classList.contains('selected');
+            updateArrowState(7, step7Complete, n);
         }
 
-        function updateArrowState(stepNum, isComplete) {
-            const arrow = document.getElementById(`step-arrow-${stepNum}`);
+        function updateArrowState(stepNum, isComplete, n) {
+            const arrow = gel(`step-arrow-${stepNum}`, n);
             if (arrow) {
                 if (isComplete) {
                     arrow.classList.add('completed');
@@ -1239,95 +1346,96 @@
         }
 
 
-        function handleRadioChange(groupName, value) {
+        function handleRadioChange(groupName, value, n) {
+            n = n || 1;
             // Handle ACS radio group
             if (groupName === 'acs') {
-                const timingGroup = document.getElementById('acs-timing-group');
+                const timingGroup = gel('acs-timing-group', n);
                 if (value === 'yes') {
                     timingGroup.style.display = 'block';
                 } else {
                     timingGroup.style.display = 'none';
                     // Clear ACS selections
-                    document.getElementById('acs-24').classList.remove('selected');
-                    document.getElementById('acs-24plus').classList.remove('selected');
-                    removeIndication('ACS <= 24 hrs');
-                    removeIndication('ACS > 24 hrs');
+                    gel('acs-24', n).classList.remove('selected');
+                    gel('acs-24plus', n).classList.remove('selected');
+                    removeIndication('ACS <= 24 hrs', n);
+                    removeIndication('ACS > 24 hrs', n);
                 }
             }
 
             // Handle Angina radio group
             if (groupName === 'angina') {
-                const historyGroup = document.getElementById('angina-history-group');
+                const historyGroup = gel('angina-history-group', n);
                 if (value === 'yes') {
                     historyGroup.style.display = 'block';
                 } else {
                     historyGroup.style.display = 'none';
                     // Hide nested change group
-                    const changeGroup = document.getElementById('angina-change-group');
+                    const changeGroup = gel('angina-change-group', n);
                     changeGroup.style.display = 'none';
                     // Clear angina selections
-                    const newOnsetAngina = document.getElementById('new-onset-angina');
-                    const anginaHistoryYes = document.getElementById('angina-history-yes');
-                    const worseningAngina = document.getElementById('worsening-angina');
-                    const stableCadAngina = document.getElementById('stable-cad-angina');
+                    const newOnsetAngina = gel('new-onset-angina', n);
+                    const anginaHistoryYes = gel('angina-history-yes', n);
+                    const worseningAngina = gel('worsening-angina', n);
+                    const stableCadAngina = gel('stable-cad-angina', n);
                     if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
                     if (anginaHistoryYes) anginaHistoryYes.classList.remove('selected');
                     if (worseningAngina) worseningAngina.classList.remove('selected');
                     if (stableCadAngina) stableCadAngina.classList.remove('selected');
-                    removeIndication('Worsening Angina');
-                    removeIndication('New Onset Angina <= 2 months');
-                    removeIndication('Stable Known CAD');
+                    removeIndication('Worsening Angina', n);
+                    removeIndication('New Onset Angina <= 2 months', n);
+                    removeIndication('Stable Known CAD', n);
                 }
             }
 
             // Handle Angina History radio group (nested under Angina Yes)
             if (groupName === 'angina-history-type') {
-                const changeGroup = document.getElementById('angina-change-group');
+                const changeGroup = gel('angina-change-group', n);
                 if (value === 'yes') {
                     changeGroup.style.display = 'block';
                     // Clear the "New Onset Angina" selection if it was selected
-                    const newOnsetAngina = document.getElementById('new-onset-angina');
+                    const newOnsetAngina = gel('new-onset-angina', n);
                     if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
-                    removeIndication('New Onset Angina <= 2 months');
+                    removeIndication('New Onset Angina <= 2 months', n);
                 } else {
                     changeGroup.style.display = 'none';
                     // Clear nested selections
-                    const worseningAngina = document.getElementById('worsening-angina');
-                    const stableCadAngina = document.getElementById('stable-cad-angina');
+                    const worseningAngina = gel('worsening-angina', n);
+                    const stableCadAngina = gel('stable-cad-angina', n);
                     if (worseningAngina) worseningAngina.classList.remove('selected');
                     if (stableCadAngina) stableCadAngina.classList.remove('selected');
-                    removeIndication('Worsening Angina');
-                    removeIndication('Stable Known CAD');
+                    removeIndication('Worsening Angina', n);
+                    removeIndication('Stable Known CAD', n);
                 }
             }
 
             // Handle CAD history radio group
             if (groupName === 'cad-history') {
-                const stabilityGroup = document.getElementById('cad-stability-group');
-                const suspectedGroup = document.getElementById('suspected-cad-group');
-                const cadStableNoText = document.getElementById('cad-stable-no-reminder');
+                const stabilityGroup = gel('cad-stability-group', n);
+                const suspectedGroup = gel('suspected-cad-group', n);
+                const cadStableNoText = gel('cad-stable-no-reminder', n);
                 if (value === 'yes') {
                     stabilityGroup.style.display = 'block';
                     suspectedGroup.style.display = 'none';
                     if (cadStableNoText) cadStableNoText.style.display = 'none';
-                    const suspectedCadRadio = document.getElementById('suspected-cad');
-                    if (suspectedCadRadio) suspectedCadRadio.classList.remove('selected');
-                    removeIndication('Suspected CAD');
+                    const suspectedCadEl = gel('suspected-cad', n);
+                    if (suspectedCadEl) suspectedCadEl.classList.remove('selected');
+                    removeIndication('Suspected CAD', n);
                 } else {
                     stabilityGroup.style.display = 'none';
                     suspectedGroup.style.display = 'block';
                     if (cadStableNoText) cadStableNoText.style.display = 'none';
-                    document.getElementById('stable-cad').classList.remove('selected');
-                    removeIndication('Stable Known CAD');
+                    gel('stable-cad', n).classList.remove('selected');
+                    removeIndication('Stable Known CAD', n);
                 }
             }
 
             // Handle CAD stable radio group
             if (groupName === 'cad-stable') {
-                const cadStableNoText = document.getElementById('cad-stable-no-reminder');
+                const cadStableNoText = gel('cad-stable-no-reminder', n);
                 if (value === 'no') {
-                    document.getElementById('stable-cad').classList.remove('selected');
-                    removeIndication('Stable Known CAD');
+                    gel('stable-cad', n).classList.remove('selected');
+                    removeIndication('Stable Known CAD', n);
                     if (cadStableNoText) cadStableNoText.style.display = 'block';
                 } else {
                     if (cadStableNoText) cadStableNoText.style.display = 'none';
@@ -1336,21 +1444,23 @@
 
             // Handle Cardiac Arrest radio group
             if (groupName === 'cardiac-arrest') {
-                const cardiacArrestSubGroup = document.getElementById('cardiac-arrest-sub-group');
+                const cardiacArrestSubGroup = gel('cardiac-arrest-sub-group', n);
                 if (value === 'yes') {
                     cardiacArrestSubGroup.style.display = 'block';
                 } else {
                     cardiacArrestSubGroup.style.display = 'none';
                     // Clear cardiac arrest selection
-                    document.getElementById('resuscitated-cardiac-arrest').classList.remove('selected');
-                    removeIndication('Resuscitated Cardiac Arrest');
+                    gel('resuscitated-cardiac-arrest', n).classList.remove('selected');
+                    removeIndication('Resuscitated Cardiac Arrest', n);
                 }
             }
 
-            updateArrows();
+            updateArrows(n);
         }
 
-        function selectIndication(indication, elementId) {
+        function selectIndication(indication, elementId, n) {
+            n = n || 1;
+            const state = visitStates[n];
             // Define mutually exclusive angina indications
             const anginaIndications = [
                 'New Onset Angina <= 2 months',
@@ -1361,37 +1471,39 @@
             // Special handling: Ensure angina indications are mutually exclusive
             if (anginaIndications.includes(indication)) {
                 anginaIndications.forEach(anginaInd => {
-                    if (anginaInd !== indication && selectedIndications.has(anginaInd)) {
-                        removeIndication(anginaInd);
+                    if (anginaInd !== indication && state.selectedIndications.has(anginaInd)) {
+                        removeIndication(anginaInd, n);
                         // Also remove the selected class from the corresponding element
                         if (anginaInd === 'New Onset Angina <= 2 months') {
-                            const elem = document.getElementById('new-onset-angina');
+                            const elem = gel('new-onset-angina', n);
                             if (elem) elem.classList.remove('selected');
                         } else if (anginaInd === 'Worsening Angina') {
-                            const elem = document.getElementById('worsening-angina');
+                            const elem = gel('worsening-angina', n);
                             if (elem) elem.classList.remove('selected');
                         } else if (anginaInd === 'Stable Known CAD') {
-                            const elem = document.getElementById('stable-cad-angina');
+                            const elem = gel('stable-cad-angina', n);
                             if (elem) elem.classList.remove('selected');
                         }
                     }
                 });
             }
 
-            selectedIndications.add(indication);
-            showReminder(indication);
-            updateSummary();
-            validateSelections();
+            state.selectedIndications.add(indication);
+            showReminder(indication, n);
+            updateSummary(n);
+            validateSelections(n);
         }
 
-        function removeIndication(indication) {
-            selectedIndications.delete(indication);
-            hideReminder(indication);
-            updateSummary();
-            validateSelections();
+        function removeIndication(indication, n) {
+            n = n || 1;
+            visitStates[n].selectedIndications.delete(indication);
+            hideReminder(indication, n);
+            updateSummary(n);
+            validateSelections(n);
         }
 
-        function showReminder(indication) {
+        function showReminder(indication, n) {
+            n = n || 1;
             const reminderMap = {
                 'ACS > 24 hrs': 'acs-24plus-reminder',
                 'Valvular Disease': 'valvular-reminder',
@@ -1405,11 +1517,13 @@
 
             const reminderId = reminderMap[indication];
             if (reminderId) {
-                document.getElementById(reminderId).style.display = 'block';
+                const el = gel(reminderId, n);
+                if (el) el.style.display = 'block';
             }
         }
 
-        function hideReminder(indication) {
+        function hideReminder(indication, n) {
+            n = n || 1;
             const reminderMap = {
                 'ACS > 24 hrs': 'acs-24plus-reminder',
                 'Valvular Disease': 'valvular-reminder',
@@ -1423,13 +1537,15 @@
 
             const reminderId = reminderMap[indication];
             if (reminderId) {
-                document.getElementById(reminderId).style.display = 'none';
+                const el = gel(reminderId, n);
+                if (el) el.style.display = 'none';
             }
         }
 
-        function validateSelections() {
+        function validateSelections(n) {
+            n = n || 1;
+            const indications = Array.from(visitStates[n].selectedIndications);
             const errors = [];
-            const indications = Array.from(selectedIndications);
 
             // Cannot select ACS <= 24 hrs with ACS > 24 hrs
             if (indications.includes('ACS <= 24 hrs') && indications.includes('ACS > 24 hrs')) {
@@ -1462,17 +1578,18 @@
                 errors.push('Cannot select both "Worsening Angina" and "Suspected CAD"');
             }
 
-            displayErrors(errors);
+            displayErrors(errors, n);
             return errors.length === 0;
         }
 
-        function displayErrors(errors) {
-            const errorDiv = document.getElementById('validation-errors');
+        function displayErrors(errors, n) {
+            n = n || 1;
+            const errorDiv = gel('validation-errors', n);
             const modal = document.getElementById('error-modal');
             const modalErrorList = document.getElementById('modal-error-list');
 
             if (errors.length === 0) {
-                errorDiv.innerHTML = '';
+                if (errorDiv) errorDiv.innerHTML = '';
                 modal.classList.remove('show');
                 return;
             }
@@ -1488,7 +1605,7 @@
             modal.classList.add('show');
 
             // Clear inline errors (no longer used)
-            errorDiv.innerHTML = '';
+            if (errorDiv) errorDiv.innerHTML = '';
         }
 
         function closeErrorModal() {
@@ -1558,61 +1675,70 @@
             }
         }
 
-        function updateSummary() {
-            const listElement = document.getElementById('selected-indications');
-            
-            if (selectedIndications.size === 0) {
+        function updateSummary(n) {
+            n = n || 1;
+            const state = visitStates[n];
+            const listElement = gel('selected-indications', n);
+            if (!listElement) return;
+
+            if (state.selectedIndications.size === 0) {
                 listElement.innerHTML = '<li class="no-selection">No indications selected yet</li>';
             } else {
                 // Sort by priority order
-                const sorted = Array.from(selectedIndications).sort((a, b) => {
+                const sorted = Array.from(state.selectedIndications).sort((a, b) => {
                     return priorityOrder.indexOf(a) - priorityOrder.indexOf(b);
                 });
 
                 listElement.innerHTML = sorted.map(ind => `<li>${ind}</li>`).join('');
             }
 
-            updateArrows();
-            determinePCIIndication();
+            updateArrows(n);
+            determinePCIIndication(n);
         }
 
-        function determinePCIIndication() {
-            if (selectedIndications.size === 0) {
-                document.getElementById('pci-indication').innerHTML = 
-                    '<span class="no-selection">Will be determined based on Cath Lab Indications</span>';
-                document.getElementById('pci-indication-section').classList.add('hidden');
+        function determinePCIIndication(n) {
+            n = n || 1;
+            const state = visitStates[n];
+            if (state.selectedIndications.size === 0) {
+                const pciEl = gel('pci-indication', n);
+                if (pciEl) pciEl.innerHTML = '<span class="no-selection">Will be determined based on Cath Lab Indications</span>';
+                const pciSection = gel('pci-indication-section', n);
+                if (pciSection) pciSection.classList.add('hidden');
                 return;
             }
 
-            if (!validateSelections()) {
-                document.getElementById('pci-indication').innerHTML = 
-                    '<span class="no-selection">Please resolve validation errors first</span>';
+            if (!validateSelections(n)) {
+                const pciEl = gel('pci-indication', n);
+                if (pciEl) pciEl.innerHTML = '<span class="no-selection">Please resolve validation errors first</span>';
                 return;
             }
 
             // Get highest priority indication
-            const sorted = Array.from(selectedIndications).sort((a, b) => {
+            const sorted = Array.from(state.selectedIndications).sort((a, b) => {
                 return priorityOrder.indexOf(a) - priorityOrder.indexOf(b);
             });
             const highest = sorted[0];
 
             // Determine PCI Indication based on highest Cath Lab Indication
             if (highest === 'ACS <= 24 hrs') {
-                showPCISubQuestion('stemi-acs24');
+                showPCISubQuestion('stemi-acs24', n);
             } else if (highest === 'ACS > 24 hrs') {
-                showPCISubQuestion('stemi-acs24plus');
+                showPCISubQuestion('stemi-acs24plus', n);
             } else if (highest === 'New Onset Angina <= 2 months') {
-                setPCIIndication('New Onset Angina <= 2 months');
+                setPCIIndication('New Onset Angina <= 2 months', n);
             } else if (highest === 'Stable Known CAD') {
-                showPCISubQuestion('stable-angina');
+                showPCISubQuestion('stable-angina', n);
             } else {
                 // All other indications map to "Other PCI Indication"
-                setPCIIndication('Other PCI Indication');
+                setPCIIndication('Other PCI Indication', n);
             }
         }
 
-        function showPCISubQuestion(questionType) {
-            const section = document.getElementById('pci-indication-section');
+        function showPCISubQuestion(questionType, n) {
+            n = n || 1;
+            const p = n === 1 ? '' : 'v2-';
+            const section = gel('pci-indication-section', n);
+            if (!section) return;
             section.classList.remove('hidden');
 
             if (questionType === 'stemi-acs24') {
@@ -1620,30 +1746,30 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
-                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="yes" id="pci-stemi-yes-24">
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="yes" id="${p}pci-stemi-yes-24">
                             Yes - Consider timing:
                         </div>
-                        <div class="sub-option-group" id="pci-stemi-timing-24" style="display: none;">
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Immediate PCI for Acute STEMI" id="stemi-immediate">
+                        <div class="sub-option-group" id="${p}pci-stemi-timing-24" style="display: none;">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Immediate PCI for Acute STEMI" id="${p}stemi-immediate">
                                 STEMI - Immediate PCI for Acute STEMI
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (<= 12 hrs from Sx)" id="stemi-stable-12">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (<= 12 hrs from Sx)" id="${p}stemi-stable-12">
                                 STEMI - Stable (≤ 12 hrs from Sx)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="stemi-stable-12plus">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="${p}stemi-stable-12plus">
                                 STEMI - Stable (> 12 hrs from Sx)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="stemi-unstable">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="${p}stemi-unstable">
                                 STEMI - Unstable (> 12 hrs from Sx)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="stemi-success-lytic">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="${p}stemi-success-lytic">
                                 STEMI (after successful lytics)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="stemi-rescue">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="${p}stemi-rescue">
                                 STEMI - Rescue (After unsuccessful lytics)
                             </div>
                         </div>
-                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="no" id="pci-stemi-no-24">
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24" data-value="no" id="${p}pci-stemi-no-24">
                             No - NSTE-ACS
                         </div>
                     </div>
@@ -1653,24 +1779,24 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Did the patient present with a STEMI?</p>
-                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="yes" id="pci-stemi-yes-24plus">
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="yes" id="${p}pci-stemi-yes-24plus">
                             Yes - Consider timing:
                         </div>
-                        <div class="sub-option-group" id="pci-stemi-timing-24plus" style="display: none;">
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="stemi-stable-12plus-2">
+                        <div class="sub-option-group" id="${p}pci-stemi-timing-24plus" style="display: none;">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Stable (> 12 hrs from Sx)" id="${p}stemi-stable-12plus-2">
                                 STEMI - Stable (> 12 hrs from Sx)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="stemi-unstable-2">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Unstable (> 12 hrs from Sx)" id="${p}stemi-unstable-2">
                                 STEMI - Unstable (> 12 hrs from Sx)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="stemi-success-lytic-2">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI (after successful lytics)" id="${p}stemi-success-lytic-2">
                                 STEMI (after successful lytics)
                             </div>
-                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="stemi-rescue-2">
+                            <div class="option" data-type="pci-option" data-pci-indication="STEMI - Rescue (After unsuccessful lytics)" id="${p}stemi-rescue-2">
                                 STEMI - Rescue (After unsuccessful lytics)
                             </div>
                         </div>
-                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="no" id="pci-stemi-no-24plus">
+                        <div class="option" data-type="pci-radio" data-question="stemi-acs24plus" data-value="no" id="${p}pci-stemi-no-24plus">
                             No - NSTE-ACS
                         </div>
                     </div>
@@ -1680,55 +1806,95 @@
                     <div class="pci-sub-question">
                         <div class="pci-sub-question-title">Additional Information Needed for PCI Indication:</div>
                         <p style="margin-bottom: 15px; font-weight: 600;">Is the patient experiencing angina/anginal equivalent symptoms?</p>
-                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="yes" id="pci-angina-yes">
+                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="yes" id="${p}pci-angina-yes">
                             Yes - Stable Angina
                         </div>
-                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="no" id="pci-angina-no">
+                        <div class="option" data-type="pci-radio" data-question="stable-angina" data-value="no" id="${p}pci-angina-no">
                             No - CAD (without ischemic Sx)
                         </div>
                     </div>
                 `;
             }
+            // Re-attach listeners to the newly injected options
+            setTimeout(attachOptionClickListeners, 0);
         }
 
-        function handlePCISubAnswer(questionType, answer) {
-            pciSubAnswers[questionType] = answer;
+        function handlePCISubAnswer(questionType, answer, n) {
+            n = n || 1;
+            visitStates[n].pciSubAnswers[questionType] = answer;
 
             if (questionType === 'stemi-acs24') {
                 if (answer === 'yes') {
-                    document.getElementById('pci-stemi-timing-24').style.display = 'block';
+                    gel('pci-stemi-timing-24', n).style.display = 'block';
                 } else {
-                    setPCIIndication('NSTE-ACS');
+                    setPCIIndication('NSTE-ACS', n);
                 }
             } else if (questionType === 'stemi-acs24plus') {
                 if (answer === 'yes') {
-                    document.getElementById('pci-stemi-timing-24plus').style.display = 'block';
+                    gel('pci-stemi-timing-24plus', n).style.display = 'block';
                 } else {
-                    setPCIIndication('NSTE-ACS');
+                    setPCIIndication('NSTE-ACS', n);
                 }
             } else if (questionType === 'stable-angina') {
                 if (answer === 'yes') {
-                    setPCIIndication('Stable angina');
+                    setPCIIndication('Stable angina', n);
                 } else {
-                    setPCIIndication('CAD (without ischemic Sx)');
+                    setPCIIndication('CAD (without ischemic Sx)', n);
                 }
             }
         }
 
-        function selectPCIOption(indication) {
-            setPCIIndication(indication);
+        function selectPCIOption(indication, n) {
+            setPCIIndication(indication, n);
         }
 
-        function setPCIIndication(indication) {
-            document.getElementById('pci-indication').innerHTML = 
-                `<div class="pci-indication-value">${indication}</div>`;
+        function setPCIIndication(indication, n) {
+            n = n || 1;
+            const el = gel('pci-indication', n);
+            if (el) el.innerHTML = `<div class="pci-indication-value">${indication}</div>`;
+        }
+
+        function resetTreeState(n) {
+            const state = visitStates[n];
+            state.selectedIndications.clear();
+            state.pciSubAnswers = {};
+
+            // Remove 'selected' class from all options in this tree
+            const container = document.getElementById(`tree-container-${n}`);
+            if (!container) return;
+            container.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+            // Hide all sub-groups
+            ['acs-timing-group', 'angina-history-group', 'angina-change-group',
+             'cad-stability-group', 'suspected-cad-group', 'cad-stable-no-reminder',
+             'cardiac-arrest-sub-group'].forEach(id => {
+                const el = gel(id, n);
+                if (el) el.style.display = 'none';
+            });
+
+            // Hide all reminders
+            container.querySelectorAll('.reminder').forEach(r => r.style.display = 'none');
+
+            // Reset arrows
+            for (let i = 1; i <= 7; i++) {
+                const arrow = gel(`step-arrow-${i}`, n);
+                if (arrow) arrow.classList.remove('completed');
+            }
+
+            // Re-enable CAD history section if it was disabled
+            const cadSection = gel('cad-history-section', n);
+            if (cadSection) cadSection.classList.remove('disabled');
+
+            // Clear validation errors
+            const errDiv = gel('validation-errors', n);
+            if (errDiv) errDiv.innerHTML = '';
+
+            // Reset summary
+            updateSummary(n);
+            updatePCIIndicationVisibility(n);
         }
 
         function resetForm() {
-            // Clear all selections
-            selectedIndications.clear();
-            pciSubAnswers = {};
-
             // Reset pre-screening
             visitCount = null;
             visitTypes = {};
@@ -1739,40 +1905,17 @@
             document.getElementById('prescreening-summary').style.display = 'none';
             document.getElementById('prescreening-summary-list').innerHTML = '';
 
-            // Remove 'selected' class from all options
-            document.querySelectorAll('.option').forEach(option => {
-                option.classList.remove('selected');
-            });
+            // Reset both tree states
+            resetTreeState(1);
+            resetTreeState(2);
 
-            // Hide all sub-groups
-            document.getElementById('acs-timing-group').style.display = 'none';
-            document.getElementById('angina-history-group').style.display = 'none';
-            document.getElementById('angina-change-group').style.display = 'none';
-            document.getElementById('cad-stability-group').style.display = 'none';
-            document.getElementById('suspected-cad-group').style.display = 'none';
-            document.getElementById('cad-stable-no-reminder').style.display = 'none';
-            document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
+            // Hide tree 2 and visit labels
+            const tree2 = document.getElementById('tree-container-2');
+            if (tree2) tree2.style.display = 'none';
+            const label1 = document.getElementById('visit-label-1');
+            if (label1) label1.style.display = 'none';
 
-            // Hide all reminders
-            document.querySelectorAll('.reminder').forEach(reminder => {
-                reminder.style.display = 'none';
-            });
-
-            // Reset all arrows to gray/pointing right
-            for (let i = 1; i <= 7; i++) {
-                const arrow = document.getElementById(`step-arrow-${i}`);
-                if (arrow) {
-                    arrow.classList.remove('completed');
-                }
-            }
-
-            // Clear validation errors
-            document.getElementById('validation-errors').innerHTML = '';
             closeErrorModal();
-
-            // Reset summary
-            updateSummary();
-            updatePCIIndicationVisibility();
         }
 
         // Function to attach click event listeners to all option boxes
@@ -1794,139 +1937,156 @@
                     }
 
                     const type = this.getAttribute('data-type');
+                    // Determine which visit tree this element belongs to
+                    const n = getVisitNum(this);
 
                     if (type === 'radio') {
-                        handleRadioClick(this);
+                        handleRadioClick(this, n);
                     } else if (type === 'checkbox') {
-                        handleCheckboxClick(this);
+                        handleCheckboxClick(this, n);
                     } else if (type === 'indication') {
-                        handleIndicationClick(this);
+                        handleIndicationClick(this, n);
                     } else if (type === 'pci-radio') {
-                        handlePCIRadioClick(this);
+                        handlePCIRadioClick(this, n);
                     } else if (type === 'pci-option') {
-                        handlePCIOptionClick(this);
+                        handlePCIOptionClick(this, n);
                     }
                 });
             });
         }
 
-        function handleRadioClick(element) {
+        function handleRadioClick(element, n) {
+            n = n || 1;
             const group = element.getAttribute('data-group');
             const value = element.getAttribute('data-value');
-            const id = element.id;
 
             // If already selected, deselect (toggle behavior)
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
-                handleRadioDeselect(group, value);
-                updateArrows();
+                handleRadioDeselect(group, value, n);
+                updateArrows(n);
                 return;
             }
 
-            // Deselect all other options in the same group
-            document.querySelectorAll(`[data-type="radio"][data-group="${group}"]`).forEach(opt => {
-                opt.classList.remove('selected');
-            });
+            // Deselect all other options in the same group within the same tree
+            const treeContainer = element.closest('[data-visit]');
+            if (treeContainer) {
+                treeContainer.querySelectorAll(`[data-type="radio"][data-group="${group}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
 
             // Select this option
             element.classList.add('selected');
-            handleRadioChange(group, value);
+            handleRadioChange(group, value, n);
         }
 
-        function handleRadioDeselect(group, value) {
+        function handleRadioDeselect(group, value, n) {
+            n = n || 1;
             // Handle deselection logic
             if (group === 'acs') {
-                document.getElementById('acs-timing-group').style.display = 'none';
-                removeIndication('ACS <= 24 hrs');
-                removeIndication('ACS > 24 hrs');
+                const tg = gel('acs-timing-group', n);
+                if (tg) tg.style.display = 'none';
+                removeIndication('ACS <= 24 hrs', n);
+                removeIndication('ACS > 24 hrs', n);
             } else if (group === 'angina') {
-                document.getElementById('angina-history-group').style.display = 'none';
-                document.getElementById('angina-change-group').style.display = 'none';
-                removeIndication('New Onset Angina <= 2 months');
-                removeIndication('Worsening Angina');
-                removeIndication('Stable Known CAD');
+                const hg = gel('angina-history-group', n);
+                const cg = gel('angina-change-group', n);
+                if (hg) hg.style.display = 'none';
+                if (cg) cg.style.display = 'none';
+                removeIndication('New Onset Angina <= 2 months', n);
+                removeIndication('Worsening Angina', n);
+                removeIndication('Stable Known CAD', n);
             } else if (group === 'cad-history') {
-                document.getElementById('cad-stability-group').style.display = 'none';
-                document.getElementById('suspected-cad-group').style.display = 'none';
-                document.getElementById('cad-stable-no-reminder').style.display = 'none';
-                removeIndication('Stable Known CAD');
-                removeIndication('Suspected CAD');
+                const sg = gel('cad-stability-group', n);
+                const spg = gel('suspected-cad-group', n);
+                const cr = gel('cad-stable-no-reminder', n);
+                if (sg) sg.style.display = 'none';
+                if (spg) spg.style.display = 'none';
+                if (cr) cr.style.display = 'none';
+                removeIndication('Stable Known CAD', n);
+                removeIndication('Suspected CAD', n);
             } else if (group === 'cardiac-arrest') {
-                document.getElementById('cardiac-arrest-sub-group').style.display = 'none';
-                removeIndication('Resuscitated Cardiac Arrest');
+                const casg = gel('cardiac-arrest-sub-group', n);
+                if (casg) casg.style.display = 'none';
+                removeIndication('Resuscitated Cardiac Arrest', n);
             }
         }
 
-        function handleCheckboxClick(element) {
+        function handleCheckboxClick(element, n) {
+            n = n || 1;
             const indication = element.getAttribute('data-indication');
 
             // Toggle selection
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
-                removeIndication(indication);
+                removeIndication(indication, n);
             } else {
                 element.classList.add('selected');
-                selectIndication(indication, element.id);
+                selectIndication(indication, element.id, n);
             }
         }
 
-        function handleIndicationClick(element) {
+        function handleIndicationClick(element, n) {
+            n = n || 1;
             const indication = element.getAttribute('data-indication');
             const id = element.id;
             const indicationGroup = element.getAttribute('data-indication-group');
+            const state = visitStates[n];
+
+            // Normalize ID: strip v2- prefix for logic checks (IDs are equal for both visits except prefix)
+            const baseId = id.replace(/^v2-/, '');
 
             // If already selected, deselect (toggle behavior)
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
-                removeIndication(indication);
+                removeIndication(indication, n);
 
                 // If deselecting Stable Known CAD from Angina section, re-enable CAD History section
-                if (indication === 'Stable Known CAD' && id === 'stable-cad-angina') {
-                    const cadHistorySection = document.getElementById('cad-history-section');
-                    if (cadHistorySection) {
-                        cadHistorySection.classList.remove('disabled');
-                    }
+                if (indication === 'Stable Known CAD' && baseId === 'stable-cad-angina') {
+                    const cadSection = gel('cad-history-section', n);
+                    if (cadSection) cadSection.classList.remove('disabled');
                 }
 
-                updateArrows();
+                updateArrows(n);
                 return;
             }
 
             // Check if selecting Stable Known CAD from CAD History section when New Onset or Worsening Angina is selected
-            if (indication === 'Stable Known CAD' && id === 'stable-cad') {
-                if (selectedIndications.has('New Onset Angina <= 2 months') || selectedIndications.has('Worsening Angina')) {
-                    displayErrors(['Cannot select "Stable Known CAD" when "New Onset Angina" or "Worsening Angina" is already selected. Please go back to Step 2 and update your angina selections.']);
+            if (indication === 'Stable Known CAD' && baseId === 'stable-cad') {
+                if (state.selectedIndications.has('New Onset Angina <= 2 months') || state.selectedIndications.has('Worsening Angina')) {
+                    displayErrors(['Cannot select "Stable Known CAD" when "New Onset Angina" or "Worsening Angina" is already selected. Please go back to Step 2 and update your angina selections.'], n);
                     return;
                 }
             }
 
             // Check for duplicate Stable Known CAD selection
-            if (indication === 'Stable Known CAD' && selectedIndications.has('Stable Known CAD')) {
-                displayErrors(['Stable Known CAD already selected, move to next question']);
+            if (indication === 'Stable Known CAD' && state.selectedIndications.has('Stable Known CAD')) {
+                displayErrors(['Stable Known CAD already selected, move to next question'], n);
                 return;
             }
 
             // If this indication has a data-indication-group, deselect all other indications in the same group
             if (indicationGroup) {
-                document.querySelectorAll(`[data-indication-group="${indicationGroup}"]`).forEach(opt => {
-                    if (opt.classList.contains('selected')) {
-                        const optIndication = opt.getAttribute('data-indication');
-                        const optId = opt.id;
-                        opt.classList.remove('selected');
-                        removeIndication(optIndication);
+                // Only deselect within the same tree container
+                const treeContainer = element.closest('[data-visit]');
+                if (treeContainer) {
+                    treeContainer.querySelectorAll(`[data-indication-group="${indicationGroup}"]`).forEach(opt => {
+                        if (opt.classList.contains('selected')) {
+                            const optIndication = opt.getAttribute('data-indication');
+                            const optBaseId = opt.id.replace(/^v2-/, '');
+                            opt.classList.remove('selected');
+                            removeIndication(optIndication, n);
 
-                        // If deselecting Stable Known CAD from Angina section due to mutual exclusivity, re-enable CAD History section
-                        if (optIndication === 'Stable Known CAD' && optId === 'stable-cad-angina') {
-                            const cadHistorySection = document.getElementById('cad-history-section');
-                            if (cadHistorySection) {
-                                cadHistorySection.classList.remove('disabled');
+                            if (optIndication === 'Stable Known CAD' && optBaseId === 'stable-cad-angina') {
+                                const cadSection = gel('cad-history-section', n);
+                                if (cadSection) cadSection.classList.remove('disabled');
                             }
                         }
-                    }
-                });
+                    });
+                }
             } else {
-                // For indication type without a group, only allow single selection within the same parent group (like radio)
-                // Find all indications in the same parent group
+                // Single selection within parent group
                 const parentGroup = element.parentElement;
                 parentGroup.querySelectorAll('[data-type="indication"]').forEach(opt => {
                     opt.classList.remove('selected');
@@ -1935,145 +2095,110 @@
 
             // Select this one
             element.classList.add('selected');
-            selectIndication(indication, id);
+            selectIndication(indication, id, n);
 
             // If selecting New Onset Angina from Angina section, clear nested history selections
-            if (indication === 'New Onset Angina <= 2 months' && id === 'new-onset-angina') {
-                // Deselect the "Yes" radio button in angina-history-type group
-                const anginaHistoryYes = document.getElementById('angina-history-yes');
+            if (indication === 'New Onset Angina <= 2 months' && baseId === 'new-onset-angina') {
+                const anginaHistoryYes = gel('angina-history-yes', n);
                 if (anginaHistoryYes && anginaHistoryYes.classList.contains('selected')) {
                     anginaHistoryYes.classList.remove('selected');
                 }
+                const anginaChangeGroup = gel('angina-change-group', n);
+                if (anginaChangeGroup) anginaChangeGroup.style.display = 'none';
 
-                // Hide the angina-change-group
-                const anginaChangeGroup = document.getElementById('angina-change-group');
-                if (anginaChangeGroup) {
-                    anginaChangeGroup.style.display = 'none';
-                }
-
-                // Deselect any indications in the angina-change-group
-                const worseningAngina = document.getElementById('worsening-angina');
-                const stableCadAngina = document.getElementById('stable-cad-angina');
-
-                if (worseningAngina && worseningAngina.classList.contains('selected')) {
-                    worseningAngina.classList.remove('selected');
-                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
-                }
+                const worseningAngina = gel('worsening-angina', n);
+                const stableCadAngina = gel('stable-cad-angina', n);
+                if (worseningAngina) worseningAngina.classList.remove('selected');
                 if (stableCadAngina && stableCadAngina.classList.contains('selected')) {
                     stableCadAngina.classList.remove('selected');
-                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
-
-                    // Also re-enable CAD History section if it was disabled
-                    const cadHistorySection = document.getElementById('cad-history-section');
-                    if (cadHistorySection) {
-                        cadHistorySection.classList.remove('disabled');
-                    }
+                    const cadSection = gel('cad-history-section', n);
+                    if (cadSection) cadSection.classList.remove('disabled');
                 }
             }
 
-            // If selecting Worsening Angina from angina-change-group, clear the parent New Onset Angina selection
-            if (indication === 'Worsening Angina' && id === 'worsening-angina') {
-                // Deselect New Onset Angina if it was selected
-                const newOnsetAngina = document.getElementById('new-onset-angina');
-                if (newOnsetAngina && newOnsetAngina.classList.contains('selected')) {
-                    newOnsetAngina.classList.remove('selected');
-                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
-                }
+            // If selecting Worsening Angina, clear New Onset Angina
+            if (indication === 'Worsening Angina' && baseId === 'worsening-angina') {
+                const newOnsetAngina = gel('new-onset-angina', n);
+                if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
             }
 
             // If selecting Stable Known CAD from Angina section, disable CAD History section
-            if (indication === 'Stable Known CAD' && id === 'stable-cad-angina') {
-                // Deselect New Onset Angina if it was selected
-                const newOnsetAngina = document.getElementById('new-onset-angina');
-                if (newOnsetAngina && newOnsetAngina.classList.contains('selected')) {
-                    newOnsetAngina.classList.remove('selected');
-                    // Don't need to remove from selectedIndications - already handled by mutual exclusivity
-                }
+            if (indication === 'Stable Known CAD' && baseId === 'stable-cad-angina') {
+                const newOnsetAngina = gel('new-onset-angina', n);
+                if (newOnsetAngina) newOnsetAngina.classList.remove('selected');
 
-                const cadHistorySection = document.getElementById('cad-history-section');
-                if (cadHistorySection) {
-                    cadHistorySection.classList.add('disabled');
-
-                    // Clear any existing selections in the CAD History section
-                    // Deselect radio buttons
-                    const cadYes = document.getElementById('cad-yes');
-                    const cadNo = document.getElementById('cad-no');
-                    const cadStableNo = document.getElementById('cad-stable-no');
+                const cadSection = gel('cad-history-section', n);
+                if (cadSection) {
+                    cadSection.classList.add('disabled');
+                    // Clear existing CAD History selections
+                    const cadYes = gel('cad-yes', n);
+                    const cadNo = gel('cad-no', n);
+                    const cadStableNo = gel('cad-stable-no', n);
                     if (cadYes) cadYes.classList.remove('selected');
                     if (cadNo) cadNo.classList.remove('selected');
                     if (cadStableNo) cadStableNo.classList.remove('selected');
 
-                    // Deselect any indication options and remove from selectedIndications
-                    const stableCadFromHistory = document.getElementById('stable-cad');
-                    const suspectedCad = document.getElementById('suspected-cad');
-                    if (stableCadFromHistory && stableCadFromHistory.classList.contains('selected')) {
-                        stableCadFromHistory.classList.remove('selected');
-                        // Note: Don't remove 'Stable Known CAD' from selectedIndications
-                        // since we just added it from the Angina section
-                    }
+                    const stableCadFromHistory = gel('stable-cad', n);
+                    if (stableCadFromHistory) stableCadFromHistory.classList.remove('selected');
+
+                    const suspectedCad = gel('suspected-cad', n);
                     if (suspectedCad && suspectedCad.classList.contains('selected')) {
                         suspectedCad.classList.remove('selected');
-                        removeIndication('Suspected CAD');
+                        removeIndication('Suspected CAD', n);
                     }
 
-                    // Hide sub-option groups
-                    const cadStabilityGroup = document.getElementById('cad-stability-group');
-                    const suspectedCadGroup = document.getElementById('suspected-cad-group');
+                    const cadStabilityGroup = gel('cad-stability-group', n);
+                    const suspectedCadGroup = gel('suspected-cad-group', n);
                     if (cadStabilityGroup) cadStabilityGroup.style.display = 'none';
                     if (suspectedCadGroup) suspectedCadGroup.style.display = 'none';
                 }
             }
         }
 
-        function handlePCIRadioClick(element) {
+        function handlePCIRadioClick(element, n) {
+            n = n || 1;
             const question = element.getAttribute('data-question');
             const value = element.getAttribute('data-value');
+            const state = visitStates[n];
 
             // If already selected, deselect (toggle behavior)
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
-                // Clear the PCI indication and hide timing options
-                delete pciSubAnswers[question];
+                delete state.pciSubAnswers[question];
                 if (question === 'stemi-acs24') {
-                    const timingGroup = document.getElementById('pci-stemi-timing-24');
-                    timingGroup.style.display = 'none';
-                    // Clear any selected timing options
-                    timingGroup.querySelectorAll('[data-type="pci-option"]').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
+                    const tg = gel('pci-stemi-timing-24', n);
+                    if (tg) { tg.style.display = 'none'; tg.querySelectorAll('[data-type="pci-option"]').forEach(o => o.classList.remove('selected')); }
                 } else if (question === 'stemi-acs24plus') {
-                    const timingGroup = document.getElementById('pci-stemi-timing-24plus');
-                    timingGroup.style.display = 'none';
-                    // Clear any selected timing options
-                    timingGroup.querySelectorAll('[data-type="pci-option"]').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
+                    const tg = gel('pci-stemi-timing-24plus', n);
+                    if (tg) { tg.style.display = 'none'; tg.querySelectorAll('[data-type="pci-option"]').forEach(o => o.classList.remove('selected')); }
                 }
-                document.getElementById('pci-indication').innerHTML =
-                    '<span class="no-selection">Please answer the question above</span>';
+                const pciEl = gel('pci-indication', n);
+                if (pciEl) pciEl.innerHTML = '<span class="no-selection">Please answer the question above</span>';
                 return;
             }
 
-            // Deselect all other options in the same question group
-            document.querySelectorAll(`[data-type="pci-radio"][data-question="${question}"]`).forEach(opt => {
-                opt.classList.remove('selected');
-            });
+            // Deselect all other options in the same question group within this tree
+            const treeContainer = element.closest('[data-visit]');
+            if (treeContainer) {
+                treeContainer.querySelectorAll(`[data-type="pci-radio"][data-question="${question}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
 
             // Select this option
             element.classList.add('selected');
-
-            // Handle the PCI sub answer
-            handlePCISubAnswer(question, value);
+            handlePCISubAnswer(question, value, n);
         }
 
-        function handlePCIOptionClick(element) {
+        function handlePCIOptionClick(element, n) {
+            n = n || 1;
             const indication = element.getAttribute('data-pci-indication');
 
             // If already selected, deselect (toggle behavior)
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
-                document.getElementById('pci-indication').innerHTML =
-                    '<span class="no-selection">Please select an option above</span>';
+                const pciEl = gel('pci-indication', n);
+                if (pciEl) pciEl.innerHTML = '<span class="no-selection">Please select an option above</span>';
                 return;
             }
 
@@ -2085,23 +2210,273 @@
 
             // Select this option
             element.classList.add('selected');
+            selectPCIOption(indication, n);
+        }
 
-            // Set the PCI indication
-            selectPCIOption(indication);
+        // Build the HTML for the second visit's decision tree (all IDs prefixed with "v2-")
+        function buildTree2HTML() {
+            return `
+            <div class="visit-tree-label" id="visit-label-2">Visit 2</div>
+
+            <h2 style="font-size: 24px; color: #2c3e50; margin-bottom: 25px; text-align: center; font-weight: 600;">Indicate the patient symptoms or condition prompting THIS Cath Lab visit</h2>
+
+            <!-- Q1: ACS -->
+            <div class="step-section">
+                <div class="section-heading">Acute Coronary Syndrome</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-1">➔</span>
+                    Is the patient being brought to the Cath Lab for:<br><br>
+                    STEMI<br>NSTEMI<br>Unstable Angina
+                </div>
+                <div class="option-group">
+                    <div class="option" data-type="radio" data-group="acs" data-value="yes" id="v2-acs-yes">Yes</div>
+                    <div class="sub-option-group" id="v2-acs-timing-group" style="display: none;">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Use the ACS <strong>diagnosis date/time</strong> to determine the correct selection. The definition is based on when the patient has ACS (unstable angina, NSTEMI, or STEMI), so the time from diagnosis to Cath Lab presentation should guide your choice.</p>
+                        <a class="reference-link" onclick="showReference('ACS Timing'); event.stopPropagation();" style="display: block; margin-bottom: 10px;">Reference</a>
+                        <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" data-indication-group="acs-indications" id="v2-acs-24">
+                            ACS ≤ 24 hrs
+                            <a class="definition-link" onclick="showDefinition('ACS <= 24 hrs'); event.stopPropagation();">View Definition</a>
+                        </div>
+                        <div class="option" data-type="indication" data-indication="ACS > 24 hrs" data-indication-group="acs-indications" id="v2-acs-24plus">
+                            ACS > 24 hrs
+                            <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
+                        </div>
+                        <div class="reminder" id="v2-acs-24plus-reminder" style="display: none;">
+                            A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit
+                            <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
+                        </div>
+                    </div>
+                    <div class="option" data-type="radio" data-group="acs" data-value="no" id="v2-acs-no">No - Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Q2: Angina -->
+            <div class="step-section">
+                <div class="section-heading">Angina</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-2">➔</span>
+                    Has the patient experienced Chest Pain or a documented anginal equivalent prior to this Cath Lab visit?
+                </div>
+                <div class="option-group">
+                    <div class="option" data-type="radio" data-group="angina" data-value="yes" id="v2-angina-yes">Yes</div>
+                    <div class="sub-option-group" id="v2-angina-history-group" style="display: none;">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
+                            Does the patient have a history of:<br>
+                            Prior MI<br>Prior PCI<br>Prior CABG<br>
+                            History of angina with onset >2 months prior to Cath Lab visit
+                        </p>
+                        <div class="option" data-type="indication" data-indication="New Onset Angina <= 2 months" data-indication-group="angina-indications" id="v2-new-onset-angina">
+                            No - New Onset Angina
+                            <a class="definition-link" onclick="showDefinition('New Onset Angina <= 2 months'); event.stopPropagation();">View Definition</a>
+                        </div>
+                        <div class="option" data-type="radio" data-group="angina-history-type" data-value="yes" id="v2-angina-history-yes">Yes</div>
+                        <div class="sub-option-group" id="v2-angina-change-group" style="display: none;">
+                            <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Has the patient's angina changed in frequency, pattern or severity over the past 2 months?</p>
+                            <div class="option" data-type="indication" data-indication="Worsening Angina" data-indication-group="angina-indications" id="v2-worsening-angina">
+                                Yes - Worsening Angina
+                                <a class="definition-link" onclick="showDefinition('Worsening Angina'); event.stopPropagation();">View Definition</a>
+                            </div>
+                            <div class="option" data-type="indication" data-indication="Stable Known CAD" data-indication-group="angina-indications" id="v2-stable-cad-angina">
+                                No - Stable Known CAD
+                                <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="option" data-type="radio" data-group="angina" data-value="no" id="v2-angina-no">No - Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Q3: CAD History -->
+            <div class="step-section" id="v2-cad-history-section">
+                <div class="section-heading">Coronary Artery Disease History</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-3">➔</span>
+                    Does the patient have a history of:<br>
+                    Prior MI<br>Prior PCI<br>Prior CABG<br>
+                    At least 50% stenosis in one or more vessels confirmed by diagnostic catheterization<br>
+                    Cardiac CTA demonstrating Obstructive CAD
+                </div>
+                <div class="option-group">
+                    <div class="option" data-type="radio" data-group="cad-history" data-value="yes" id="v2-cad-yes">Yes</div>
+                    <div class="sub-option-group" id="v2-cad-stability-group" style="display: none;">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Is the patient currently stable?<br>
+                        <em>Stability is defined as:</em><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;No signs or symptoms of ACS<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;No new-onset or worsening angina<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;No hemodynamic instability<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;If angina is present, it has remained unchanged in pattern, frequency, and severity for at least 6 weeks</p>
+                        <div class="option" data-type="indication" data-indication="Stable Known CAD" id="v2-stable-cad">
+                            Yes - Stable Known CAD
+                            <a class="definition-link" onclick="showDefinition('Stable Known CAD'); event.stopPropagation();">View Definition</a>
+                        </div>
+                        <div class="option" data-type="radio" data-group="cad-stable" data-value="no" id="v2-cad-stable-no">No</div>
+                        <div class="reminder" id="v2-cad-stable-no-reminder" style="display: none;">
+                            If the patient has a KNOWN history of CAD, but is UNSTABLE, do not select Stable Known CAD, move on to the next question
+                        </div>
+                    </div>
+                    <div class="option" data-type="radio" data-group="cad-history" data-value="no" id="v2-cad-no">No</div>
+                    <div class="sub-option-group" id="v2-suspected-cad-group" style="display: none;">
+                        <p style="margin-bottom: 10px; color: #555; font-style: italic;">Consider including Suspected CAD if applicable</p>
+                        <div class="option" data-type="indication" data-indication="Suspected CAD" id="v2-suspected-cad">
+                            Suspected CAD
+                            <a class="definition-link" onclick="showDefinition('Suspected CAD'); event.stopPropagation();">View Definition</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4: Cardiac Arrest -->
+            <div class="step-section">
+                <div class="section-heading">Cardiac Arrest</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-4">➔</span>
+                    Is the patient being brought to the Cath Lab following a Cardiac Arrest?
+                </div>
+                <div class="option-group">
+                    <div class="option" data-type="radio" data-group="cardiac-arrest" data-value="yes" id="v2-cardiac-arrest-yes">Yes</div>
+                    <div class="sub-option-group" id="v2-cardiac-arrest-sub-group" style="display: none;">
+                        <div class="option" data-type="indication" data-indication="Resuscitated Cardiac Arrest" id="v2-resuscitated-cardiac-arrest">
+                            Resuscitated Cardiac Arrest
+                            <a class="definition-link" onclick="showDefinition('Resuscitated Cardiac Arrest'); event.stopPropagation();">View Definition</a>
+                        </div>
+                    </div>
+                    <div class="option" data-type="radio" data-group="cardiac-arrest" data-value="no" id="v2-cardiac-arrest-no">No - Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Q5: Non-Ischemic/Structural -->
+            <div class="step-section">
+                <div class="section-heading">Non-Ischemic/Structural Heart Disease</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-5">➔</span>
+                    Is this Cath Lab visit being prompted by a Non-Ischemic/Structural Issue?
+                </div>
+                <p class="instruction">Select any/all that apply to THIS Cath Lab visit:</p>
+                <div class="option-group">
+                    <div class="option" data-type="checkbox" data-indication="Valvular Disease" id="v2-valvular">
+                        Valvular Disease
+                        <a class="definition-link" onclick="showDefinition('Valvular Disease'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-valvular-reminder" style="display: none;">
+                        Select Valvular Disease if:<br>
+                        - The patient is being evaluated to confirm severity of valve disease or before valve repair/replacement/TAVR<br>
+                        - The patient has valvular stenosis or regurgitation prompting THIS Cath Lab visit
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Pericardial Disease" id="v2-pericardial">
+                        Pericardial Disease
+                        <a class="definition-link" onclick="showDefinition('Pericardial Disease'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Cardiac arrhythmia" id="v2-arrhythmia">
+                        Cardiac Arrhythmia
+                        <a class="definition-link" onclick="showDefinition('Cardiac arrhythmia'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-arrhythmia-reminder" style="display: none;">
+                        A HISTORY ONLY of arrhythmia would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Cardiomyopathy" id="v2-cardiomyopathy">
+                        Cardiomyopathy
+                        <a class="definition-link" onclick="showDefinition('Cardiomyopathy'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-cardiomyopathy-reminder" style="display: none;">
+                        Cardiomyopathy must be explicitly stated as an indication by the physician.
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="LV Dysfunction" id="v2-lv-dysfunction">
+                        LV Dysfunction
+                        <a class="definition-link" onclick="showDefinition('LV Dysfunction'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-lv-dysfunction-reminder" style="display: none;">
+                        This indication is the best fit for patients being brought to the Cath Lab for Heart Failure.
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Syncope" id="v2-syncope">
+                        Syncope
+                        <a class="definition-link" onclick="showDefinition('Syncope'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-syncope-reminder" style="display: none;">
+                        A HISTORY ONLY of syncope would not allow for coding this - it must be a reason that is prompting the current cath lab visit.
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Post Cardiac Transplant" id="v2-post-transplant">
+                        Post Cardiac Transplant
+                        <a class="definition-link" onclick="showDefinition('Post Cardiac Transplant'); event.stopPropagation();">View Definition</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6: Non-Cardiac/Evaluation -->
+            <div class="step-section">
+                <div class="section-heading">Non-Cardiac/Evaluation</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-6">➔</span>
+                    Is the patient being seen in the Cath Lab for a Non-Cardiac/Evaluation reason?
+                </div>
+                <p class="instruction">Select all that apply:</p>
+                <div class="option-group">
+                    <div class="option" data-type="checkbox" data-indication="Pre-operative Evaluation" id="v2-pre-op">
+                        Pre-Operative Evaluation
+                        <a class="definition-link" onclick="showDefinition('Pre-operative Evaluation'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-pre-op-reminder" style="display: none;">
+                        TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
+                        <a class="reference-link" onclick="showReference('Pre-operative Evaluation'); event.stopPropagation();">Reference</a>
+                    </div>
+                    <div class="option" data-type="checkbox" data-indication="Evaluation for Exercise Clearance" id="v2-exercise">
+                        Evaluation for Exercise Clearance
+                        <a class="definition-link" onclick="showDefinition('Evaluation for Exercise Clearance'); event.stopPropagation();">View Definition</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7: Other -->
+            <div class="step-section">
+                <div class="section-heading">Other Indications</div>
+                <div class="step-title">
+                    <span class="step-number" id="v2-step-arrow-7">➔</span>
+                    If NO OTHER INDICATIONS apply to this Cath Lab scenario:
+                </div>
+                <div class="option-group">
+                    <div class="option" data-type="checkbox" data-indication="Other" id="v2-other">
+                        Other
+                        <a class="definition-link" onclick="showDefinition('Other'); event.stopPropagation();">View Definition</a>
+                    </div>
+                    <div class="reminder" id="v2-other-reminder" style="display: none;">
+                        Other should be used very rarely and ONLY when no other indications apply. If the only reason listed for Cath Lab Indication is "Abnormal Stress Test", this does NOT support coding Other. The abstractor should review the patient condition prompting the Stress Test for more information.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Errors -->
+            <div id="v2-validation-errors"></div>
+
+            <!-- Summary Section -->
+            <div class="summary-section">
+                <div class="summary-columns">
+                    <div class="summary-column">
+                        <div class="summary-title">Selected Indications Summary</div>
+                        <div class="summary-content">
+                            <div class="summary-label">Cath Lab Indications:</div>
+                            <ul class="indication-list" id="v2-selected-indications">
+                                <li class="no-selection">No indications selected yet</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="summary-column" id="v2-pci-column">
+                        <div class="pci-indication-title">PCI Indication</div>
+                        <div id="v2-pci-indication-section" class="hidden"></div>
+                        <div class="pci-indication">
+                            <div class="pci-indication-label">PCI Indication:</div>
+                            <div class="pci-indication-value" id="v2-pci-indication">
+                                <span class="no-selection">Will be determined based on Cath Lab Indications</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
         }
 
         // Attach event listeners when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             attachOptionClickListeners();
         });
-
-        // Modify showPCISubQuestion to attach event listeners after adding dynamic content
-        const originalShowPCISubQuestion = showPCISubQuestion;
-        showPCISubQuestion = function(questionType) {
-            originalShowPCISubQuestion(questionType);
-            // Attach event listeners to the newly added options
-            setTimeout(attachOptionClickListeners, 0);
-        };
     </script>
 </body>
 </html>
