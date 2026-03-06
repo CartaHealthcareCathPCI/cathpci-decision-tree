@@ -1252,6 +1252,9 @@
 
             // Update PCI column visibility for visit 1
             updatePCIIndicationVisibility(1);
+
+            // Sync step heights after layout changes
+            setTimeout(syncStepHeights, 0);
         }
 
         function updatePCIIndicationVisibility(visitNum) {
@@ -1936,6 +1939,34 @@
             if (label1) label1.style.display = 'none';
 
             closeErrorModal();
+            syncStepHeights();
+        }
+
+        // Sync the height of corresponding step sections between Visit 1 and Visit 2
+        // so that section headers stay visually aligned when content expands.
+        function syncStepHeights() {
+            const container1 = document.getElementById('tree-container-1');
+            const container2 = document.getElementById('tree-container-2');
+
+            // Always clear previously applied min-heights first
+            if (container1) {
+                container1.querySelectorAll('.step-section').forEach(s => s.style.minHeight = '');
+            }
+            if (container2) {
+                container2.querySelectorAll('.step-section').forEach(s => s.style.minHeight = '');
+            }
+
+            // Only align when both trees are visible side by side
+            if (visitCount !== 2 || !container1 || !container2) return;
+
+            const sections1 = container1.querySelectorAll('.step-section');
+            const sections2 = container2.querySelectorAll('.step-section');
+            const count = Math.min(sections1.length, sections2.length);
+            for (let i = 0; i < count; i++) {
+                const maxH = Math.max(sections1[i].offsetHeight, sections2[i].offsetHeight);
+                sections1[i].style.minHeight = maxH + 'px';
+                sections2[i].style.minHeight = maxH + 'px';
+            }
         }
 
         // Function to attach click event listeners to all option boxes
@@ -1971,6 +2002,8 @@
                     } else if (type === 'pci-option') {
                         handlePCIOptionClick(this, n);
                     }
+                    // Re-sync step heights after any selection changes content
+                    setTimeout(syncStepHeights, 0);
                 });
             });
         }
