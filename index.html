@@ -885,6 +885,13 @@
                 <div class="visit-types-container" id="visit-types-container" style="display: none;">
                     <!-- Visit type rows will be dynamically inserted here -->
                 </div>
+                <div id="staging-question-container" style="display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid #c8d8e4;">
+                    <div class="visit-type-label">Is this a Staged procedure?</div>
+                    <div class="visit-type-options">
+                        <div class="visit-type-option" id="staging-initial" onclick="selectStagedProcedure('initial')">Initial</div>
+                        <div class="visit-type-option" id="staging-staged" onclick="selectStagedProcedure('staged')">Staged</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Trees wrapper: flex when 2 visits side by side -->
@@ -1163,6 +1170,9 @@
             <div class="combined-meta-row" id="combined-meta-row" style="display: none;">
                 Cath Lab visits this encounter: <strong id="combined-visit-count"></strong>
             </div>
+            <div class="combined-meta-row" id="combined-staging-row" style="display: none;">
+                PCI Staging: <strong id="combined-staging-value"></strong>
+            </div>
 
             <!-- Visit 1 block -->
             <div class="combined-visit-block" id="combined-block-1" data-visit="1">
@@ -1247,6 +1257,7 @@
         // Pre-screening state
         let visitCount = null;
         let visitTypes = {};
+        let stagedProcedure = null;
 
         // Helper: get element ID prefixed for a given visit (visit 1 = original IDs, visit 2 = v2- prefix)
         function vid(id, n) {
@@ -1282,6 +1293,7 @@
                 container.innerHTML = '';
                 updatePrescreeningSummary();
                 updateTreeLayout();
+                updateStagingQuestion();
                 return;
             }
 
@@ -1329,6 +1341,7 @@
             container.style.display = 'block';
             updatePrescreeningSummary();
             updateTreeLayout();
+            updateStagingQuestion();
         }
 
         function selectVisitType(visitNum, typeKey) {
@@ -1356,6 +1369,7 @@
             updatePrescreeningSummary();
             updateVisitLabel(visitNum);
             updatePCIIndicationVisibility(visitNum);
+            updateStagingQuestion();
         }
 
         // Update the colored header label for a visit tree and combined summary
@@ -1466,6 +1480,67 @@
             const countLabel = visitCount === 3 ? '3+' : String(visitCount);
             if (countEl) countEl.textContent = countLabel;
             if (metaRow) metaRow.style.display = 'block';
+        }
+
+        function isPCIVisitType(typeKey) {
+            return typeKey === 'pci' || typeKey === 'attempted';
+        }
+
+        // Show or hide the staging question based on whether visit 1 and any
+        // subsequent visit are both PCI or Attempted/Aborted PCI.
+        function updateStagingQuestion() {
+            const container = document.getElementById('staging-question-container');
+            if (!container) return;
+
+            const visit1IsPCI = visitTypes[1] && isPCIVisitType(visitTypes[1]);
+            const hasSubsequentPCI = (visitTypes[2] && isPCIVisitType(visitTypes[2])) ||
+                                     (visitTypes[3] && isPCIVisitType(visitTypes[3]));
+
+            if (visit1IsPCI && hasSubsequentPCI) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+                // Clear selection if no longer applicable
+                if (stagedProcedure !== null) {
+                    stagedProcedure = null;
+                    document.getElementById('staging-initial')?.classList.remove('selected');
+                    document.getElementById('staging-staged')?.classList.remove('selected');
+                    updateStagingSummary();
+                }
+            }
+        }
+
+        function selectStagedProcedure(value) {
+            // Toggle if already selected
+            if (stagedProcedure === value) {
+                stagedProcedure = null;
+                document.getElementById('staging-' + value)?.classList.remove('selected');
+                updateStagingSummary();
+                return;
+            }
+
+            stagedProcedure = value;
+
+            ['initial', 'staged'].forEach(v => {
+                document.getElementById('staging-' + v)?.classList.remove('selected');
+            });
+            document.getElementById('staging-' + value)?.classList.add('selected');
+            updateStagingSummary();
+        }
+
+        function updateStagingSummary() {
+            const stagingRow = document.getElementById('combined-staging-row');
+            const stagingValue = document.getElementById('combined-staging-value');
+            const container = document.getElementById('staging-question-container');
+            const isVisible = container && container.style.display !== 'none';
+
+            if (isVisible && stagedProcedure) {
+                const label = stagedProcedure === 'initial' ? 'Initial' : 'Staged';
+                if (stagingValue) stagingValue.textContent = label;
+                if (stagingRow) stagingRow.style.display = 'block';
+            } else {
+                if (stagingRow) stagingRow.style.display = 'none';
+            }
         }
 
         // Indication priority order (highest to lowest)
@@ -2096,14 +2171,23 @@
             // Reset pre-screening
             visitCount = null;
             visitTypes = {};
+            stagedProcedure = null;
             document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
             const visitTypesContainer = document.getElementById('visit-types-container');
             visitTypesContainer.style.display = 'none';
             visitTypesContainer.innerHTML = '';
 
+            // Reset staging question UI
+            const stagingContainer = document.getElementById('staging-question-container');
+            if (stagingContainer) stagingContainer.style.display = 'none';
+            document.getElementById('staging-initial')?.classList.remove('selected');
+            document.getElementById('staging-staged')?.classList.remove('selected');
+
             // Reset combined summary meta row and visit headers
             const metaRow = document.getElementById('combined-meta-row');
             if (metaRow) metaRow.style.display = 'none';
+            const stagingRow = document.getElementById('combined-staging-row');
+            if (stagingRow) stagingRow.style.display = 'none';
             const combinedHeader1 = document.getElementById('combined-header-1');
             if (combinedHeader1) combinedHeader1.style.display = 'none';
             const combinedBlock2 = document.getElementById('combined-block-2');
