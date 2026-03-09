@@ -897,6 +897,19 @@
         .combined-visit-block.visit-2 .option.selected {
             border-color: #00AEC7;
         }
+
+        /* Visually indicate a radio option is unavailable due to clinical logic restrictions */
+        .option.option-unavailable {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            border-color: #ccc;
+            color: #888;
+        }
+        .option.option-unavailable:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -1405,6 +1418,10 @@
             updateVisitLabel(visitNum);
             updatePCIIndicationVisibility(visitNum);
             updateStagingQuestion();
+            // When Visit 1 type changes, update the availability of "No – continuation of prior ACS"
+            if (visitNum === 1) {
+                updateAcsNewNoState();
+            }
         }
 
         // Update the colored header label for a visit tree and combined summary
@@ -1425,6 +1442,33 @@
             const combinedHeader = document.getElementById(`combined-header-${visitNum}`);
             if (combinedHeader) {
                 combinedHeader.textContent = fullLabel;
+            }
+        }
+
+        // Update the visual state of the "No – continuation of prior ACS" option in Visit 2.
+        // This option is only valid when Visit 1 was Diagnostic Only.
+        // If Visit 1 was PCI or Attempted/Aborted PCI, the option is grayed out.
+        function updateAcsNewNoState() {
+            const acsNewNo = document.getElementById('v2-acs-new-no');
+            if (!acsNewNo) return;
+
+            const visit1Type = visitTypes[1];
+            if (visit1Type === 'pci' || visit1Type === 'attempted') {
+                acsNewNo.classList.add('option-unavailable');
+                // If it was already selected, deselect it and collapse the timing group
+                if (acsNewNo.classList.contains('selected')) {
+                    acsNewNo.classList.remove('selected');
+                    const timingGroup = document.getElementById('v2-acs-timing-group');
+                    if (timingGroup) timingGroup.style.display = 'none';
+                    const acs24 = document.getElementById('v2-acs-24');
+                    const acs24plus = document.getElementById('v2-acs-24plus');
+                    if (acs24) acs24.classList.remove('selected');
+                    if (acs24plus) acs24plus.classList.remove('selected');
+                    removeIndication('ACS <= 24 hrs', 2);
+                    removeIndication('ACS > 24 hrs', 2);
+                }
+            } else {
+                acsNewNo.classList.remove('option-unavailable');
             }
         }
 
@@ -1453,8 +1497,10 @@
                     tree2Div.innerHTML = buildTree2HTML();
                     wrapper.appendChild(tree2Div);
                     attachOptionClickListeners();
+                    updateAcsNewNoState();
                 } else {
                     existingTree2.style.display = '';
+                    updateAcsNewNoState();
                 }
                 updateVisitLabel(2);
                 updatePCIIndicationVisibility(2);
@@ -1662,17 +1708,69 @@
             n = n || 1;
             // Handle ACS radio group
             if (groupName === 'acs') {
-                const timingGroup = gel('acs-timing-group', n);
-                if (value === 'yes') {
-                    timingGroup.style.display = 'block';
+                if (n === 2) {
+                    // For subsequent visits, show the "New ACS?" sub-question when Yes is clicked
+                    const newSubGroup = gel('acs-new-sub-group', n);
+                    if (value === 'yes') {
+                        if (newSubGroup) newSubGroup.style.display = 'block';
+                    } else {
+                        // "No - Move to next question" selected: hide everything and clear
+                        if (newSubGroup) newSubGroup.style.display = 'none';
+                        const timingGroup = gel('acs-timing-group', n);
+                        if (timingGroup) timingGroup.style.display = 'none';
+                        const acsNewYes = gel('acs-new-yes', n);
+                        const acsNewNo = gel('acs-new-no', n);
+                        if (acsNewYes) acsNewYes.classList.remove('selected');
+                        if (acsNewNo) acsNewNo.classList.remove('selected');
+                        const acs24 = gel('acs-24', n);
+                        const acs24plus = gel('acs-24plus', n);
+                        if (acs24) acs24.classList.remove('selected');
+                        if (acs24plus) acs24plus.classList.remove('selected');
+                        removeIndication('ACS <= 24 hrs', n);
+                        removeIndication('ACS > 24 hrs', n);
+                    }
                 } else {
-                    timingGroup.style.display = 'none';
-                    // Clear ACS selections
-                    gel('acs-24', n).classList.remove('selected');
-                    gel('acs-24plus', n).classList.remove('selected');
-                    removeIndication('ACS <= 24 hrs', n);
-                    removeIndication('ACS > 24 hrs', n);
+                    // First visit: show timing group directly after Yes
+                    const timingGroup = gel('acs-timing-group', n);
+                    if (value === 'yes') {
+                        timingGroup.style.display = 'block';
+                    } else {
+                        timingGroup.style.display = 'none';
+                        // Clear ACS selections
+                        gel('acs-24', n).classList.remove('selected');
+                        gel('acs-24plus', n).classList.remove('selected');
+                        removeIndication('ACS <= 24 hrs', n);
+                        removeIndication('ACS > 24 hrs', n);
+                    }
                 }
+            }
+
+            // Handle "New ACS?" sub-question for subsequent visits (only applies to visit 2)
+            if (groupName === 'acs-new') {
+                // Clear any previously selected ACS timing options when switching between Yes/No
+                const acs24 = gel('acs-24', n);
+                const acs24plus = gel('acs-24plus', n);
+                if (acs24) acs24.classList.remove('selected');
+                if (acs24plus) acs24plus.classList.remove('selected');
+                removeIndication('ACS <= 24 hrs', n);
+                removeIndication('ACS > 24 hrs', n);
+                const timingGroup = gel('acs-timing-group', n);
+                if (timingGroup) timingGroup.style.display = 'none';
+
+                if (value === 'no') {
+                    // Check if Visit 1 was PCI or Attempted/Aborted PCI — if so, cannot select this
+                    const visit1Type = visitTypes[1];
+                    if (visit1Type === 'pci' || visit1Type === 'attempted') {
+                        // Prevent selection: deselect and show error
+                        const acsNewNo = gel('acs-new-no', n);
+                        if (acsNewNo) acsNewNo.classList.remove('selected');
+                        displayErrors(['Cannot select "No – continuation of prior ACS" because the first Cath Lab visit was a ' + caseTypeLabels[visit1Type] + '. This selection is only valid when the first Cath Lab visit was Diagnostic Only.'], n);
+                        return;
+                    }
+                }
+
+                // Show the ACS timing group for both Yes and No – continuation (when allowed)
+                if (timingGroup) timingGroup.style.display = 'block';
             }
 
             // Handle Angina radio group
@@ -2229,7 +2327,7 @@
             container.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
 
             // Hide all sub-groups
-            ['acs-timing-group', 'angina-history-group', 'angina-change-group',
+            ['acs-new-sub-group', 'acs-timing-group', 'angina-history-group', 'angina-change-group',
              'cad-stability-group', 'suspected-cad-group', 'cad-stable-no-reminder',
              'cardiac-arrest-sub-group'].forEach(id => {
                 const el = gel(id, n);
@@ -2396,6 +2494,25 @@
             if (group === 'acs') {
                 const tg = gel('acs-timing-group', n);
                 if (tg) tg.style.display = 'none';
+                // For visit 2, also hide the "New ACS?" sub-group and clear its selections
+                if (n === 2) {
+                    const newSg = gel('acs-new-sub-group', n);
+                    if (newSg) newSg.style.display = 'none';
+                    const acsNewYes = gel('acs-new-yes', n);
+                    const acsNewNo = gel('acs-new-no', n);
+                    if (acsNewYes) acsNewYes.classList.remove('selected');
+                    if (acsNewNo) acsNewNo.classList.remove('selected');
+                }
+                removeIndication('ACS <= 24 hrs', n);
+                removeIndication('ACS > 24 hrs', n);
+            } else if (group === 'acs-new') {
+                // Deselecting a "New ACS?" answer: hide timing group and clear ACS selections
+                const tg = gel('acs-timing-group', n);
+                if (tg) tg.style.display = 'none';
+                const acs24 = gel('acs-24', n);
+                const acs24plus = gel('acs-24plus', n);
+                if (acs24) acs24.classList.remove('selected');
+                if (acs24plus) acs24plus.classList.remove('selected');
                 removeIndication('ACS <= 24 hrs', n);
                 removeIndication('ACS > 24 hrs', n);
             } else if (group === 'angina') {
@@ -2639,20 +2756,25 @@
                 </div>
                 <div class="option-group">
                     <div class="option" data-type="radio" data-group="acs" data-value="yes" id="v2-acs-yes">Yes</div>
-                    <div class="sub-option-group" id="v2-acs-timing-group" style="display: none;">
-                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Use the ACS <strong>diagnosis date/time</strong> to determine the correct selection. The definition is based on when the patient has ACS (unstable angina, NSTEMI, or STEMI), so the time from diagnosis to Cath Lab presentation should guide your choice.</p>
-                        <a class="reference-link" onclick="showReference('ACS Timing'); event.stopPropagation();" style="display: block; margin-bottom: 10px;">Reference</a>
-                        <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" data-indication-group="acs-indications" id="v2-acs-24">
-                            ACS ≤ 24 hrs
-                            <a class="definition-link" onclick="showDefinition('ACS <= 24 hrs'); event.stopPropagation();">View Definition</a>
-                        </div>
-                        <div class="option" data-type="indication" data-indication="ACS > 24 hrs" data-indication-group="acs-indications" id="v2-acs-24plus">
-                            ACS > 24 hrs
-                            <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
-                        </div>
-                        <div class="reminder" id="v2-acs-24plus-reminder" style="display: none;">
-                            A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit
-                            <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
+                    <div class="sub-option-group" id="v2-acs-new-sub-group" style="display: none;">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">New ACS since prior cath lab visit in this encounter?</p>
+                        <div class="option" data-type="radio" data-group="acs-new" data-value="yes" id="v2-acs-new-yes">Yes</div>
+                        <div class="option" data-type="radio" data-group="acs-new" data-value="no" id="v2-acs-new-no">No – continuation of prior ACS</div>
+                        <div class="sub-option-group" id="v2-acs-timing-group" style="display: none;">
+                            <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Use the ACS <strong>diagnosis date/time</strong> to determine the correct selection. The definition is based on when the patient has ACS (unstable angina, NSTEMI, or STEMI), so the time from diagnosis to Cath Lab presentation should guide your choice.</p>
+                            <a class="reference-link" onclick="showReference('ACS Timing'); event.stopPropagation();" style="display: block; margin-bottom: 10px;">Reference</a>
+                            <div class="option" data-type="indication" data-indication="ACS <= 24 hrs" data-indication-group="acs-indications" id="v2-acs-24">
+                                ACS ≤ 24 hrs
+                                <a class="definition-link" onclick="showDefinition('ACS <= 24 hrs'); event.stopPropagation();">View Definition</a>
+                            </div>
+                            <div class="option" data-type="indication" data-indication="ACS > 24 hrs" data-indication-group="acs-indications" id="v2-acs-24plus">
+                                ACS > 24 hrs
+                                <a class="definition-link" onclick="showDefinition('ACS > 24 hrs'); event.stopPropagation();">View Definition</a>
+                            </div>
+                            <div class="reminder" id="v2-acs-24plus-reminder" style="display: none;">
+                                A STEMI/NSTEMI which is diagnosed >7 days prior to the Cath Lab visit is considered 'over' by the registry and may no longer be captured as the Cath Lab or PCI indication. Please only code current symptoms/conditions prompting the Cath Lab visit
+                                <a class="reference-link" onclick="showReference('ACS > 24 hrs'); event.stopPropagation();">Reference</a>
+                            </div>
                         </div>
                     </div>
                     <div class="option" data-type="radio" data-group="acs" data-value="no" id="v2-acs-no">No - Move to next question</div>
