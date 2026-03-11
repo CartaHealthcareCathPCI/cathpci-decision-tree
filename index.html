@@ -1486,30 +1486,48 @@
             }
         }
 
-        // Update the visual state of the "No – continuation of prior ACS" option in Visit 2.
-        // This option is only valid when Visit 1 was Diagnostic Only.
-        // If Visit 1 was PCI or Attempted/Aborted PCI, the option is grayed out.
+        // Update the visible "No" option in Visit 2's ACS sub-question based on Visit 1 type.
+        // If Visit 1 was Diagnostic Only: show "No – continuation of prior ACS".
+        // If Visit 1 was PCI or Attempted/Aborted PCI: show plain "No" with registry explanation.
         function updateAcsNewNoState() {
             const acsNewNo = document.getElementById('v2-acs-new-no');
-            if (!acsNewNo) return;
+            const acsNewNoPci = document.getElementById('v2-acs-new-no-pci');
+            if (!acsNewNo && !acsNewNoPci) return;
 
             const visit1Type = visitTypes[1];
             if (visit1Type === 'pci' || visit1Type === 'attempted') {
-                acsNewNo.classList.add('option-unavailable');
-                // If it was already selected, deselect it and collapse the timing group
-                if (acsNewNo.classList.contains('selected')) {
-                    acsNewNo.classList.remove('selected');
-                    const timingGroup = document.getElementById('v2-acs-timing-group');
-                    if (timingGroup) timingGroup.style.display = 'none';
-                    const acs24 = document.getElementById('v2-acs-24');
-                    const acs24plus = document.getElementById('v2-acs-24plus');
-                    if (acs24) acs24.classList.remove('selected');
-                    if (acs24plus) acs24plus.classList.remove('selected');
-                    removeIndication('ACS <= 24 hrs', 2);
-                    removeIndication('ACS > 24 hrs', 2);
+                // Show the plain "No" option; hide the "continuation" option
+                if (acsNewNo) {
+                    acsNewNo.style.display = 'none';
+                    // If it was already selected, deselect it and collapse the timing group
+                    if (acsNewNo.classList.contains('selected')) {
+                        acsNewNo.classList.remove('selected');
+                        const timingGroup = document.getElementById('v2-acs-timing-group');
+                        if (timingGroup) timingGroup.style.display = 'none';
+                        const acs24 = document.getElementById('v2-acs-24');
+                        const acs24plus = document.getElementById('v2-acs-24plus');
+                        if (acs24) acs24.classList.remove('selected');
+                        if (acs24plus) acs24plus.classList.remove('selected');
+                        removeIndication('ACS <= 24 hrs', 2);
+                        removeIndication('ACS > 24 hrs', 2);
+                    }
                 }
+                if (acsNewNoPci) acsNewNoPci.style.display = '';
             } else {
-                acsNewNo.classList.remove('option-unavailable');
+                // Show the "continuation" option; hide the plain "No" option
+                if (acsNewNo) {
+                    acsNewNo.style.display = '';
+                    acsNewNo.classList.remove('option-unavailable');
+                }
+                if (acsNewNoPci) {
+                    // If the plain "No" was selected, deselect it and hide its reminder
+                    if (acsNewNoPci.classList.contains('selected')) {
+                        acsNewNoPci.classList.remove('selected');
+                        const reminder = document.getElementById('v2-acs-new-no-pci-reminder');
+                        if (reminder) reminder.style.display = 'none';
+                    }
+                    acsNewNoPci.style.display = 'none';
+                }
             }
         }
 
@@ -1751,6 +1769,10 @@
                         const acsNewNo = gel('acs-new-no', n);
                         if (acsNewYes) acsNewYes.classList.remove('selected');
                         if (acsNewNo) acsNewNo.classList.remove('selected');
+                        const acsNewNoPci = document.getElementById(vid('acs-new-no-pci', n));
+                        if (acsNewNoPci) acsNewNoPci.classList.remove('selected');
+                        const noPciReminder = document.getElementById(vid('acs-new-no-pci-reminder', n));
+                        if (noPciReminder) noPciReminder.style.display = 'none';
                         const acs24 = gel('acs-24', n);
                         const acs24plus = gel('acs-24plus', n);
                         if (acs24) acs24.classList.remove('selected');
@@ -1776,7 +1798,7 @@
 
             // Handle "New ACS?" sub-question for subsequent visits (only applies to visit 2)
             if (groupName === 'acs-new') {
-                // Clear any previously selected ACS timing options when switching between Yes/No
+                // Clear any previously selected ACS timing options when switching answers
                 const acs24 = gel('acs-24', n);
                 const acs24plus = gel('acs-24plus', n);
                 if (acs24) acs24.classList.remove('selected');
@@ -1786,19 +1808,18 @@
                 const timingGroup = gel('acs-timing-group', n);
                 if (timingGroup) timingGroup.style.display = 'none';
 
-                if (value === 'no') {
-                    // Check if Visit 1 was PCI or Attempted/Aborted PCI — if so, cannot select this
-                    const visit1Type = visitTypes[1];
-                    if (visit1Type === 'pci' || visit1Type === 'attempted') {
-                        // Prevent selection: deselect and show error
-                        const acsNewNo = gel('acs-new-no', n);
-                        if (acsNewNo) acsNewNo.classList.remove('selected');
-                        displayErrors(['Cannot select "No – continuation of prior ACS" because the first Cath Lab visit was a ' + caseTypeLabels[visit1Type] + '. This selection is only valid when the first Cath Lab visit was Diagnostic Only.'], n);
-                        return;
-                    }
+                // Always hide the PCI "No" reminder before deciding what to show
+                const noPciReminder = document.getElementById(vid('acs-new-no-pci-reminder', n));
+                if (noPciReminder) noPciReminder.style.display = 'none';
+
+                if (value === 'no-pci') {
+                    // Visit 1 was PCI/Attempted and user selected "No":
+                    // Show the registry explanation and do not show ACS timing options
+                    if (noPciReminder) noPciReminder.style.display = 'block';
+                    return;
                 }
 
-                // Show the ACS timing group for both Yes and No – continuation (when allowed)
+                // Show the ACS timing group for Yes and No – continuation (diagnostic path)
                 if (timingGroup) timingGroup.style.display = 'block';
             }
 
@@ -2533,11 +2554,15 @@
                     const acsNewNo = gel('acs-new-no', n);
                     if (acsNewYes) acsNewYes.classList.remove('selected');
                     if (acsNewNo) acsNewNo.classList.remove('selected');
+                    const acsNewNoPci = document.getElementById(vid('acs-new-no-pci', n));
+                    if (acsNewNoPci) acsNewNoPci.classList.remove('selected');
+                    const noPciReminder = document.getElementById(vid('acs-new-no-pci-reminder', n));
+                    if (noPciReminder) noPciReminder.style.display = 'none';
                 }
                 removeIndication('ACS <= 24 hrs', n);
                 removeIndication('ACS > 24 hrs', n);
             } else if (group === 'acs-new') {
-                // Deselecting a "New ACS?" answer: hide timing group and clear ACS selections
+                // Deselecting a "New ACS?" answer: hide timing group, clear ACS selections, hide PCI reminder
                 const tg = gel('acs-timing-group', n);
                 if (tg) tg.style.display = 'none';
                 const acs24 = gel('acs-24', n);
@@ -2546,6 +2571,8 @@
                 if (acs24plus) acs24plus.classList.remove('selected');
                 removeIndication('ACS <= 24 hrs', n);
                 removeIndication('ACS > 24 hrs', n);
+                const noPciReminder = document.getElementById(vid('acs-new-no-pci-reminder', n));
+                if (noPciReminder) noPciReminder.style.display = 'none';
             } else if (group === 'angina') {
                 const hg = gel('angina-history-group', n);
                 const cg = gel('angina-change-group', n);
@@ -2791,6 +2818,10 @@
                         <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">New ACS since prior cath lab visit in this encounter?</p>
                         <div class="option" data-type="radio" data-group="acs-new" data-value="yes" id="v2-acs-new-yes">Yes</div>
                         <div class="option" data-type="radio" data-group="acs-new" data-value="no" id="v2-acs-new-no">No – continuation of prior ACS</div>
+                        <div class="option" data-type="radio" data-group="acs-new" data-value="no-pci" id="v2-acs-new-no-pci" style="display: none;">No</div>
+                        <div class="reminder" id="v2-acs-new-no-pci-reminder" style="display: none;">
+                            When a patient receives PCI for any indication, that 'event' is considered 'over' by the registry. Thus, only current conditions/indications for THIS cath lab visit would be coded
+                        </div>
                         <div class="sub-option-group" id="v2-acs-timing-group" style="display: none;">
                             <p style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">Use the ACS <strong>diagnosis date/time</strong> to determine the correct selection. The definition is based on when the patient has ACS (unstable angina, NSTEMI, or STEMI), so the time from diagnosis to Cath Lab presentation should guide your choice.</p>
                             <a class="reference-link" onclick="showReference('ACS Timing'); event.stopPropagation();" style="display: block; margin-bottom: 10px;">Reference</a>
