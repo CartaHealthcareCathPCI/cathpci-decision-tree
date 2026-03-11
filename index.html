@@ -705,6 +705,24 @@
             font-weight: 600;
         }
 
+        .add-visit-button {
+            background: white;
+            border: 2px dashed #013349;
+            border-radius: 6px;
+            padding: 9px 22px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #013349;
+            cursor: pointer;
+            font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .add-visit-button:hover {
+            background: #e4eef5;
+            border-style: solid;
+        }
+
         .prescreening-summary-block {
             background: white;
             border-radius: 6px;
@@ -927,11 +945,13 @@
                 <div class="prescreening-question">How many Cath Lab visits occurred during this encounter?</div>
                 <div class="visit-count-buttons">
                     <div class="visit-count-btn" id="visit-count-1" onclick="selectVisitCount(1)">1</div>
-                    <div class="visit-count-btn" id="visit-count-2" onclick="selectVisitCount(2)">2</div>
-                    <div class="visit-count-btn" id="visit-count-3" onclick="selectVisitCount(3)">3+</div>
+                    <div class="visit-count-btn" id="visit-count-2" onclick="selectVisitCount(2)">2+</div>
                 </div>
                 <div class="visit-types-container" id="visit-types-container" style="display: none;">
                     <!-- Visit type rows will be dynamically inserted here -->
+                </div>
+                <div id="add-visit-btn" style="display: none; margin-top: 14px;">
+                    <button class="add-visit-button" onclick="addVisit()">+ Add Visit</button>
                 </div>
                 <div id="staging-question-container" style="display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid #c8d8e4;">
                     <div class="visit-type-label">Is Visit 2 a Staged procedure?</div>
@@ -1330,15 +1350,62 @@
             'attempted': 'Attempted or Aborted PCI'
         };
 
+        // Build a single visit-type row for a given visit number
+        function buildVisitTypeRow(visitNum) {
+            const row = document.createElement('div');
+            row.className = 'visit-type-row';
+            row.id = `visit-type-row-${visitNum}`;
+            row.innerHTML = `
+                <div class="visit-type-label">Visit ${visitNum} — What type of case was this?</div>
+                <div class="visit-type-options">
+                    <div class="visit-type-option" id="visit-${visitNum}-diagnostic"
+                         onclick="selectVisitType(${visitNum}, 'diagnostic')">
+                        Diagnostic Only
+                    </div>
+                    <div class="visit-type-option" id="visit-${visitNum}-pci"
+                         onclick="selectVisitType(${visitNum}, 'pci')">
+                        PCI
+                    </div>
+                    <div class="visit-type-option" id="visit-${visitNum}-attempted"
+                         onclick="selectVisitType(${visitNum}, 'attempted')">
+                        Attempted or Aborted PCI
+                    </div>
+                </div>
+            `;
+            return row;
+        }
+
+        // Show or hide the "+ Add Visit" button based on current visitCount
+        function updateAddVisitButton() {
+            const btn = document.getElementById('add-visit-btn');
+            if (!btn) return;
+            btn.style.display = (visitCount >= 2 && visitCount < 5) ? 'block' : 'none';
+        }
+
+        // Add one more visit (up to the 5-visit maximum)
+        function addVisit() {
+            if (visitCount >= 5) return;
+            visitCount++;
+            const container = document.getElementById('visit-types-container');
+            container.appendChild(buildVisitTypeRow(visitCount));
+            updateAddVisitButton();
+            updatePrescreeningSummary();
+            updateTreeLayout();
+            updateStagingQuestion();
+        }
+
         function selectVisitCount(count) {
-            // Deselect if already selected
-            if (visitCount === count) {
+            // Deselect: clicking "1" when already 1, or clicking "2+" when already 2+
+            const isAlreadySelected = (count === 1 && visitCount === 1) ||
+                                      (count === 2 && visitCount >= 2);
+            if (isAlreadySelected) {
                 visitCount = null;
                 visitTypes = {};
                 document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
                 const container = document.getElementById('visit-types-container');
                 container.style.display = 'none';
                 container.innerHTML = '';
+                updateAddVisitButton();
                 updatePrescreeningSummary();
                 updateTreeLayout();
                 updateStagingQuestion();
@@ -1352,41 +1419,15 @@
             document.querySelectorAll('.visit-count-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById(`visit-count-${count}`).classList.add('selected');
 
-            // Build visit type rows
+            // Build visit type rows (one per visit for initial count)
             const container = document.getElementById('visit-types-container');
             container.innerHTML = '';
-
-            const visitLabels = count === 1
-                ? ['Visit 1']
-                : count === 2
-                ? ['Visit 1', 'Visit 2']
-                : ['Visit 1', 'Visit 2', 'Visit 3 (and beyond)'];
-
-            visitLabels.forEach((label, index) => {
-                const visitNum = index + 1;
-                const row = document.createElement('div');
-                row.className = 'visit-type-row';
-                row.innerHTML = `
-                    <div class="visit-type-label">${label} — What type of case was this?</div>
-                    <div class="visit-type-options">
-                        <div class="visit-type-option" id="visit-${visitNum}-diagnostic"
-                             onclick="selectVisitType(${visitNum}, 'diagnostic')">
-                            Diagnostic Only
-                        </div>
-                        <div class="visit-type-option" id="visit-${visitNum}-pci"
-                             onclick="selectVisitType(${visitNum}, 'pci')">
-                            PCI
-                        </div>
-                        <div class="visit-type-option" id="visit-${visitNum}-attempted"
-                             onclick="selectVisitType(${visitNum}, 'attempted')">
-                            Attempted or Aborted PCI
-                        </div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
+            for (let i = 1; i <= count; i++) {
+                container.appendChild(buildVisitTypeRow(i));
+            }
 
             container.style.display = 'block';
+            updateAddVisitButton();
             updatePrescreeningSummary();
             updateTreeLayout();
             updateStagingQuestion();
@@ -1480,7 +1521,7 @@
             const combinedBlock2 = document.getElementById('combined-block-2');
             const combinedHeader1 = document.getElementById('combined-header-1');
 
-            if (visitCount === 2) {
+            if (visitCount >= 2) {
                 // Show visit labels on tree 1
                 if (tree1Label) tree1Label.style.display = 'block';
                 updateVisitLabel(1);
@@ -1507,17 +1548,6 @@
 
                 // Show combined summary visit 2 block
                 if (combinedBlock2) combinedBlock2.style.display = '';
-            } else if (visitCount === 3) {
-                // 3+ visits: show tree 1 only, show visit 1 header in combined summary
-                if (tree1Label) tree1Label.style.display = 'none';
-                if (combinedHeader1) combinedHeader1.style.display = 'block';
-                updateVisitLabel(1);
-
-                // Hide tree 2 if present
-                if (existingTree2) existingTree2.style.display = 'none';
-
-                // Hide combined block 2
-                if (combinedBlock2) combinedBlock2.style.display = 'none';
             } else {
                 // Single tree (1 visit) or no selection: hide all visit headers
                 if (tree1Label) tree1Label.style.display = 'none';
@@ -1558,7 +1588,7 @@
                 return;
             }
 
-            const countLabel = visitCount === 3 ? '3+' : String(visitCount);
+            const countLabel = String(visitCount);
             if (countEl) countEl.textContent = countLabel;
             if (metaRow) metaRow.style.display = 'block';
         }
@@ -1574,8 +1604,7 @@
             if (!container) return;
 
             const visit1IsPCI = visitTypes[1] && isPCIVisitType(visitTypes[1]);
-            const hasSubsequentPCI = (visitTypes[2] && isPCIVisitType(visitTypes[2])) ||
-                                     (visitTypes[3] && isPCIVisitType(visitTypes[3]));
+            const hasSubsequentPCI = [2, 3, 4, 5].some(n => visitTypes[n] && isPCIVisitType(visitTypes[n]));
 
             if (visit1IsPCI && hasSubsequentPCI) {
                 container.style.display = 'block';
@@ -2365,6 +2394,8 @@
             const visitTypesContainer = document.getElementById('visit-types-container');
             visitTypesContainer.style.display = 'none';
             visitTypesContainer.innerHTML = '';
+            const addVisitBtn = document.getElementById('add-visit-btn');
+            if (addVisitBtn) addVisitBtn.style.display = 'none';
 
             // Reset staging question UI
             const stagingContainer = document.getElementById('staging-question-container');
@@ -2411,7 +2442,7 @@
             }
 
             // Only align when both trees are visible side by side
-            if (visitCount !== 2 || !container1 || !container2) return;
+            if (visitCount < 2 || !container1 || !container2) return;
 
             const sections1 = container1.querySelectorAll('.step-section');
             const sections2 = container2.querySelectorAll('.step-section');
