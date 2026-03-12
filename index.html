@@ -928,6 +928,154 @@
             background: #f0f0f0;
             border-color: #ccc;
         }
+
+        /* ===== WIZARD CHROME ===== */
+        .wizard-chrome {
+            background: #f0f4f8;
+            border-bottom: 2px solid #d8e4ed;
+            padding: 14px 30px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .wizard-progress-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .wizard-visit-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .wizard-visit-badge.visit-1 { background: #FF6720; color: white; }
+        .wizard-visit-badge.visit-2 { background: #00AEC7; color: white; }
+        .wizard-visit-badge.results { background: #4caf50; color: white; }
+
+        .wizard-step-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .wizard-progress-track {
+            background: #d8e4ed;
+            border-radius: 4px;
+            height: 6px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .wizard-progress-fill {
+            background: linear-gradient(90deg, #FF6720, #ff9a6c);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.35s ease;
+        }
+
+        .wizard-dots {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .wizard-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccdae6;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .wizard-dot.active { background: #FF6720; transform: scale(1.4); }
+        .wizard-dot.completed { background: #4caf50; }
+        .wizard-dot.visit-2 { background: #a8dde8; }
+        .wizard-dot.visit-2.active { background: #00AEC7; transform: scale(1.4); }
+        .wizard-dot.visit-2.completed { background: #4caf50; }
+
+        .wizard-dot-divider {
+            width: 18px;
+            height: 2px;
+            background: #ccdae6;
+            margin: 0 3px;
+            flex-shrink: 0;
+        }
+
+        /* Wizard mode: single column, no side-by-side flex */
+        .trees-wrapper {
+            display: block !important;
+        }
+
+        /* Hide visit labels — wizard badge replaces them */
+        .visit-tree-label {
+            display: none !important;
+        }
+
+        .wizard-nav {
+            display: flex;
+            align-items: center;
+            padding: 16px 30px;
+            border-top: 2px solid #d8e4ed;
+            background: #f0f4f8;
+            gap: 10px;
+        }
+
+        .wizard-btn {
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .wizard-btn-back {
+            background: white;
+            border: 2px solid #d0d0d0;
+            color: #555;
+        }
+
+        .wizard-btn-back:hover { border-color: #FF6720; color: #FF6720; }
+
+        .wizard-btn-skip {
+            background: white;
+            border: 2px solid #d0d0d0;
+            color: #888;
+            font-size: 13px;
+            padding: 9px 18px;
+        }
+
+        .wizard-btn-skip:hover { border-color: #aaa; color: #555; }
+
+        .wizard-btn-next {
+            background: #FF6720;
+            color: white;
+            margin-left: auto;
+            border: 2px solid transparent;
+        }
+
+        .wizard-btn-next:hover { background: #e5581a; }
+
+        .wizard-btn-results {
+            background: #4caf50;
+            color: white;
+            margin-left: auto;
+            border: 2px solid transparent;
+        }
+
+        .wizard-btn-results:hover { background: #43a047; }
     </style>
 </head>
 <body>
@@ -938,6 +1086,18 @@
         </div>
         
         <div class="content">
+
+            <!-- Wizard Chrome: progress bar, dots, visit badge -->
+            <div id="wizard-chrome" class="wizard-chrome">
+                <div class="wizard-progress-area">
+                    <span id="wizard-visit-badge" class="wizard-visit-badge visit-1">Encounter Setup</span>
+                    <div class="wizard-progress-track">
+                        <div id="wizard-progress-fill" class="wizard-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <span id="wizard-step-label" class="wizard-step-label"></span>
+                </div>
+                <div id="wizard-dots" class="wizard-dots"></div>
+            </div>
 
             <!-- Pre-screening Questions -->
             <div class="prescreening-section">
@@ -1229,6 +1389,13 @@
 
             </div><!-- /tree-container-1 -->
             </div><!-- /trees-wrapper -->
+
+            <!-- Wizard Navigation: Back / Skip / Next -->
+            <div id="wizard-nav" class="wizard-nav">
+                <button id="wizard-back" class="wizard-btn wizard-btn-back" onclick="WizardController.back()">← Back</button>
+                <button id="wizard-skip" class="wizard-btn wizard-btn-skip" onclick="WizardController.skip()">Skip</button>
+                <button id="wizard-next" class="wizard-btn wizard-btn-next" onclick="WizardController.next()">Next →</button>
+            </div>
 
         <!-- Combined Summary Box -->
         <div class="combined-summary-section" id="combined-summary">
@@ -1581,8 +1748,8 @@
             // Update PCI column visibility for visit 1
             updatePCIIndicationVisibility(1);
 
-            // Sync step heights after layout changes
-            setTimeout(syncStepHeights, 0);
+            // Wizard: re-apply current step visibility after layout changes
+            WizardController.reapplyVisibility();
         }
 
         function updatePCIIndicationVisibility(visitNum) {
@@ -2445,7 +2612,7 @@
             if (label1) label1.style.display = 'none';
 
             closeErrorModal();
-            syncStepHeights();
+            WizardController.reset();
         }
 
         // Sync the height of corresponding step sections between Visit 1 and Visit 2
@@ -3039,9 +3206,240 @@
             `;
         }
 
+        // ===== WIZARD CONTROLLER =====
+        // Controls step-by-step navigation through the decision tree.
+        // Step 0 = prescreening, Steps 1-7 = Visit 1 clinical steps,
+        // Steps 8-14 = Visit 2 clinical steps, RESULTS_STEP = results screen.
+        const WizardController = {
+            currentStep: 0,
+            RESULTS_STEP: 99,
+
+            // Get all top-level .step-section elements within a tree container
+            getStepSections(visitNum) {
+                const container = document.getElementById(`tree-container-${visitNum}`);
+                if (!container) return [];
+                return Array.from(container.querySelectorAll(':scope > .step-section'));
+            },
+
+            // Parse a step number into type info
+            getStepInfo(step) {
+                if (step === 0) return { type: 'prescreening' };
+                if (step >= 1 && step <= 7) return { type: 'clinical', visit: 1, stepIdx: step - 1 };
+                if (step >= 8 && step <= 14) return { type: 'clinical', visit: 2, stepIdx: step - 8 };
+                if (step === this.RESULTS_STEP) return { type: 'results' };
+                return { type: 'unknown' };
+            },
+
+            // Show only the content for the given step; hide everything else
+            showStep(step) {
+                const prescreening = document.querySelector('.prescreening-section');
+                const treesWrapper = document.getElementById('trees-wrapper');
+                const combinedSummary = document.getElementById('combined-summary');
+                const wizardNav = document.getElementById('wizard-nav');
+                const tree1 = document.getElementById('tree-container-1');
+                const tree2 = document.getElementById('tree-container-2');
+
+                // Hide all content areas
+                if (prescreening) prescreening.style.display = 'none';
+                if (treesWrapper) treesWrapper.style.display = 'none';
+                if (combinedSummary) combinedSummary.style.display = 'none';
+                if (tree1) tree1.style.display = 'none';
+                if (tree2) tree2.style.display = 'none';
+
+                // Hide all step sections in both trees
+                [1, 2].forEach(visitNum => {
+                    this.getStepSections(visitNum).forEach(s => s.style.display = 'none');
+                });
+
+                const info = this.getStepInfo(step);
+
+                if (info.type === 'prescreening') {
+                    if (prescreening) prescreening.style.display = '';
+                } else if (info.type === 'clinical') {
+                    if (treesWrapper) treesWrapper.style.display = '';
+                    const treeEl = document.getElementById(`tree-container-${info.visit}`);
+                    if (treeEl) treeEl.style.display = '';
+                    const sections = this.getStepSections(info.visit);
+                    if (sections[info.stepIdx]) {
+                        sections[info.stepIdx].style.display = '';
+                    }
+                } else if (info.type === 'results') {
+                    if (combinedSummary) combinedSummary.style.display = '';
+                }
+
+                // Show wizard nav on all steps except results
+                if (wizardNav) {
+                    wizardNav.style.display = info.type === 'results' ? 'none' : '';
+                }
+
+                this.currentStep = step;
+                this.updateChrome(step);
+            },
+
+            next() {
+                if (this.currentStep === 0) {
+                    this.showStep(1);
+                } else if (this.currentStep >= 1 && this.currentStep <= 7) {
+                    if (this.currentStep === 7) {
+                        if (visitCount >= 2) {
+                            // Ensure Visit 2 tree exists in the DOM before navigating to it
+                            if (!document.getElementById('tree-container-2')) {
+                                updateTreeLayout();
+                            }
+                            this.showStep(8);
+                        } else {
+                            this.showStep(this.RESULTS_STEP);
+                        }
+                    } else {
+                        this.showStep(this.currentStep + 1);
+                    }
+                } else if (this.currentStep >= 8 && this.currentStep <= 14) {
+                    if (this.currentStep === 14) {
+                        this.showStep(this.RESULTS_STEP);
+                    } else {
+                        this.showStep(this.currentStep + 1);
+                    }
+                }
+            },
+
+            back() {
+                if (this.currentStep === 0) return;
+                if (this.currentStep === this.RESULTS_STEP) {
+                    this.showStep(visitCount >= 2 ? 14 : 7);
+                } else if (this.currentStep === 8) {
+                    this.showStep(7);
+                } else {
+                    this.showStep(this.currentStep - 1);
+                }
+            },
+
+            skip() {
+                this.next();
+            },
+
+            // Re-apply current step visibility after external layout changes (e.g. updateTreeLayout)
+            reapplyVisibility() {
+                let target = this.currentStep;
+                // Safety: if on Visit 2 steps but visitCount is now 1, return to prescreening
+                if (target >= 8 && target <= 14 && !(visitCount >= 2)) {
+                    target = 0;
+                }
+                this.showStep(target);
+            },
+
+            reset() {
+                this.currentStep = 0;
+                this.showStep(0);
+            },
+
+            updateChrome(step) {
+                const info = this.getStepInfo(step);
+
+                // Visit badge
+                const badge = document.getElementById('wizard-visit-badge');
+                if (badge) {
+                    if (info.type === 'prescreening') {
+                        badge.textContent = 'Encounter Setup';
+                        badge.className = 'wizard-visit-badge visit-1';
+                    } else if (info.type === 'clinical' && info.visit === 1) {
+                        badge.textContent = 'Visit 1';
+                        badge.className = 'wizard-visit-badge visit-1';
+                    } else if (info.type === 'clinical' && info.visit === 2) {
+                        badge.textContent = 'Visit 2';
+                        badge.className = 'wizard-visit-badge visit-2';
+                    } else if (info.type === 'results') {
+                        badge.textContent = 'Results';
+                        badge.className = 'wizard-visit-badge results';
+                    }
+                }
+
+                // Step label
+                const stepLabel = document.getElementById('wizard-step-label');
+                if (stepLabel) {
+                    if (info.type === 'results') {
+                        stepLabel.textContent = 'Complete';
+                    } else if (info.type === 'prescreening') {
+                        stepLabel.textContent = '';
+                    } else {
+                        stepLabel.textContent = `Step ${info.stepIdx + 1} of 7`;
+                    }
+                }
+
+                // Progress bar (shows per-visit progress, 0–100%)
+                const fill = document.getElementById('wizard-progress-fill');
+                if (fill) {
+                    let pct = 0;
+                    if (info.type === 'results') {
+                        pct = 100;
+                    } else if (info.type === 'clinical') {
+                        pct = ((info.stepIdx + 1) / 7) * 100;
+                    }
+                    fill.style.width = pct + '%';
+                }
+
+                // Dot navigation
+                this.renderDots(step);
+
+                // Nav buttons
+                const backBtn = document.getElementById('wizard-back');
+                const skipBtn = document.getElementById('wizard-skip');
+                const nextBtn = document.getElementById('wizard-next');
+
+                if (backBtn) backBtn.style.display = step === 0 ? 'none' : '';
+                if (skipBtn) skipBtn.style.display = info.type === 'results' ? 'none' : '';
+                if (nextBtn) {
+                    if (info.type === 'results') {
+                        nextBtn.style.display = 'none';
+                    } else if ((step === 7 && !(visitCount >= 2)) || step === 14) {
+                        nextBtn.textContent = 'View Results ✓';
+                        nextBtn.className = 'wizard-btn wizard-btn-results';
+                        nextBtn.style.display = '';
+                    } else {
+                        nextBtn.textContent = 'Next →';
+                        nextBtn.className = 'wizard-btn wizard-btn-next';
+                        nextBtn.style.display = '';
+                    }
+                }
+            },
+
+            renderDots(currentStep) {
+                const dotsEl = document.getElementById('wizard-dots');
+                if (!dotsEl) return;
+
+                const info = this.getStepInfo(currentStep);
+                const numVisits = visitCount >= 2 ? 2 : 1;
+                const stepNames = [
+                    'Acute Coronary Syndrome', 'Angina', 'CAD History',
+                    'Cardiac Arrest', 'Non-Ischemic/Structural', 'Non-Cardiac/Evaluation', 'Other'
+                ];
+
+                let html = '';
+                for (let v = 1; v <= numVisits; v++) {
+                    if (v === 2) html += '<div class="wizard-dot-divider"></div>';
+                    for (let s = 1; s <= 7; s++) {
+                        const stepNum = v === 1 ? s : s + 7;
+                        let cls = 'wizard-dot' + (v === 2 ? ' visit-2' : '');
+                        const isActive = info.type === 'clinical' && info.visit === v && info.stepIdx === s - 1;
+                        const isPast = info.type === 'results' ||
+                            (info.type === 'clinical' && info.visit === 2 && v === 1) ||
+                            (info.type === 'clinical' && info.visit === v && (s - 1) < info.stepIdx);
+                        if (isActive) cls += ' active';
+                        else if (isPast) cls += ' completed';
+                        html += `<div class="${cls}" title="${stepNames[s - 1]}"></div>`;
+                    }
+                }
+                dotsEl.innerHTML = html;
+            },
+
+            init() {
+                this.showStep(0);
+            }
+        };
+
         // Attach event listeners when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             attachOptionClickListeners();
+            WizardController.init();
         });
     </script>
 </body>
