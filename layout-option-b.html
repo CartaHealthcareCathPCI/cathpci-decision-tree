@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Option B – Step-by-Step Wizard | CathPCI Decision Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #e8edf2;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .layout-label {
+            background: #013349;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            text-align: center;
+        }
+
+        .header {
+            background: #013349;
+            color: white;
+            padding: 22px 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p  { font-size: 13px; opacity: 0.85; }
+
+        /* ── Progress bar & breadcrumb ── */
+        .progress-area {
+            background: #f0f5f9;
+            padding: 16px 24px;
+            border-bottom: 1px solid #d4e0e8;
+        }
+
+        .visit-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .visit-badge.v1 { background: #FF6720; color: white; }
+        .visit-badge.v2 { background: #00AEC7; color: white; }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .progress-label .step-name { font-size: 14px; font-weight: 700; color: #013349; }
+        .progress-label .step-counter { font-size: 12px; color: #888; }
+
+        .progress-track {
+            height: 8px;
+            background: #d4e0e8;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #FF6720;
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .progress-fill.v2 { background: #00AEC7; }
+
+        /* ── Step dots ── */
+        .step-dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #d4e0e8;
+            color: #888;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .dot.done { background: #4caf50; color: white; }
+        .dot.current { background: #FF6720; color: white; width: 32px; height: 32px; font-size: 13px; }
+        .dot.current.v2 { background: #00AEC7; }
+        .dot.visit-divider {
+            width: 1px;
+            background: #b0b8c0;
+            height: 28px;
+            border-radius: 0;
+        }
+
+        /* ── Main card ── */
+        .step-card {
+            padding: 28px 30px;
+        }
+
+        .section-chip {
+            display: inline-block;
+            background: #FF6720;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        .section-chip.v2 { background: #00AEC7; }
+
+        .step-question {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .step-hint {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid #c8c8c8;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .option:hover { border-color: #FF6720; background: #fff8f5; }
+        .option:hover::before { border-color: #FF6720; }
+        .option.selected { border-color: #FF6720; background: #C6DAE7; font-weight: 600; }
+        .option.selected::before {
+            background: #FF6720;
+            border-color: #FF6720;
+            box-shadow: inset 0 0 0 3px white;
+        }
+        .option.checkbox::before { border-radius: 3px; }
+        .option.checkbox.selected::before { border-radius: 3px; background: #FF6720; }
+
+        /* v2 color variants */
+        .v2-mode .option:hover { border-color: #00AEC7; }
+        .v2-mode .option:hover::before { border-color: #00AEC7; }
+        .v2-mode .option.selected { border-color: #00AEC7; }
+        .v2-mode .option.selected::before { background: #00AEC7; border-color: #00AEC7; }
+
+        .reminder-box {
+            background: #FFF8E6;
+            border: 2px solid #F1C400;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #013349;
+            line-height: 1.5;
+            font-weight: 500;
+            display: none;
+        }
+        .reminder-box.show { display: block; }
+
+        /* ── Nav buttons ── */
+        .nav-bar {
+            padding: 16px 30px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .btn-ghost { background: transparent; border-color: #c0c0c0; color: #555; }
+        .btn-ghost:hover { border-color: #013349; color: #013349; }
+        .btn-primary { background: #013349; color: white; border-color: #013349; }
+        .btn-primary:hover { background: #024a68; }
+        .btn-primary:disabled { background: #b0b8c0; border-color: #b0b8c0; cursor: not-allowed; }
+        .btn-success { background: #4caf50; color: white; border-color: #4caf50; }
+        .btn-success:hover { background: #388e3c; }
+
+        .skip-link {
+            font-size: 12px;
+            color: #aaa;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .skip-link:hover { color: #666; }
+
+        /* ── Results screen ── */
+        .results-screen { display: none; padding: 28px 30px; }
+        .results-screen.show { display: block; }
+
+        .results-heading {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .results-heading .check-circle {
+            background: #4caf50;
+            color: white;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .result-visit-block {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        .result-visit-header {
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+        }
+        .result-visit-header.v1 { background: #FF6720; }
+        .result-visit-header.v2 { background: #00AEC7; }
+        .result-visit-body { padding: 16px 18px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .result-col { flex: 1; min-width: 180px; }
+        .result-col-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .result-pill {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 13px;
+            display: inline-block;
+            margin: 3px 3px 3px 0;
+            color: #2e7d32;
+        }
+        .result-pci {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .note-box {
+            background: #FFF8E6;
+            border: 2px solid #F1C400;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #013349;
+            line-height: 1.6;
+        }
+        .note-box strong { display: block; margin-bottom: 4px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="layout-label">Layout Option B &mdash; Step-by-Step Wizard</div>
+
+    <div class="header">
+        <h1>Cath Lab Indications &amp; PCI Indication Decision Guide</h1>
+        <p>NCDR CathPCI Registry&reg; Cath Lab Indication and PCI Indication Selection Tool</p>
+    </div>
+
+    <!-- Main wizard area -->
+    <div id="wizard-area">
+
+        <!-- Progress area -->
+        <div class="progress-area" id="progress-area">
+            <span class="visit-badge v1" id="visit-badge">Visit 1</span>
+            <div class="progress-label">
+                <span class="step-name" id="step-name-label">Step 1 of 7 &mdash; Acute Coronary Syndrome</span>
+                <span class="step-counter" id="step-counter-label">1 / 7</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill" style="width: 14%;"></div>
+            </div>
+            <div class="step-dots" id="step-dots">
+                <div class="dot current" id="dot-0" onclick="goToStep(0)">1</div>
+                <div class="dot" id="dot-1" onclick="goToStep(1)">2</div>
+                <div class="dot" id="dot-2" onclick="goToStep(2)">3</div>
+                <div class="dot" id="dot-3" onclick="goToStep(3)">4</div>
+                <div class="dot" id="dot-4" onclick="goToStep(4)">5</div>
+                <div class="dot" id="dot-5" onclick="goToStep(5)">6</div>
+                <div class="dot" id="dot-6" onclick="goToStep(6)">7</div>
+                <!-- Visit 2 dots shown when 2 visits selected -->
+                <div class="dot visit-divider" id="visit-divider" style="display:none;"></div>
+                <div class="dot" id="dot-v2-0" style="display:none;" onclick="goToStep(7)">1</div>
+                <div class="dot" id="dot-v2-1" style="display:none;" onclick="goToStep(8)">2</div>
+                <div class="dot" id="dot-v2-2" style="display:none;" onclick="goToStep(9)">3</div>
+                <div class="dot" id="dot-v2-3" style="display:none;" onclick="goToStep(10)">4</div>
+                <div class="dot" id="dot-v2-4" style="display:none;" onclick="goToStep(11)">5</div>
+                <div class="dot" id="dot-v2-5" style="display:none;" onclick="goToStep(12)">6</div>
+                <div class="dot" id="dot-v2-6" style="display:none;" onclick="goToStep(13)">7</div>
+            </div>
+        </div>
+
+        <!-- Step card -->
+        <div class="step-card" id="step-card">
+            <div class="note-box" id="intro-note" style="display:none;">
+                <strong>How this layout works:</strong>
+                Answer one question at a time. Use Back / Next to navigate, or click a dot above to jump to a step. After finishing Visit 1, continue to Visit 2 (if applicable). Results are shown at the end.
+            </div>
+
+            <div id="section-chip-el" class="section-chip">Acute Coronary Syndrome</div>
+
+            <div class="step-question" id="step-question">
+                Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?
+            </div>
+            <div class="step-hint" id="step-hint">
+                Select Yes if the primary reason for this Cath Lab visit is an acute coronary syndrome diagnosis.
+            </div>
+
+            <div id="options-area">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="reminder-box" id="reminder-box"></div>
+        </div>
+
+        <!-- Nav -->
+        <div class="nav-bar">
+            <button class="btn btn-ghost" id="btn-back" onclick="prevStep()">&#8592; Back</button>
+            <span class="skip-link" id="skip-link" onclick="skipStep()">Skip this step</span>
+            <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Next &#8594;</button>
+        </div>
+
+    </div>
+
+    <!-- Results screen -->
+    <div class="results-screen" id="results-screen">
+        <div class="results-heading">
+            <div class="check-circle">&#10003;</div>
+            Results Summary
+        </div>
+
+        <div class="result-visit-block">
+            <div class="result-visit-header v1">Visit 1</div>
+            <div class="result-visit-body">
+                <div class="result-col">
+                    <div class="result-col-label">Cath Lab Indications</div>
+                    <span class="result-pill">ACS ≤ 24 hrs</span>
+                    <span class="result-pill">Valvular Disease</span>
+                </div>
+                <div class="result-col">
+                    <div class="result-col-label">PCI Indication</div>
+                    <div class="result-pci">NSTE-ACS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-visit-block" id="result-visit2-block" style="display:none;">
+            <div class="result-visit-header v2">Visit 2</div>
+            <div class="result-visit-body">
+                <div class="result-col">
+                    <div class="result-col-label">Cath Lab Indications</div>
+                    <em style="color:#aaa; font-size:13px;">None selected</em>
+                </div>
+                <div class="result-col">
+                    <div class="result-col-label">PCI Indication</div>
+                    <em style="color:#aaa; font-size:13px;">—</em>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button class="btn btn-ghost" onclick="goToStep(0); document.getElementById('results-screen').classList.remove('show'); document.getElementById('wizard-area').style.display='';">&#8592; Edit Selections</button>
+            <button class="btn btn-success" onclick="alert('Copy to clipboard / export')">Copy Results</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const STEPS = [
+    // Visit 1
+    {
+        visit: 1,
+        section: 'Acute Coronary Syndrome',
+        question: 'Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?',
+        hint: 'Use the ACS diagnosis date/time to determine the correct selection.',
+        type: 'radio',
+        options: ['Yes — proceed to ACS timing', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 1,
+        section: 'Angina',
+        question: 'Has the patient experienced Chest Pain or a documented anginal equivalent prior to this Cath Lab visit?',
+        hint: 'Include documented anginal equivalents such as dyspnea, arm pain, or jaw pain.',
+        type: 'radio',
+        options: ['Yes', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 1,
+        section: 'Coronary Artery Disease History',
+        question: 'Does the patient have a history of CAD?',
+        hint: 'Prior MI, Prior PCI, Prior CABG, ≥50% stenosis confirmed by diagnostic catheterization, or Obstructive CAD on Cardiac CTA.',
+        type: 'radio',
+        options: ['Yes — Assess stability', 'No — Consider Suspected CAD'],
+        reminder: ''
+    },
+    {
+        visit: 1,
+        section: 'Cardiac Arrest',
+        question: 'Is the patient being brought to the Cath Lab following a Cardiac Arrest?',
+        hint: '',
+        type: 'radio',
+        options: ['Yes — Resuscitated Cardiac Arrest', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 1,
+        section: 'Non-Ischemic / Structural Heart Disease',
+        question: 'Is this Cath Lab visit prompted by a Non-Ischemic or Structural issue?',
+        hint: 'Select any/all that apply to THIS Cath Lab visit:',
+        type: 'checkbox',
+        options: ['Valvular Disease', 'Pericardial Disease', 'Cardiac Arrhythmia', 'Cardiomyopathy', 'LV Dysfunction', 'Syncope', 'Post Cardiac Transplant'],
+        reminder: ''
+    },
+    {
+        visit: 1,
+        section: 'Non-Cardiac / Evaluation',
+        question: 'Is the patient being seen in the Cath Lab for a Non-Cardiac or Evaluation reason?',
+        hint: 'Select all that apply.',
+        type: 'checkbox',
+        options: ['Pre-Operative Evaluation', 'Evaluation for Exercise Clearance'],
+        reminder: 'TAVR evaluations should be captured with Valvular Disease, not Pre-Operative Evaluation.'
+    },
+    {
+        visit: 1,
+        section: 'Other Indications',
+        question: 'If NO OTHER INDICATIONS apply to this Cath Lab scenario:',
+        hint: 'Other should be used very rarely and ONLY when no other indications apply.',
+        type: 'checkbox',
+        options: ['Other'],
+        reminder: 'Other should be used very rarely. If the only reason listed is "Abnormal Stress Test", this does NOT support coding Other.'
+    },
+    // Visit 2 (same steps, v2 flag)
+    {
+        visit: 2,
+        section: 'Acute Coronary Syndrome',
+        question: 'Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?',
+        hint: 'Use the ACS diagnosis date/time to determine the correct selection.',
+        type: 'radio',
+        options: ['Yes — proceed to ACS timing', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Angina',
+        question: 'Has the patient experienced Chest Pain or a documented anginal equivalent prior to this Cath Lab visit?',
+        hint: '',
+        type: 'radio',
+        options: ['Yes', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Coronary Artery Disease History',
+        question: 'Does the patient have a history of CAD?',
+        hint: 'Prior MI, Prior PCI, Prior CABG, ≥50% stenosis, or Obstructive CAD on CTA.',
+        type: 'radio',
+        options: ['Yes — Assess stability', 'No — Consider Suspected CAD'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Cardiac Arrest',
+        question: 'Is the patient being brought to the Cath Lab following a Cardiac Arrest?',
+        hint: '',
+        type: 'radio',
+        options: ['Yes — Resuscitated Cardiac Arrest', 'No — Move to next question'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Non-Ischemic / Structural Heart Disease',
+        question: 'Is this Cath Lab visit prompted by a Non-Ischemic or Structural issue?',
+        hint: 'Select any/all that apply to THIS Cath Lab visit:',
+        type: 'checkbox',
+        options: ['Valvular Disease', 'Pericardial Disease', 'Cardiac Arrhythmia', 'Cardiomyopathy', 'LV Dysfunction', 'Syncope', 'Post Cardiac Transplant'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Non-Cardiac / Evaluation',
+        question: 'Is the patient being seen in the Cath Lab for a Non-Cardiac or Evaluation reason?',
+        hint: '',
+        type: 'checkbox',
+        options: ['Pre-Operative Evaluation', 'Evaluation for Exercise Clearance'],
+        reminder: ''
+    },
+    {
+        visit: 2,
+        section: 'Other Indications',
+        question: 'If NO OTHER INDICATIONS apply to this Cath Lab scenario:',
+        hint: '',
+        type: 'checkbox',
+        options: ['Other'],
+        reminder: ''
+    }
+];
+
+let currentStep = 0;
+let numVisits = 1;
+let answers = {};
+
+function renderStep(idx) {
+    currentStep = idx;
+    const s = STEPS[idx];
+    const isV2 = s.visit === 2;
+    const card = document.getElementById('step-card');
+
+    // Visit badge
+    const badge = document.getElementById('visit-badge');
+    badge.textContent = 'Visit ' + s.visit;
+    badge.className = 'visit-badge ' + (isV2 ? 'v2' : 'v1');
+
+    // Section chip
+    const chip = document.getElementById('section-chip-el');
+    chip.textContent = s.section;
+    chip.className = 'section-chip' + (isV2 ? ' v2' : '');
+
+    // Question / hint
+    document.getElementById('step-question').textContent = s.question;
+    document.getElementById('step-hint').textContent = s.hint;
+
+    // Options
+    const area = document.getElementById('options-area');
+    area.innerHTML = '';
+    const savedAnswers = answers[idx] || [];
+    s.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option' + (s.type === 'checkbox' ? ' checkbox' : '');
+        if (savedAnswers.includes(i)) div.classList.add('selected');
+        div.textContent = opt;
+        div.addEventListener('click', () => {
+            if (s.type === 'radio') {
+                area.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                div.classList.add('selected');
+                answers[idx] = [i];
+            } else {
+                div.classList.toggle('selected');
+                const sel = [];
+                area.querySelectorAll('.option').forEach((o, j) => { if (o.classList.contains('selected')) sel.push(j); });
+                answers[idx] = sel;
+            }
+            // Show reminder if option with reminder
+            if (s.reminder && div.classList.contains('selected')) {
+                showReminder(s.reminder);
+            }
+        });
+        area.appendChild(div);
+    });
+
+    // v2 color mode
+    card.className = 'step-card' + (isV2 ? ' v2-mode' : '');
+
+    // Reminder
+    document.getElementById('reminder-box').textContent = '';
+    document.getElementById('reminder-box').className = 'reminder-box';
+
+    // Progress
+    const totalSteps = numVisits === 2 ? 14 : 7;
+    const pct = Math.round(((idx + 1) / totalSteps) * 100);
+    const fill = document.getElementById('progress-fill');
+    fill.style.width = pct + '%';
+    fill.className = 'progress-fill' + (isV2 ? ' v2' : '');
+
+    const stepNum = (idx % 7) + 1;
+    document.getElementById('step-name-label').textContent = 'Step ' + stepNum + ' of 7 — ' + s.section;
+    document.getElementById('step-counter-label').textContent = stepNum + ' / 7';
+
+    // Dots
+    for (let d = 0; d < 7; d++) {
+        const dot = document.getElementById('dot-' + d);
+        dot.textContent = d + 1;
+        dot.className = 'dot';
+        if (d < idx && idx < 7) dot.classList.add('done');
+        if (d === idx && idx < 7) dot.classList.add('current');
+    }
+    if (numVisits === 2) {
+        for (let d = 0; d < 7; d++) {
+            const dot = document.getElementById('dot-v2-' + d);
+            dot.textContent = d + 1;
+            dot.className = 'dot';
+            const gi = d + 7;
+            if (gi < idx) dot.classList.add('done');
+            if (gi === idx) { dot.classList.add('current'); dot.classList.add('v2'); }
+        }
+    }
+
+    // Buttons
+    document.getElementById('btn-back').style.visibility = idx === 0 ? 'hidden' : 'visible';
+    const isLast = (numVisits === 1 && idx === 6) || (numVisits === 2 && idx === 13);
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.textContent = isLast ? 'View Results →' : 'Next →';
+
+    document.getElementById('intro-note').style.display = idx === 0 ? '' : 'none';
+}
+
+function showReminder(text) {
+    const box = document.getElementById('reminder-box');
+    box.textContent = text;
+    box.classList.add('show');
+}
+
+function nextStep() {
+    const maxStep = numVisits === 2 ? 13 : 6;
+    if (currentStep >= maxStep) {
+        document.getElementById('wizard-area').style.display = 'none';
+        document.getElementById('results-screen').classList.add('show');
+        if (numVisits === 2) document.getElementById('result-visit2-block').style.display = '';
+        return;
+    }
+    renderStep(currentStep + 1);
+}
+
+function prevStep() {
+    if (currentStep > 0) renderStep(currentStep - 1);
+}
+
+function skipStep() {
+    delete answers[currentStep];
+    nextStep();
+}
+
+function goToStep(idx) {
+    const maxStep = numVisits === 2 ? 13 : 6;
+    if (idx <= maxStep) renderStep(idx);
+}
+
+// Show v2 dots when visit count is 2
+document.querySelectorAll('.count-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const n = parseInt(btn.dataset.visits);
+        numVisits = n;
+        ['visit-divider', 'dot-v2-0', 'dot-v2-1', 'dot-v2-2', 'dot-v2-3', 'dot-v2-4', 'dot-v2-5', 'dot-v2-6'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = n === 2 ? '' : 'none';
+        });
+        renderStep(currentStep);
+    });
+});
+
+// Initial render
+renderStep(0);
+document.getElementById('intro-note').style.display = '';
+</script>
+</body>
+</html>
