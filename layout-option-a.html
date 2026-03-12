@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Option A – Tab-Based | CathPCI Decision Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #e8edf2;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: #013349;
+            color: white;
+            padding: 24px 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 22px; margin-bottom: 6px; }
+        .header p  { font-size: 13px; opacity: 0.85; }
+
+        /* ── Encounter bar ── */
+        .encounter-bar {
+            background: #f0f5f9;
+            border-bottom: 2px solid #c8d8e4;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .encounter-bar .label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #013349;
+            white-space: nowrap;
+        }
+        .count-btn {
+            border: 2px solid #c8d8e4;
+            background: white;
+            border-radius: 6px;
+            padding: 6px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .count-btn.active {
+            border-color: #013349;
+            background: #C6DAE7;
+        }
+        .count-btn:hover { border-color: #013349; }
+
+        /* ── Visit Tabs ── */
+        .tab-bar {
+            display: flex;
+            border-bottom: 3px solid #e0e0e0;
+            background: #f8f9fa;
+            padding: 0 24px;
+        }
+        .tab {
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+            color: #666;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab.active {
+            color: #FF6720;
+            border-bottom-color: #FF6720;
+        }
+        .tab:hover:not(.active) { color: #333; }
+        .tab .badge {
+            background: #4caf50;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tab.tab-visit2 { display: none; }
+        .tab.tab-visit2.visible { display: flex; }
+
+        /* ── Tab Panels ── */
+        .tab-panel { display: none; padding: 24px; }
+        .tab-panel.active { display: block; }
+
+        .visit-subheading {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        /* ── Steps ── */
+        .step-section {
+            background: #f8f9fa;
+            border-left: 4px solid #FF6720;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .tab-panel.visit2 .step-section { border-left-color: #00AEC7; }
+
+        .section-heading {
+            background: #FF6720;
+            color: white;
+            padding: 8px 20px;
+            margin: -20px -20px 16px -20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab-panel.visit2 .section-heading { background: #00AEC7; }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .option:hover { border-color: #FF6720; background: #fff8f5; }
+        .option.selected { border-color: #FF6720; background: #C6DAE7; font-weight: 600; }
+
+        .tab-panel.visit2 .option:hover  { border-color: #00AEC7; }
+        .tab-panel.visit2 .option.selected { border-color: #00AEC7; background: #C6DAE7; }
+
+        .option-group { margin-left: 0; margin-top: 10px; }
+
+        /* ── Summary Tab ── */
+        .summary-panel {
+            padding: 24px;
+        }
+        .summary-visit-block {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .summary-visit-header {
+            background: #FF6720;
+            color: white;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .summary-visit-header.v2 { background: #00AEC7; }
+        .summary-visit-body { padding: 16px 18px; display: flex; gap: 20px; }
+        .summary-col { flex: 1; }
+        .summary-col-label { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .indication-pill {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 13px;
+            display: inline-block;
+            margin: 3px 3px 3px 0;
+            color: #2e7d32;
+        }
+        .pci-result {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .empty-state { color: #aaa; font-size: 13px; font-style: italic; }
+
+        /* ── Reset / Nav buttons ── */
+        .bottom-bar {
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 9px 22px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .btn-outline {
+            background: white;
+            border-color: #c0c0c0;
+            color: #444;
+        }
+        .btn-outline:hover { border-color: #013349; color: #013349; }
+        .btn-primary {
+            background: #013349;
+            color: white;
+            border-color: #013349;
+        }
+        .btn-primary:hover { background: #024a68; }
+
+        /* ── Annotation label ── */
+        .layout-label {
+            background: #013349;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            text-align: center;
+        }
+
+        .note-box {
+            background: #FFF8E6;
+            border: 2px solid #F1C400;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 0 24px 20px;
+            font-size: 13px;
+            color: #013349;
+            line-height: 1.6;
+        }
+        .note-box strong { display: block; margin-bottom: 4px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="layout-label">Layout Option A &mdash; Tab-Based Visit Navigation</div>
+
+    <div class="header">
+        <h1>Cath Lab Indications &amp; PCI Indication Decision Guide</h1>
+        <p>NCDR CathPCI Registry&reg; Cath Lab Indication and PCI Indication Selection Tool</p>
+    </div>
+
+    <!-- Encounter bar -->
+    <div class="encounter-bar">
+        <span class="label">Cath Lab visits this encounter:</span>
+        <div style="display:flex; gap:8px;">
+            <div class="count-btn active" onclick="selectCount(1, this)">1</div>
+            <div class="count-btn" onclick="selectCount(2, this)">2+</div>
+        </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('visit1', this)">Visit 1</div>
+        <div class="tab tab-visit2" id="tab-visit2" onclick="switchTab('visit2', this)">
+            Visit 2
+        </div>
+        <div class="tab" onclick="switchTab('summary', this)" style="margin-left: auto;">
+            Results Summary
+        </div>
+    </div>
+
+    <!-- Visit 1 panel -->
+    <div class="tab-panel active" id="panel-visit1">
+        <div class="visit-subheading">Indicate the patient symptoms or condition prompting Visit 1</div>
+
+        <div class="note-box">
+            <strong>How this layout works:</strong>
+            Complete all 7 steps for Visit 1, then switch to the Visit 2 tab (if applicable). Results are consolidated in the Summary tab. Each visit has its own independent decision tree.
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 1 &mdash; Acute Coronary Syndrome</div>
+            <div class="step-title">Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 2 &mdash; Angina</div>
+            <div class="step-title">Has the patient experienced Chest Pain or a documented anginal equivalent prior to this visit?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 3 &mdash; Coronary Artery Disease History</div>
+            <div class="step-title">Does the patient have a history of Prior MI, Prior PCI, Prior CABG, ≥50% stenosis, or Obstructive CAD on CTA?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 4 &mdash; Cardiac Arrest</div>
+            <div class="step-title">Is the patient being brought to the Cath Lab following a Cardiac Arrest?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes — Resuscitated Cardiac Arrest</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 5 &mdash; Non-Ischemic / Structural Heart Disease</div>
+            <div class="step-title">Select any/all that apply to THIS Cath Lab visit:</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Valvular Disease</div>
+                <div class="option" onclick="toggle(this)">Pericardial Disease</div>
+                <div class="option" onclick="toggle(this)">Cardiac Arrhythmia</div>
+                <div class="option" onclick="toggle(this)">Cardiomyopathy</div>
+                <div class="option" onclick="toggle(this)">LV Dysfunction</div>
+                <div class="option" onclick="toggle(this)">Syncope</div>
+                <div class="option" onclick="toggle(this)">Post Cardiac Transplant</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 6 &mdash; Non-Cardiac / Evaluation</div>
+            <div class="step-title">Is the patient being seen for a Non-Cardiac/Evaluation reason?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Pre-Operative Evaluation</div>
+                <div class="option" onclick="toggle(this)">Evaluation for Exercise Clearance</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 7 &mdash; Other Indications</div>
+            <div class="step-title">If NO OTHER INDICATIONS apply to this Cath Lab scenario:</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Other</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visit 2 panel (hidden by default) -->
+    <div class="tab-panel visit2" id="panel-visit2">
+        <div class="visit-subheading">Indicate the patient symptoms or condition prompting Visit 2</div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 1 &mdash; Acute Coronary Syndrome</div>
+            <div class="step-title">Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 2 &mdash; Angina</div>
+            <div class="step-title">Has the patient experienced Chest Pain or a documented anginal equivalent prior to this visit?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 3 &mdash; Coronary Artery Disease History</div>
+            <div class="step-title">Does the patient have a history of Prior MI, Prior PCI, Prior CABG, ≥50% stenosis, or Obstructive CAD on CTA?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes</div>
+                <div class="option" onclick="toggle(this)">No</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 4 &mdash; Cardiac Arrest</div>
+            <div class="step-title">Is the patient being brought to the Cath Lab following a Cardiac Arrest?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Yes — Resuscitated Cardiac Arrest</div>
+                <div class="option" onclick="toggle(this)">No — Move to next question</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 5 &mdash; Non-Ischemic / Structural Heart Disease</div>
+            <div class="step-title">Select any/all that apply to THIS Cath Lab visit:</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Valvular Disease</div>
+                <div class="option" onclick="toggle(this)">Pericardial Disease</div>
+                <div class="option" onclick="toggle(this)">Cardiac Arrhythmia</div>
+                <div class="option" onclick="toggle(this)">Cardiomyopathy</div>
+                <div class="option" onclick="toggle(this)">LV Dysfunction</div>
+                <div class="option" onclick="toggle(this)">Syncope</div>
+                <div class="option" onclick="toggle(this)">Post Cardiac Transplant</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 6 &mdash; Non-Cardiac / Evaluation</div>
+            <div class="step-title">Is the patient being seen for a Non-Cardiac/Evaluation reason?</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Pre-Operative Evaluation</div>
+                <div class="option" onclick="toggle(this)">Evaluation for Exercise Clearance</div>
+            </div>
+        </div>
+
+        <div class="step-section">
+            <div class="section-heading">Step 7 &mdash; Other Indications</div>
+            <div class="step-title">If NO OTHER INDICATIONS apply to this Cath Lab scenario:</div>
+            <div class="option-group">
+                <div class="option" onclick="toggle(this)">Other</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary panel -->
+    <div class="tab-panel" id="panel-summary">
+        <div class="summary-visit-block">
+            <div class="summary-visit-header">Visit 1</div>
+            <div class="summary-visit-body">
+                <div class="summary-col">
+                    <div class="summary-col-label">Cath Lab Indications</div>
+                    <span class="indication-pill">ACS ≤ 24 hrs</span>
+                    <span class="indication-pill">Valvular Disease</span>
+                </div>
+                <div class="summary-col">
+                    <div class="summary-col-label">PCI Indication</div>
+                    <div class="pci-result">NSTE-ACS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-visit-block" id="summary-visit2-block" style="display:none;">
+            <div class="summary-visit-header v2">Visit 2</div>
+            <div class="summary-visit-body">
+                <div class="summary-col">
+                    <div class="summary-col-label">Cath Lab Indications</div>
+                    <div class="empty-state">No selections yet</div>
+                </div>
+                <div class="summary-col">
+                    <div class="summary-col-label">PCI Indication</div>
+                    <div class="empty-state">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+        <button class="btn btn-outline" onclick="alert('Resets all selections for this encounter')">Reset All</button>
+        <div style="font-size:13px; color:#666;">
+            <strong>Option A:</strong> Tab-based — one visit at a time, switch via tabs above
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(panelId, tabEl) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tabEl.classList.add('active');
+        document.getElementById('panel-' + panelId).classList.add('active');
+    }
+
+    function selectCount(n, btn) {
+        document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab2 = document.getElementById('tab-visit2');
+        const block2 = document.getElementById('summary-visit2-block');
+        if (n >= 2) {
+            tab2.classList.add('visible');
+            if (block2) block2.style.display = '';
+        } else {
+            tab2.classList.remove('visible');
+            if (block2) block2.style.display = 'none';
+        }
+    }
+
+    function toggle(el) {
+        el.classList.toggle('selected');
+    }
+</script>
+</body>
+</html>

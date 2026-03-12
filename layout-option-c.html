@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Option C – Split-Panel Live Summary | CathPCI Decision Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #e8edf2;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1160px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .layout-label {
+            background: #013349;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            text-align: center;
+        }
+
+        .header {
+            background: #013349;
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p  { font-size: 13px; opacity: 0.85; }
+
+        /* ── Visit selector bar ── */
+        .visit-bar {
+            background: #f0f5f9;
+            border-bottom: 2px solid #c8d8e4;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .visit-bar .label { font-weight: 600; font-size: 14px; color: #013349; }
+
+        .visit-toggle {
+            display: flex;
+            border: 2px solid #c8d8e4;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .visit-toggle-btn {
+            padding: 6px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #666;
+            font-family: inherit;
+            border: none;
+        }
+        .visit-toggle-btn.active { background: #013349; color: white; }
+
+        .staged-badge {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .staged-badge span {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+
+        /* ── Main 3-column layout ── */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 190px 1fr 310px;
+            min-height: 600px;
+            align-items: start;
+        }
+
+        /* ── Left nav: step checklist ── */
+        .step-nav {
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+        }
+
+        .step-nav-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .step-nav-item:hover { background: #eef3f7; }
+        .step-nav-item.active {
+            background: #e4eef5;
+            border-left-color: #FF6720;
+        }
+        .step-nav-item.active.v2 { border-left-color: #00AEC7; }
+        .step-nav-item.done .step-nav-dot { background: #4caf50; color: white; }
+
+        .step-nav-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #d4e0e8;
+            color: #888;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .step-nav-dot.check::after { content: '✓'; }
+
+        .step-nav-text { font-size: 12px; color: #444; line-height: 1.4; font-weight: 600; }
+        .step-nav-item.active .step-nav-text { color: #013349; }
+
+        .step-nav-divider {
+            margin: 8px 16px;
+            border: none;
+            border-top: 1px solid #d0dae2;
+        }
+
+        .step-nav-visit-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #888;
+            padding: 8px 16px 4px;
+        }
+
+        /* ── Center: decision tree steps ── */
+        .decision-area {
+            padding: 20px 24px;
+            overflow-y: auto;
+        }
+
+        .visit-heading {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .step-section {
+            border-left: 4px solid #FF6720;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            background: #f8f9fa;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+            scroll-margin-top: 16px;
+        }
+        .step-section:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .step-section.active-section { box-shadow: 0 2px 12px rgba(255,103,32,0.18); }
+
+        .v2 .step-section { border-left-color: #00AEC7; }
+        .v2 .step-section.active-section { box-shadow: 0 2px 12px rgba(0,174,199,0.18); }
+
+        /* Accordion header */
+        .step-acc-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            background: #FF6720;
+            color: white;
+        }
+        .v2 .step-acc-header { background: #00AEC7; }
+
+        .step-acc-title { font-size: 13px; font-weight: 700; letter-spacing: 0.3px; flex: 1; }
+        .step-acc-status {
+            font-size: 11px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-weight: 600;
+        }
+        .step-acc-status.done { background: rgba(255,255,255,0.4); }
+        .step-acc-toggle { font-size: 14px; transition: transform 0.2s; }
+        .step-acc-toggle.open { transform: rotate(90deg); }
+
+        /* Accordion body */
+        .step-acc-body {
+            padding: 14px 16px;
+            display: none;
+        }
+        .step-acc-body.open { display: block; }
+
+        .step-question { font-size: 13px; font-weight: 600; color: #2c3e50; margin-bottom: 10px; line-height: 1.5; }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .option:hover { border-color: #FF6720; background: #fff8f5; }
+        .option.selected { border-color: #FF6720; background: #C6DAE7; font-weight: 600; }
+
+        .v2 .option:hover  { border-color: #00AEC7; }
+        .v2 .option.selected { border-color: #00AEC7; background: #C6DAE7; }
+
+        .reminder-box {
+            background: #FFF8E6;
+            border: 2px solid #F1C400;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #013349;
+            line-height: 1.5;
+            font-weight: 500;
+            display: none;
+        }
+
+        /* ── Right: live summary panel ── */
+        .summary-panel {
+            border-left: 1px solid #e0e0e0;
+            background: #f4f8fb;
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            min-height: 600px;
+        }
+
+        .summary-panel-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #013349;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #c8d8e4;
+        }
+
+        .summary-visit-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: white;
+            background: #FF6720;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .summary-visit-label.v2 { background: #00AEC7; }
+
+        .summary-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin: 10px 0 4px;
+        }
+
+        .indication-pill {
+            display: inline-block;
+            background: white;
+            border: 1px solid #a5d6a7;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
+            color: #2e7d32;
+            margin: 2px 2px 2px 0;
+        }
+
+        .pci-result-box {
+            background: white;
+            border: 2px solid #ff9800;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 6px;
+        }
+
+        .empty-note { font-size: 12px; color: #bbb; font-style: italic; }
+
+        .summary-divider {
+            border: none;
+            border-top: 1px solid #d4e0e8;
+            margin: 14px 0;
+        }
+
+        .summary-cta {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #d4e0e8;
+        }
+        .btn-copy {
+            width: 100%;
+            padding: 9px;
+            background: #013349;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-copy:hover { background: #024a68; }
+        .btn-reset {
+            width: 100%;
+            margin-top: 8px;
+            padding: 7px;
+            background: transparent;
+            color: #888;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-reset:hover { color: #dc3545; border-color: #dc3545; }
+
+        .note-box {
+            background: #FFF8E6;
+            border: 2px solid #F1C400;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #013349;
+            line-height: 1.6;
+        }
+        .note-box strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .step-nav { display: none; }
+            .summary-panel { border-left: none; border-top: 1px solid #e0e0e0; min-height: auto; position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="layout-label">Layout Option C &mdash; Accordion Steps + Persistent Live Summary</div>
+
+    <div class="header">
+        <h1>Cath Lab Indications &amp; PCI Indication Decision Guide</h1>
+        <p>NCDR CathPCI Registry&reg; Cath Lab Indication and PCI Indication Selection Tool</p>
+    </div>
+
+    <!-- Visit selector bar -->
+    <div class="visit-bar">
+        <span class="label">Editing:</span>
+        <div class="visit-toggle">
+            <button class="visit-toggle-btn active" id="toggle-v1" onclick="switchVisit(1)">Visit 1</button>
+            <button class="visit-toggle-btn" id="toggle-v2" onclick="switchVisit(2)" style="display:none;">Visit 2</button>
+        </div>
+        <span class="label" style="margin-left:16px;">Cath Lab visits this encounter:</span>
+        <div style="display:flex;gap:6px;">
+            <button class="visit-toggle-btn active" id="cnt-1" onclick="setCount(1)" style="border:2px solid #c8d8e4; border-radius:6px; padding:5px 16px;">1</button>
+            <button class="visit-toggle-btn" id="cnt-2" onclick="setCount(2)" style="border:2px solid #c8d8e4; border-radius:6px; padding:5px 16px;">2+</button>
+        </div>
+        <div class="staged-badge" id="staged-badge" style="display:none;">
+            Visit 2: <span>Staged procedure</span>
+        </div>
+    </div>
+
+    <!-- 3-column layout -->
+    <div class="main-layout">
+
+        <!-- Left nav -->
+        <nav class="step-nav" id="step-nav">
+            <div class="step-nav-visit-label" id="nav-v1-label">Visit 1</div>
+            <div class="step-nav-item active" onclick="openStep('step-1')" id="nav-1">
+                <div class="step-nav-dot" id="nav-dot-1">1</div>
+                <div class="step-nav-text">Acute Coronary Syndrome</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-2')" id="nav-2">
+                <div class="step-nav-dot" id="nav-dot-2">2</div>
+                <div class="step-nav-text">Angina</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-3')" id="nav-3">
+                <div class="step-nav-dot" id="nav-dot-3">3</div>
+                <div class="step-nav-text">CAD History</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-4')" id="nav-4">
+                <div class="step-nav-dot" id="nav-dot-4">4</div>
+                <div class="step-nav-text">Cardiac Arrest</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-5')" id="nav-5">
+                <div class="step-nav-dot" id="nav-dot-5">5</div>
+                <div class="step-nav-text">Non-Ischemic / Structural</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-6')" id="nav-6">
+                <div class="step-nav-dot" id="nav-dot-6">6</div>
+                <div class="step-nav-text">Non-Cardiac / Evaluation</div>
+            </div>
+            <div class="step-nav-item" onclick="openStep('step-7')" id="nav-7">
+                <div class="step-nav-dot" id="nav-dot-7">7</div>
+                <div class="step-nav-text">Other Indications</div>
+            </div>
+        </nav>
+
+        <!-- Center decision tree -->
+        <div class="decision-area" id="decision-area">
+            <div class="note-box">
+                <strong>How this layout works:</strong>
+                Steps are shown as collapsible cards — click any heading to expand/collapse it. The live Results panel on the right updates immediately as you make selections. Use the Visit toggle above to switch between visits.
+            </div>
+
+            <div class="visit-heading" id="visit-heading">Indicate symptoms/condition prompting Visit 1</div>
+
+            <!-- Step 1 -->
+            <div class="step-section" id="step-1">
+                <div class="step-acc-header" onclick="toggleAcc('body-1', 'icon-1', 'nav-1')">
+                    <span class="step-acc-title">1 — Acute Coronary Syndrome</span>
+                    <span class="step-acc-status" id="status-1">Not answered</span>
+                    <span class="step-acc-toggle open" id="icon-1">&#9654;</span>
+                </div>
+                <div class="step-acc-body open" id="body-1">
+                    <div class="step-question">Is the patient being brought to the Cath Lab for STEMI, NSTEMI, or Unstable Angina?</div>
+                    <div class="option" onclick="selectRadio(this, 'acs', 'Yes', 1)">Yes</div>
+                    <div class="option" onclick="selectRadio(this, 'acs', 'No', 1)">No — Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-section" id="step-2">
+                <div class="step-acc-header" onclick="toggleAcc('body-2', 'icon-2', 'nav-2')">
+                    <span class="step-acc-title">2 — Angina</span>
+                    <span class="step-acc-status" id="status-2">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-2">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-2">
+                    <div class="step-question">Has the patient experienced Chest Pain or a documented anginal equivalent prior to this visit?</div>
+                    <div class="option" onclick="selectRadio(this, 'angina', 'Yes', 2)">Yes</div>
+                    <div class="option" onclick="selectRadio(this, 'angina', 'No', 2)">No — Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-section" id="step-3">
+                <div class="step-acc-header" onclick="toggleAcc('body-3', 'icon-3', 'nav-3')">
+                    <span class="step-acc-title">3 — Coronary Artery Disease History</span>
+                    <span class="step-acc-status" id="status-3">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-3">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-3">
+                    <div class="step-question">Does the patient have a history of Prior MI, Prior PCI, Prior CABG, ≥50% stenosis, or Obstructive CAD on CTA?</div>
+                    <div class="option" onclick="selectRadio(this, 'cad', 'Yes — Stable Known CAD', 3)">Yes — Stable Known CAD</div>
+                    <div class="option" onclick="selectRadio(this, 'cad', 'No — Suspected CAD', 3)">No — Consider Suspected CAD</div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-section" id="step-4">
+                <div class="step-acc-header" onclick="toggleAcc('body-4', 'icon-4', 'nav-4')">
+                    <span class="step-acc-title">4 — Cardiac Arrest</span>
+                    <span class="step-acc-status" id="status-4">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-4">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-4">
+                    <div class="step-question">Is the patient being brought to the Cath Lab following a Cardiac Arrest?</div>
+                    <div class="option" onclick="selectRadio(this, 'cardiac-arrest', 'Resuscitated Cardiac Arrest', 4)">Yes — Resuscitated Cardiac Arrest</div>
+                    <div class="option" onclick="selectRadio(this, 'cardiac-arrest', 'No', 4)">No — Move to next question</div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step-section" id="step-5">
+                <div class="step-acc-header" onclick="toggleAcc('body-5', 'icon-5', 'nav-5')">
+                    <span class="step-acc-title">5 — Non-Ischemic / Structural Heart Disease</span>
+                    <span class="step-acc-status" id="status-5">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-5">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-5">
+                    <div class="step-question">Select any/all that apply to THIS Cath Lab visit:</div>
+                    <div class="option" onclick="toggleCheck(this, 'Valvular Disease', 5)">Valvular Disease</div>
+                    <div class="option" onclick="toggleCheck(this, 'Pericardial Disease', 5)">Pericardial Disease</div>
+                    <div class="option" onclick="toggleCheck(this, 'Cardiac Arrhythmia', 5)">Cardiac Arrhythmia</div>
+                    <div class="option" onclick="toggleCheck(this, 'Cardiomyopathy', 5)">Cardiomyopathy</div>
+                    <div class="option" onclick="toggleCheck(this, 'LV Dysfunction', 5)">LV Dysfunction</div>
+                    <div class="option" onclick="toggleCheck(this, 'Syncope', 5)">Syncope</div>
+                    <div class="option" onclick="toggleCheck(this, 'Post Cardiac Transplant', 5)">Post Cardiac Transplant</div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step-section" id="step-6">
+                <div class="step-acc-header" onclick="toggleAcc('body-6', 'icon-6', 'nav-6')">
+                    <span class="step-acc-title">6 — Non-Cardiac / Evaluation</span>
+                    <span class="step-acc-status" id="status-6">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-6">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-6">
+                    <div class="step-question">Is the patient being seen for a Non-Cardiac or Evaluation reason?</div>
+                    <div class="option" onclick="toggleCheck(this, 'Pre-Operative Evaluation', 6)">Pre-Operative Evaluation</div>
+                    <div class="option" onclick="toggleCheck(this, 'Evaluation for Exercise Clearance', 6)">Evaluation for Exercise Clearance</div>
+                    <div class="reminder-box" id="pre-op-reminder">
+                        TAVR evaluations should be captured with the Valvular Disease indication, not Pre-Operative Evaluation.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="step-section" id="step-7">
+                <div class="step-acc-header" onclick="toggleAcc('body-7', 'icon-7', 'nav-7')">
+                    <span class="step-acc-title">7 — Other Indications</span>
+                    <span class="step-acc-status" id="status-7">Not answered</span>
+                    <span class="step-acc-toggle" id="icon-7">&#9654;</span>
+                </div>
+                <div class="step-acc-body" id="body-7">
+                    <div class="step-question">If NO OTHER INDICATIONS apply to this Cath Lab scenario:</div>
+                    <div class="option" onclick="toggleCheck(this, 'Other', 7)">Other</div>
+                    <div class="reminder-box">
+                        Other should be used very rarely and ONLY when no other indications apply.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: live summary -->
+        <aside class="summary-panel">
+            <div class="summary-panel-title">Live Results</div>
+
+            <!-- Visit 1 summary -->
+            <div id="summary-v1">
+                <span class="summary-visit-label">Visit 1</span>
+                <div class="summary-section-label">Cath Lab Indications</div>
+                <div id="v1-indications"><span class="empty-note">None selected yet</span></div>
+                <div class="summary-section-label" style="margin-top:12px;">PCI Indication</div>
+                <div class="pci-result-box" id="v1-pci"><em style="color:#aaa;font-weight:400;">Pending selections…</em></div>
+            </div>
+
+            <!-- Visit 2 summary (hidden unless 2 visits) -->
+            <div id="summary-v2" style="display:none;">
+                <hr class="summary-divider">
+                <span class="summary-visit-label v2">Visit 2</span>
+                <div class="summary-section-label">Cath Lab Indications</div>
+                <div id="v2-indications"><span class="empty-note">None selected yet</span></div>
+                <div class="summary-section-label" style="margin-top:12px;">PCI Indication</div>
+                <div class="pci-result-box" id="v2-pci"><em style="color:#aaa;font-weight:400;">Pending selections…</em></div>
+            </div>
+
+            <div class="summary-cta">
+                <button class="btn-copy" onclick="alert('Copy results to clipboard')">Copy Results</button>
+                <button class="btn-reset" onclick="alert('Reset all selections')">Reset All</button>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+let currentVisit = 1;
+let numVisits = 1;
+
+// Simple state: per-visit indication sets
+const visitState = {
+    1: { indications: new Set(), radioAnswers: {} },
+    2: { indications: new Set(), radioAnswers: {} }
+};
+
+function setCount(n) {
+    numVisits = n;
+    document.getElementById('cnt-1').classList.toggle('active', n === 1);
+    document.getElementById('cnt-2').classList.toggle('active', n === 2);
+    document.getElementById('toggle-v2').style.display = n === 2 ? '' : 'none';
+    document.getElementById('summary-v2').style.display = n === 2 ? '' : 'none';
+    document.getElementById('staged-badge').style.display = n === 2 ? '' : 'none';
+}
+
+function switchVisit(v) {
+    currentVisit = v;
+    document.getElementById('toggle-v1').classList.toggle('active', v === 1);
+    document.getElementById('toggle-v2').classList.toggle('active', v === 2);
+
+    const area = document.getElementById('decision-area');
+    const heading = document.getElementById('visit-heading');
+    if (v === 2) {
+        area.classList.add('v2');
+        heading.textContent = 'Indicate symptoms/condition prompting Visit 2';
+    } else {
+        area.classList.remove('v2');
+        heading.textContent = 'Indicate symptoms/condition prompting Visit 1';
+    }
+}
+
+function toggleAcc(bodyId, iconId, navId) {
+    const body = document.getElementById(bodyId);
+    const icon = document.getElementById(iconId);
+    const nav  = document.getElementById(navId);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+    if (nav) {
+        document.querySelectorAll('.step-nav-item').forEach(n => n.classList.remove('active'));
+        if (!isOpen) nav.classList.add('active');
+    }
+}
+
+function openStep(stepId) {
+    const section = document.getElementById(stepId);
+    if (!section) return;
+    const num = stepId.replace('step-', '');
+    const bodyId = 'body-' + num;
+    const iconId = 'icon-' + num;
+    const navId  = 'nav-' + num;
+    const body = document.getElementById(bodyId);
+    if (!body.classList.contains('open')) {
+        toggleAcc(bodyId, iconId, navId);
+    }
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.step-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(navId).classList.add('active');
+}
+
+function selectRadio(el, group, value, stepNum) {
+    const body = el.closest('.step-acc-body');
+    body.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const st = visitState[currentVisit];
+    // Remove previous indication for this group
+    st.radioAnswers[group] = value;
+    updateSummary();
+    updateStepStatus(stepNum, value);
+}
+
+function toggleCheck(el, value, stepNum) {
+    el.classList.toggle('selected');
+    const st = visitState[currentVisit];
+    if (el.classList.contains('selected')) {
+        st.indications.add(value);
+    } else {
+        st.indications.delete(value);
+    }
+    updateSummary();
+    const body = el.closest('.step-acc-body');
+    const selected = body.querySelectorAll('.option.selected').length;
+    updateStepStatus(stepNum, selected > 0 ? selected + ' selected' : null);
+}
+
+function updateStepStatus(stepNum, value) {
+    const statusEl = document.getElementById('status-' + stepNum);
+    const navDot   = document.getElementById('nav-dot-' + stepNum);
+    const navItem  = document.getElementById('nav-' + stepNum);
+    if (value && value !== 'No' && !value.toLowerCase().includes('no —')) {
+        statusEl.textContent = '✓ ' + (typeof value === 'string' ? value : value + ' selected');
+        statusEl.classList.add('done');
+        navDot.classList.add('check');
+        navItem.classList.add('done');
+    } else {
+        statusEl.textContent = value ? 'Skipped' : 'Not answered';
+        statusEl.classList.remove('done');
+        navDot.classList.remove('check');
+        navItem.classList.remove('done');
+    }
+}
+
+function updateSummary() {
+    const st = visitState[currentVisit];
+    const v = currentVisit;
+    const indicationsEl = document.getElementById('v' + v + '-indications');
+    const pciEl = document.getElementById('v' + v + '-pci');
+
+    // Gather all indications
+    const all = [];
+    const ra = st.radioAnswers;
+    if (ra['acs'] === 'Yes') all.push('ACS (timing TBD)');
+    if (ra['angina'] === 'Yes') all.push('Angina');
+    if (ra['cad'] && ra['cad'].includes('Stable')) all.push('Stable Known CAD');
+    if (ra['cad'] && ra['cad'].includes('Suspected')) all.push('Suspected CAD');
+    if (ra['cardiac-arrest'] && ra['cardiac-arrest'].includes('Resuscitated')) all.push('Resuscitated Cardiac Arrest');
+    st.indications.forEach(i => all.push(i));
+
+    if (all.length === 0) {
+        indicationsEl.innerHTML = '<span class="empty-note">None selected yet</span>';
+        pciEl.innerHTML = '<em style="color:#aaa;font-weight:400;">Pending selections…</em>';
+    } else {
+        indicationsEl.innerHTML = all.map(i => `<span class="indication-pill">${i}</span>`).join('');
+        pciEl.textContent = derivePCI(ra, st.indications);
+    }
+}
+
+function derivePCI(ra, indications) {
+    if (ra['acs'] === 'Yes') return 'NSTE-ACS (or STEMI subtype — select timing)';
+    if (ra['angina'] === 'Yes') return 'New Onset Angina / Worsening Angina';
+    if (ra['cad'] && ra['cad'].includes('Stable')) return 'Stable Angina / CAD (without ischemic Sx)';
+    if (ra['cad'] && ra['cad'].includes('Suspected')) return 'Other PCI Indication';
+    if (ra['cardiac-arrest'] && ra['cardiac-arrest'].includes('Resuscitated')) return 'Other PCI Indication';
+    if (indications.size > 0) return 'Other PCI Indication';
+    return 'Pending…';
+}
+</script>
+</body>
+</html>
